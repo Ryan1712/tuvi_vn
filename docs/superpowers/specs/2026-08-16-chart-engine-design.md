@@ -122,12 +122,12 @@ Nhắc lại: đây là 1 cách triển khai cụ thể, không phải chuẩn t
 
 | Chi (branch) | Cung | Chính tinh | Phụ tinh nổi bật |
 |---|---|---|---|
-| Tý | Thiên Di | Thiên Lương (H) | Lộc Tồn, Thiếu Âm, Bác Sỹ |
+| Tỵ | Thiên Di | Thiên Lương (H) | Lộc Tồn, Thiếu Âm, Bác Sỹ |
 | Sửu | Phúc Đức | Thái Âm (Đ), Thái Dương (Đ) | Hữu Bật, Tả Phù, Thiên Khôi, Quốc Ấn, Hồng Loan, Thiên Thọ |
 | Dần | Điền Trạch | Tham Lang (Đ) | Phong Cáo, Ân Quang, Hóa Lộc |
-| Mão | Quan Lộc | Cự Môn (H), Thiên Cơ (H) | Thiên Phúc, Thiên Quan, Đào Hoa, Thiếu Dương, Linh Tinh (Đ), Thiên Không, Phục Binh, Hóa Kỵ, Hóa Quyền |
+| Mão | Quan Lộc | Cự Môn (M), Thiên Cơ (M) | Thiên Phúc, Thiên Quan, Đào Hoa, Thiếu Dương, Linh Tinh (Đ), Thiên Không, Phục Binh, Hóa Kỵ, Hóa Quyền |
 | Thìn | Nô Bộc | Tử Vi (V), Thiên Tướng (V) | Văn Khúc (Đ), Đà La (Đ), Địa Giải, Thiên Khốc (H), Tang Môn, Quan Phù, Thiên La, Thiên Thương |
-| Tỵ | Phụ Mẫu | Vũ Khúc (V), Thiên Phủ (M) | Hỷ Thần, Thiên Quý, Điếu Khách, Thiên Khốc, Thiên Hư |
+| Tý | Phụ Mẫu | Vũ Khúc (V), Thiên Phủ (M) | Hỷ Thần, Thiên Quý, Điếu Khách, Thiên Khốc, Thiên Hư |
 | Ngọ | Tật Ách | Thất Sát (M) | Thai Phụ, Thiên Hình (H), Thiên Trù, Kình Dương (H), Long Trì, Lực Sỹ, Quan Phù, Thái Tuế, Tam Thai, Kình Dương, Văn Khúc, Thiên Sứ |
 | Mùi | Tài Bạch | (vô chính diệu — chỉ có phụ tinh) | Thiên Việt, Tử Phù, Thiên Hỉ, Nguyệt Đức, Thanh Long |
 | Thân | Tử Tức | Liêm Trinh (V) | Văn Tinh, Thiên Mã (H), Giải Thần, Phượng Các, Bát Tọa, Văn Xương, Thiên Mã, Thiên Hư (Đ), Tuế Phá, Tiểu Hao, Tang Môn, Hóa Kỵ |
@@ -136,6 +136,13 @@ Nhắc lại: đây là 1 cách triển khai cụ thể, không phải chuẩn t
 | **Hợi** | **Mệnh〈Thân〉** | **Thiên Đồng (Đ)** | **Thiên Đức, Phúc Đức, Thiên Khôi, Hóa Lộc, Địa Không (Đ), Địa Kiếp, Kiếp Sát, Phi Liêm** |
 
 (Đ = Đắc, V = Vượng, M = Miếu, H = Hãm — theo chú thích cuối ảnh)
+
+**Ghi chú tự-soát:** lần transcribe đầu tiên của bảng trên bị lỗi — hoán đổi nhãn branch của
+Tý và Tỵ (Thiên Di thực ra ở Tỵ, Phụ Mẫu thực ra ở Tý; đã sửa), và ghi sai độ sáng sao ở Mão
+(Cự Môn/Thiên Cơ là Miếu, ghi nhầm thành Hãm; đã sửa). Người dùng phát hiện qua đối chiếu tay
+với ảnh gốc. Đây là minh chứng trực tiếp cho nguyên tắc mục 8/9 build spec — kể cả bước transcribe
+1 ảnh cụ thể, do người/AI làm trực tiếp, cũng cần bị soát lại chứ không mặc định đúng ngay lần
+đầu. Toàn bộ 12 dòng đã được đối chiếu lại lần 2 sau khi sửa, không phát hiện thêm sai lệch.
 
 **Điểm mấu chốt cần adapter/test bắt đúng:**
 - Mệnh và Thân đồng cung tại **Hợi** (`menh_than.same_palace = true`).
