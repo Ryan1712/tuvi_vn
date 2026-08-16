@@ -5,8 +5,15 @@
 Conflict Resolver, hay LLM — những phần đó nằm ngoài phạm vi bản này (xem mục 13 của build spec).
 
 **Định nghĩa "xong" cho bản này:** code Chart Engine chạy được, có test tự động (Vitest) assert
-đúng case Phạm Duy, cross-check khớp với lá số gốc từ tuvi.vn, rồi dừng lại báo cáo kết quả trước
-khi làm tiếp Rule Engine.
+đúng case Phạm Duy đối chiếu với reference implementation #1 (mục 1), rồi dừng lại báo cáo kết
+quả — kèm danh sách các nhánh CHƯA được test (mục 10) — trước khi làm tiếp Rule Engine.
+
+**Lưu ý quan trọng về bản chất của việc "cross-check" trong toàn bộ tài liệu này:** không có
+nguồn nào ở đây là "sự thật tuyệt đối". `iztro` là 1 cách triển khai cụ thể của 1 (hoặc vài)
+trường phái an sao; ảnh tuvi.vn cũng chỉ là output của 1 phần mềm khác, theo lựa chọn trường
+phái/thuật toán riêng của họ — không phải "chân lý vũ trụ". Khi 2 nguồn lệch nhau, đó có thể là
+bug ở 1 trong 2 bên, hoặc chỉ là khác biệt trường phái hợp lệ — không được mặc định bên nào đúng.
+Xem mục 1 và mục 7 để biết cách xử lý khi phát hiện lệch.
 
 ---
 
@@ -17,8 +24,13 @@ khi làm tiếp Rule Engine.
   khả thi. Dùng để tham khảo *cách tư duy evaluator* (condition/modifier/exception tách riêng),
   KHÔNG dùng dữ liệu chart trong đó làm ground truth — đó là dữ liệu rút gọn tự nghĩ, chỉ đủ để
   chứng minh shape hoạt động, và tự thừa nhận sai lệch (vd Tỵ/Hợi tưởng nhầm là tam hợp).
-- **Ảnh lá số gốc từ tuvi.vn** (người dùng cung cấp 2026-08-16) — nguồn cross-check độc lập,
-  dùng làm **ground truth duy nhất** cho fixture test case Phạm Duy. Transcript đầy đủ ở mục 6.
+- **Ảnh lá số từ tuvi.vn** (người dùng cung cấp 2026-08-16) — gọi là **"reference implementation
+  #1 (tuvi.vn)"** trong tài liệu này, KHÔNG gọi là "ground truth". Đây là output của 1 phần mềm
+  cụ thể theo 1 lựa chọn trường phái/thuật toán cụ thể của tuvi.vn — không phải sự thật khách
+  quan, y hệt như `iztro` cũng là 1 lựa chọn trường phái cụ thể khác. Dùng làm điểm đối chiếu
+  duy nhất hiện có cho fixture test case Phạm Duy (transcript đầy đủ ở mục 6), nhưng bất kỳ lệch
+  nào giữa `iztro` và nguồn này PHẢI được phân loại theo quy trình mục 7, không tự động "sửa cho
+  khớp tuvi.vn".
 
 ## 2. Nguyên tắc bắt buộc (nhắc lại từ build spec, áp dụng khi code)
 
@@ -48,7 +60,7 @@ tuvi_AI/
 ├── test/
 │   └── chart/
 │       ├── fixtures/
-│       │   └── pham-duy.ts   # transcript đầy đủ từ ảnh tuvi.vn, dùng làm expected data
+│       │   └── pham-duy.ts   # transcript từ reference implementation #1 (tuvi.vn), dùng để đối chiếu
 │       └── pham-duy.test.ts  # assertion Chart output khớp fixture
 └── docs/superpowers/specs/2026-08-16-chart-engine-design.md   # file này
 ```
@@ -90,10 +102,13 @@ type BuildChartInput =
 - **`star-id-map.ts`**: chỉ liệt kê các sao xuất hiện trong lá số Phạm Duy (từ transcript mục 6)
   ở bản này — YAGNI, không cố map hết toàn bộ hệ thống sao ngay.
 
-## 6. Ground truth: transcript lá số Phạm Duy (từ ảnh tuvi.vn)
+## 6. Reference implementation #1: transcript lá số Phạm Duy (từ ảnh tuvi.vn)
 
-Dùng làm dữ liệu kỳ vọng trong `test/chart/fixtures/pham-duy.ts`. Đây là **nguồn duy nhất** —
-không dùng số liệu rút gọn trong `tuvi_rule_engine_prototype.py` làm ground truth (xem mục 1).
+Dùng làm dữ liệu đối chiếu trong `test/chart/fixtures/pham-duy.ts`. Đây là **điểm đối chiếu duy
+nhất hiện có** cho case Phạm Duy — không dùng số liệu rút gọn trong `tuvi_rule_engine_prototype.py`
+làm điểm đối chiếu (xem mục 1), vì đó là dữ liệu tự nghĩ, không phải output của phần mềm nào.
+Nhắc lại: đây là 1 cách triển khai cụ thể, không phải chuẩn tuyệt đối — xem mục 7 khi lệch với
+`iztro`.
 
 **Thông tin sinh:**
 - Họ tên: Phạm Duy — Dương Nam
@@ -124,9 +139,13 @@ không dùng số liệu rút gọn trong `tuvi_rule_engine_prototype.py` làm g
 
 **Điểm mấu chốt cần adapter/test bắt đúng:**
 - Mệnh và Thân đồng cung tại **Hợi** (`menh_than.same_palace = true`).
-- Cung **Phúc Đức nằm ở Sửu** (không phải Mùi như bản rút gọn trong prototype Python — đây
-  chính là sai lệch giữa 2 nguồn mà spec cảnh báo phải điều tra; đã điều tra và chốt ở câu hỏi
-  với người dùng: nguồn đúng là ảnh, prototype Python chỉ là dữ liệu rút gọn tự nghĩ).
+- Reference #1 (ảnh) đặt cung **Phúc Đức ở Sửu**; bản rút gọn trong prototype Python đặt Phúc
+  Đức ở Mùi. Đây KHÔNG được coi là "prototype sai, ảnh đúng" — prototype Python chưa bao giờ là
+  1 nguồn đối chiếu (dữ liệu tự nghĩ để chứng minh code shape, tác giả tự ghi chú là rút gọn),
+  nên không có xung đột thật giữa 2 nguồn ở đây, chỉ đơn giản là dùng đúng nguồn có giá trị đối
+  chiếu (reference #1) thay vì dữ liệu tự nghĩ. Việc cần cảnh giác thật sự là bước SAU: nếu
+  `iztro` build ra Phúc Đức khác Sửu, đó mới là chỗ cần phân loại theo mục 7 (bug vs khác trường
+  phái), không tự sửa cho khớp ảnh.
   Quan hệ giữa Sửu và Hợi (tam hợp/xung chiếu/khác) KHÔNG được giả định tay trong design doc
   này — đúng bài học mục 8/9 build spec (đừng tin trí nhớ về quan hệ cung). Việc xác định quan
   hệ này là trách nhiệm của `relatedPalace()` gọi hàm gốc `iztro`, và test ở mục 8 sẽ assert
@@ -137,16 +156,25 @@ không dùng số liệu rút gọn trong `tuvi_rule_engine_prototype.py` làm g
   bản này", KHÔNG bỏ qua âm thầm.
 - Cục: Thủy Nhị Cục, Bản mệnh nạp âm: Thành Đầu Thổ.
 
-## 7. Cross-check & xử lý sai lệch
+## 7. Cross-check & phân loại khi lệch với reference #1
 
 Sau khi `buildChart()` chạy ra kết quả cho input Phạm Duy, so từng cung với bảng transcript mục 6.
-Nếu có sai lệch:
-1. Xác định là khác trường phái an sao, khác bảng tứ hóa, khác cách tính Tuần/Triệt, hay bug
-   trong adapter — ghi rõ nguyên nhân trong báo cáo cuối, không âm thầm "sửa cho khớp".
-2. Nếu là khác biệt trường phái hợp lệ (vd `iztro` mặc định dùng trường phái khác tuvi.vn cho 1
-   sao phụ nào đó): ghi vào `engine_meta.school_used`, không coi là bug.
-3. Nếu là bug thật trong adapter: sửa, thêm assertion cụ thể để bắt lại lỗi đó (giống bài học
-   mục 8 build spec — mỗi lỗi tìm ra phải có regression test).
+Nếu có lệch giữa `iztro` và reference #1, phân loại vào đúng 1 trong 3 nhóm sau — **không được
+mặc định reference #1 đúng chỉ vì nó đến trước hoặc "nhìn uy tín"**:
+
+1. **Bug thật trong adapter/code của ta** (vd đọc sai field, map nhầm cung, off-by-one) — sửa,
+   thêm assertion cụ thể để bắt lại lỗi đó (giống bài học mục 8 build spec: mỗi lỗi tìm ra phải
+   có regression test). Đây là trường hợp DUY NHẤT được phép "sửa cho khớp".
+2. **Khác biệt trường phái hợp lệ** (vd `iztro` và tuvi.vn dùng công thức an sao phụ tinh khác
+   nhau cho cùng 1 sao, hoặc cách tính Tuần/Triệt khác nhau) — KHÔNG sửa để ép khớp. Ghi cả 2 kết
+   quả vào báo cáo, đặt `engine_meta.school_used` mô tả trường phái `iztro` đang dùng, và note
+   rõ "tuvi.vn cho kết quả khác ở điểm X, nghi là khác trường phái, chưa xác nhận".
+3. **Chưa xác định được nguyên nhân** — đây là trạng thái mặc định khi không đủ căn cứ để xếp
+   vào (1) hay (2). Ghi vào báo cáo là "cần nghiên cứu thêm", giữ nguyên output của `iztro` (vì
+   đó là engine ta chọn dùng), KHÔNG tự ý sửa theo reference #1 chỉ để 2 bên khớp nhau.
+
+Nguyên tắc chung: bất đồng giữa 2 nguồn là dữ liệu cần trình bày trung thực trong báo cáo cuối,
+không phải thứ cần "giải quyết cho êm" bằng cách chọn 1 bên.
 
 ## 8. Testing
 
@@ -165,3 +193,30 @@ Nếu có sai lệch:
 
 Không làm ở bản này: Rule Engine, Conflict Resolver, LLM integration, UI, vector DB/RAG,
 billing. Không viết thêm Rule ngoài Entry mẫu mục 9 build spec — đó là việc của giai đoạn sau.
+
+## 10. Fixture case Phạm Duy chỉ là 1/nhiều — backlog các case còn thiếu
+
+**Quan trọng: pass test case Phạm Duy KHÔNG có nghĩa là "Chart Engine đáng tin cậy nói chung".**
+Nó chỉ chứng minh đúng với đúng 1 tổ hợp cụ thể: 1 giới tính (Dương Nam), 1 Cục số (Thủy Nhị
+Cục), 1 cách tính chiều Đại Vận tương ứng, tháng sinh không nhuận. Rất nhiều nhánh logic an sao
+chưa được chạm tới bởi case này, ví dụ:
+
+- **Giới tính khác** → đổi chiều thuận/nghịch khi an Đại Vận (Dương Nam đi thuận, Âm Nam đi
+  nghịch, v.v. — case Phạm Duy chỉ phủ 1 trong 4 tổ hợp Âm Dương × Nam Nữ).
+- **Cục số khác** Thủy Nhị Cục là 1 trong 5 cục (Kim/Mộc/Thủy/Hỏa/Thổ) và Nhị Cục là 1 trong các
+  cục số (2/3/4/5/6) — chưa test các cục còn lại, vốn ảnh hưởng vị trí an Tử Vi.
+- **Tháng nhuận** — case Phạm Duy không rơi vào tháng nhuận âm lịch, chưa test logic
+  `isLeapMonth` của `iztro` có map đúng vào adapter hay không.
+- Các sao phụ hiếm/ít gặp không xuất hiện trong lá số Phạm Duy — `star-id-map.ts` ở bản này chỉ
+  liệt kê sao xuất hiện trong case này (YAGNI có chủ đích, xem mục 5), nghĩa là còn thiếu nhiều
+  mã sao chưa được đưa vào bảng tra.
+
+**Việc CHƯA làm ở bản này (backlog, không phải phạm vi bây giờ):** trước khi coi Chart Engine là
+"đáng tin cậy nói chung" (khác với "đúng ở đúng 1 trường hợp đã test"), cần bổ sung tối thiểu:
+1. 1 chart nữ mệnh (để phủ chiều Đại Vận ngược).
+2. 1 chart Cục số khác Thủy Nhị Cục.
+3. 1 chart có tháng sinh nhuận.
+
+Mỗi case bổ sung này cần 1 reference implementation độc lập riêng (ảnh lá số từ 1 nguồn nào đó)
+để đối chiếu, theo đúng quy trình mục 7 — không tự bịa dữ liệu kỳ vọng. Việc này nằm ngoài phạm
+vi bản Chart Engine đầu tiên, ghi lại đây để không bị quên khi đánh giá "đã đủ tin cậy chưa".
