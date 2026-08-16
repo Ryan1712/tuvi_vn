@@ -8,6 +8,14 @@ Conflict Resolver, hay LLM — những phần đó nằm ngoài phạm vi bản 
 đúng case Phạm Duy đối chiếu với reference implementation #1 (mục 1), rồi dừng lại báo cáo kết
 quả — kèm danh sách các nhánh CHƯA được test (mục 10) — trước khi làm tiếp Rule Engine.
 
+**Chỉ đạo ưu tiên (mục 14 build spec, 2026-08-16 — xem nguyên văn trong
+`TuVi_Build_Spec_v1.md`):** độ chính xác + đầy đủ của phép tính là ưu tiên số 1, cao hơn tốc độ
+code nhanh. Sai 1 sao/1 cung so với reference implementation là KHÔNG chấp nhận được — không
+được coi là "gần đúng thì được". UI/UX/CSS KHÔNG làm ở bản này; khi làm ở giai đoạn sau, chuẩn
+tối thiểu là hiển thị đầy đủ thông tin ngang mức tuvi.vn (đủ 12 cung, đủ chính/phụ tinh, đủ chú
+thích miếu vượng đắc hãm, đủ Đại Vận/Tiểu Vận/Lưu Niên), chưa cần trang trí/hiệu ứng. Xem thêm
+mục 8 và mục 9 bên dưới.
+
 **Lưu ý quan trọng về bản chất của việc "cross-check" trong toàn bộ tài liệu này:** không có
 nguồn nào ở đây là "sự thật tuyệt đối". `iztro` là 1 cách triển khai cụ thể của 1 (hoặc vài)
 trường phái an sao; ảnh tuvi.vn cũng chỉ là output của 1 phần mềm khác, theo lựa chọn trường
@@ -19,8 +27,11 @@ Xem mục 1 và mục 7 để biết cách xử lý khi phát hiện lệch.
 
 ## 1. Bối cảnh & nguồn tham khảo
 
-- `TuVi_Build_Spec_v1.md` — đặc tả đầy đủ, là ngữ cảnh bắt buộc phải tuân theo.
-- `tuvi_rule_engine_prototype.py` — prototype Python chứng minh Chart Data Shape + Rule Schema
+- `TuVi_Build_Spec_v1.md` (lưu tại gốc repo) — đặc tả đầy đủ, là ngữ cảnh bắt buộc phải tuân theo,
+  bao gồm mục 14 bổ sung 2026-08-16 (thứ tự ưu tiên: chính xác tính toán trước, UI để sau — xem
+  mục 9 dưới đây).
+- `tuvi_rule_engine_prototype.py` (lưu tại gốc repo) — prototype Python chứng minh Chart Data
+  Shape + Rule Schema
   khả thi. Dùng để tham khảo *cách tư duy evaluator* (condition/modifier/exception tách riêng),
   KHÔNG dùng dữ liệu chart trong đó làm ground truth — đó là dữ liệu rút gọn tự nghĩ, chỉ đủ để
   chứng minh shape hoạt động, và tự thừa nhận sai lệch (vd Tỵ/Hợi tưởng nhầm là tam hợp).
@@ -186,20 +197,33 @@ không phải thứ cần "giải quyết cho êm" bằng cách chọn 1 bên.
 ## 8. Testing
 
 - Framework: **Vitest**.
+- **Chuẩn chấp nhận (mục 14 build spec): sai 1 sao/1 cung so với reference implementation #1 là
+  test FAIL, không có khái niệm "gần đúng thì cho qua".** Assertion phải liệt kê đủ từng cung,
+  không chỉ vài cung tiêu biểu — vì mục tiêu là bắt được sai lệch ở bất kỳ cung nào, không chỉ
+  cung Mệnh.
 - `test/chart/pham-duy.test.ts`: build chart từ input âm lịch Kỷ Hợi (theo mục 6), assert:
   - `menh_than.same_palace === true`, cung Mệnh = Hợi
   - `cuc.ngu_hanh === 'Thuy'`, `cuc.cuc_so` đúng (Nhị Cục)
   - `ban_menh_nap_am` chứa "Thành Đầu Thổ"
   - Mệnh có `THIEN_DONG` (major) + `DIA_KHONG`, `DIA_KIEP` (minor)
   - Cung Phúc Đức đúng vị trí Sửu với Thái Âm + Thái Dương
-  - Với mỗi cung trong bảng mục 6: chính tinh khớp danh sách
+  - **Cả 12 cung** trong bảng mục 6: chính tinh + độ sáng (miếu/vượng/đắc/hãm) khớp từng cung,
+    không bỏ sót cung nào — đúng chuẩn "sai 1 cung là fail" ở trên.
 - Không viết test cho input dương lịch ở bản này (chỉ cần cơ chế build được, không có case nền
   dương lịch để đối chiếu) — nhưng code vẫn hỗ trợ input đó theo mục 4 vì tương lai cần.
 
-## 9. Ngoài phạm vi (giữ nguyên theo mục 13 build spec)
+## 9. Ngoài phạm vi (giữ nguyên theo mục 13 build spec + chỉ đạo mục 14)
 
-Không làm ở bản này: Rule Engine, Conflict Resolver, LLM integration, UI, vector DB/RAG,
-billing. Không viết thêm Rule ngoài Entry mẫu mục 9 build spec — đó là việc của giai đoạn sau.
+Không làm ở bản này: Rule Engine, Conflict Resolver, LLM integration, **UI/UX/CSS**, vector
+DB/RAG, billing. Không viết thêm Rule ngoài Entry mẫu mục 9 build spec — đó là việc của giai
+đoạn sau.
+
+**Về UI cụ thể (mục 14 build spec):** không tự ý bắt đầu làm UI đẹp/có trang trí trong lúc Chart
+Engine chưa được xác nhận chính xác 100% trên case nền. Nếu vì lý do nào đó cần 1 cách xem output
+Chart (debug, demo nội bộ), dùng console.log/print JSON hoặc test output thuần — KHÔNG viết
+component UI, KHÔNG chọn CSS framework, KHÔNG thiết kế layout ở bản này. Khi tới lúc làm UI (ở
+giai đoạn sau, do người dùng yêu cầu riêng), chuẩn tối thiểu là hiển thị đủ thông tin ngang mức
+tuvi.vn trước, đẹp/hiệu ứng tính sau.
 
 ## 10. Fixture case Phạm Duy chỉ là 1/nhiều — backlog các case còn thiếu
 
