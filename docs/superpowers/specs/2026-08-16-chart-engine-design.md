@@ -4,6 +4,16 @@
 **Phạm vi:** Chỉ Chart Engine (mục 1, 3, 7 của `TuVi_Build_Spec_v1.md`). KHÔNG bao gồm Rule Engine,
 Conflict Resolver, hay LLM — những phần đó nằm ngoài phạm vi bản này (xem mục 13 của build spec).
 
+## Known issues / chưa xử lý xong
+
+Mục này track các phát hiện đã nêu ra trong quá trình review nhưng CHƯA được xác nhận đóng —
+để tránh lặp lại đúng rủi ro mà chính tài liệu này đang cố phòng: 1 phát hiện đúng có thể "trôi
+mất" giữa nhiều lượt sửa của 1 cuộc trò chuyện dài, kể cả khi không ai cố ý bỏ qua. Không dựa vào
+trí nhớ hội thoại để track việc còn dang dở — dùng mục này.
+
+*(Hiện không có mục nào đang mở. Khi phát hiện 1 vấn đề cần sửa nhưng chưa sửa ngay được trong
+cùng lượt, thêm 1 dòng vào đây trước khi làm việc khác; xoá dòng khi đã xác nhận xử lý xong.)*
+
 **Định nghĩa "xong" cho bản này:** code Chart Engine chạy được, có test tự động (Vitest) assert
 đúng case Phạm Duy đối chiếu với reference implementation #1 (mục 1), rồi dừng lại báo cáo kết
 quả — kèm danh sách các nhánh CHƯA được test (mục 10) — trước khi làm tiếp Rule Engine.
@@ -173,10 +183,16 @@ với ảnh gốc. Đây là minh chứng trực tiếp cho nguyên tắc mục 
   này — đúng bài học mục 8/9 build spec (đừng tin trí nhớ về quan hệ cung). Việc xác định quan
   hệ này là trách nhiệm của `relatedPalace()` gọi hàm gốc `iztro`, và test ở mục 8 sẽ assert
   kết quả cụ thể mà `iztro` trả về, không suy luận trước ở đây.
-- Triệt tại Sửu/Thân (theo vị trí "Triệt" trong ảnh, giữa các cung Thìn-Tỵ hàng dưới) và Tuần
-  tại Dậu — cần adapter map đúng nếu `iztro` output có trường tương ứng; nếu bản `iztro` đang
-  dùng không hỗ trợ Tuần/Triệt trực tiếp thì ghi rõ trong `engine_meta` là "không map được ở
-  bản này", KHÔNG bỏ qua âm thầm.
+- Ảnh có 2 nhãn "Tuần" và "Triệt" đặt tại 1 ranh giới cung nào đó, nhưng design doc này KHÔNG
+  khóa cứng vị trí cụ thể của chúng bằng cách đọc pixel/layout trên 1 ảnh — Tuần/Triệt là kết quả
+  của công thức tính theo Can/Chi năm sinh, không phải thứ suy luận đáng tin cậy chỉ từ việc nhìn
+  nhãn nằm cạnh cung nào trong 1 hình ảnh. Nguồn chính cho vị trí Tuần/Triệt phải là hàm tính có
+  sẵn của `iztro` (đúng mục 7 build spec: không tự viết lại bảng tĩnh). Nếu `iztro` không hỗ trợ
+  Tuần/Triệt trực tiếp, ghi rõ trong `engine_meta` là "không map được ở bản này", KHÔNG bỏ qua âm
+  thầm. Nếu `iztro` cho vị trí khác với quan sát trên ảnh, xử lý qua đúng quy trình phân loại mục
+  7 như mọi điểm lệch khác (rất có thể sẽ rơi vào nhóm "cần nghiên cứu thêm" trước, vì bản thân vị
+  trí đọc từ ảnh ở đây chưa được xác nhận chắc chắn) — không suy diễn công thức tổng quát chỉ từ
+  cách đọc 1 ảnh.
 - Cục: Thủy Nhị Cục, Bản mệnh nạp âm: Thành Đầu Thổ.
 
 ## 7. Cross-check & phân loại khi lệch với reference #1
