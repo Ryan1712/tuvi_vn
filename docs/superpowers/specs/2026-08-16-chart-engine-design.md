@@ -11,8 +11,21 @@ Mục này track các phát hiện đã nêu ra trong quá trình review nhưng 
 mất" giữa nhiều lượt sửa của 1 cuộc trò chuyện dài, kể cả khi không ai cố ý bỏ qua. Không dựa vào
 trí nhớ hội thoại để track việc còn dang dở — dùng mục này.
 
-*(Hiện không có mục nào đang mở. Khi phát hiện 1 vấn đề cần sửa nhưng chưa sửa ngay được trong
-cùng lượt, thêm 1 dòng vào đây trước khi làm việc khác; xoá dòng khi đã xác nhận xử lý xong.)*
+- **[MỞ] Build spec mục 6 ghi sai ngày sinh case nền.** Build spec ghi "sinh 17/10 Kỷ Hợi (âm
+  lịch)". Đối chiếu ảnh reference #1: ảnh ghi "Tháng: 12 (10) Quý Hợi | Ngày: 17 (30) Kỷ Hợi" —
+  tức **17 là ngày DƯƠNG lịch, 30 mới là ngày ÂM lịch**; và **Kỷ Hợi là trụ NGÀY, không phải năm**
+  (năm là Mậu Dần 1998). Build spec đã gộp nhầm "ngày dương 17" + "tháng âm 10" thành "17/10 âm
+  lịch", đồng thời hiểu nhầm Kỷ Hợi là năm sinh. Đã xác minh bằng `iztro`: chỉ
+  `bySolar('1998-12-17', 12)` (giờ Tý muộn 23:00–00:00, khớp "23 giờ 15 phút" trong ảnh) mới cho
+  `chineseDate = "Mậu Dần - Quý Hợi - Kỷ Hợi - Giáp Tý"` trùng khít 4 trụ trong ảnh. Nhập theo
+  "17/10 âm lịch" cho ra lá số HOÀN TOÀN KHÁC. → Cần sửa mục 6 build spec sau khi Chart Engine
+  xong; fixture phải dùng ngày đã xác minh, không dùng ngày trong build spec.
+- **[MỞ] Thang độ sáng lệch nhau giữa 3 nguồn.** `iztro` dùng **7 mức** (Miếu/Vượng/Đắc/**Lợi**/
+  Bình/**Bất**/Hạn); Chart Data Shape v0.1 (build spec mục 3) định nghĩa **5 mức**
+  (`mieu,vuong,dac,binh,ham`); ảnh tuvi.vn chú thích **5 mức** (M/V/Đ/B/H). "Lợi" và "Bất" của
+  `iztro` không có tương đương trong thang 5 mức. → Quyết định trong plan: KHÔNG map giảm 7→5
+  (sẽ là ép chuẩn hoá, mất thông tin, đúng thứ mục 7 cấm); mở rộng enum giữ nguyên giá trị gốc
+  `iztro`. Cần chủ dự án xác nhận khi review kết quả.
 
 **Định nghĩa "xong" cho bản này:** code Chart Engine chạy được, có test tự động (Vitest) assert
 đúng case Phạm Duy đối chiếu với reference implementation #1 (mục 1), rồi dừng lại báo cáo kết
