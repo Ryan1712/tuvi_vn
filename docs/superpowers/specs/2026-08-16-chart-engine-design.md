@@ -11,10 +11,15 @@ quả — kèm danh sách các nhánh CHƯA được test (mục 10) — trướ
 **Chỉ đạo ưu tiên (mục 14 build spec, 2026-08-16 — xem nguyên văn trong
 `TuVi_Build_Spec_v1.md`):** độ chính xác + đầy đủ của phép tính là ưu tiên số 1, cao hơn tốc độ
 code nhanh. Sai 1 sao/1 cung so với reference implementation là KHÔNG chấp nhận được — không
-được coi là "gần đúng thì được". UI/UX/CSS KHÔNG làm ở bản này; khi làm ở giai đoạn sau, chuẩn
-tối thiểu là hiển thị đầy đủ thông tin ngang mức tuvi.vn (đủ 12 cung, đủ chính/phụ tinh, đủ chú
-thích miếu vượng đắc hãm, đủ Đại Vận/Tiểu Vận/Lưu Niên), chưa cần trang trí/hiệu ứng. Xem thêm
-mục 8 và mục 9 bên dưới.
+được coi là "gần đúng thì được". **Làm rõ ngay để tránh mâu thuẫn với mục 7:** "sai" ở đây nghĩa
+là lỗi code hoặc lỗi transcribe (đọc sai field, map nhầm cung, gõ nhầm dữ liệu) — KHÔNG có nghĩa
+là output `iztro` bắt buộc phải trùng tuyệt đối tuvi.vn. Nếu 1 điểm lệch hóa ra là khác biệt
+trường phái hợp lệ (phân loại theo mục 7), KHÔNG được sửa code hay đổi cấu hình `iztro` chỉ để
+ép khớp tuvi.vn — làm vậy là âm thầm để 1 nguồn "thắng" ở tầng an sao, đúng điều mà toàn bộ
+Rule Schema/`conflict_group_id` ở tầng tri thức được thiết kế ra để tránh. Xem quy trình đầy đủ
+ở mục 7 và mục 8. UI/UX/CSS KHÔNG làm ở bản này; khi làm ở giai đoạn sau, chuẩn tối thiểu là
+hiển thị đầy đủ thông tin ngang mức tuvi.vn (đủ 12 cung, đủ chính/phụ tinh, đủ chú thích miếu
+vượng đắc hãm, đủ Đại Vận/Tiểu Vận/Lưu Niên), chưa cần trang trí/hiệu ứng. Xem thêm mục 9.
 
 **Lưu ý quan trọng về bản chất của việc "cross-check" trong toàn bộ tài liệu này:** không có
 nguồn nào ở đây là "sự thật tuyệt đối". `iztro` là 1 cách triển khai cụ thể của 1 (hoặc vài)
@@ -197,18 +202,40 @@ không phải thứ cần "giải quyết cho êm" bằng cách chọn 1 bên.
 ## 8. Testing
 
 - Framework: **Vitest**.
-- **Chuẩn chấp nhận (mục 14 build spec): sai 1 sao/1 cung so với reference implementation #1 là
-  test FAIL, không có khái niệm "gần đúng thì cho qua".** Assertion phải liệt kê đủ từng cung,
-  không chỉ vài cung tiêu biểu — vì mục tiêu là bắt được sai lệch ở bất kỳ cung nào, không chỉ
-  cung Mệnh.
+
+**Làm rõ phạm vi của "sai 1 sao/1 cung là không chấp nhận được" (mục 14 build spec) — điểm này
+áp dụng cho LỖI CODE (đọc sai field của `iztro`, map nhầm cung, thiếu trường, off-by-one, lỗi
+transcribe reference #1), KHÔNG áp dụng để ép output `iztro` khớp tuyệt đối reference #1 khi lệch
+đó là khác biệt trường phái hợp lệ. Mục 14 và mục 7 không mâu thuẫn khi đọc đúng cách: "chính xác"
+nghĩa là code không có bug và không có sai sót transcribe — không có nghĩa "mọi con số phải trùng
+tuvi.vn 100%". Quy trình 2 bước bắt buộc:**
+
+1. **Bước phát hiện (không phải bước kết luận):** viết assertion so từng cung trong bảng mục 6
+   với output `iztro` để tìm ra toàn bộ điểm lệch (nếu có) — không bỏ sót cung nào, không chỉ
+   check vài cung tiêu biểu, vì mục tiêu bước này là tìm hết lệch, chưa phải chốt đúng/sai.
+2. **Bước phân loại + chốt assertion (bắt buộc đi qua mục 7 trước khi sửa bất cứ gì):** với mỗi
+   điểm lệch tìm được ở bước 1, phân loại theo đúng 3 nhóm mục 7:
+   - **Bug thật** → sửa adapter/transcribe, assertion cuối cùng theo reference #1 (khớp mục 6).
+   - **Khác trường phái hợp lệ** → **KHÔNG sửa code, KHÔNG đổi config `iztro` cho khớp tuvi.vn
+     chỉ để test xanh.** Assertion cuối cùng phải theo đúng output thật của `iztro`, kèm comment
+     giải thích lý do khác reference #1 (vd `// iztro dùng công thức an [sao X] khác tuvi.vn,
+     xem mục 7`). Test case này CHỦ ĐÍCH không khớp bảng mục 6 ở điểm đó.
+   - **Chưa xác định** → assertion theo output hiện tại của `iztro`, đánh dấu `// TODO: cần
+     nghiên cứu thêm, xem mục 7` — không chặn việc coi Chart Engine "xong" ở bản này nếu số lượng
+     điểm chưa xác định nhỏ và đã liệt kê đầy đủ trong báo cáo cuối; không được tự sửa cho êm.
+
+   Nói cách khác: **assertion cuối cùng trong test suite phản ánh kết quả PHÂN LOẠI, không phải
+   luôn luôn phản ánh reference #1.** Không được vì muốn "12/12 cung khớp tuvi.vn cho đẹp" mà bỏ
+   qua bước phân loại và ép sửa/ép đổi trường phái `iztro`.
+
 - `test/chart/pham-duy.test.ts`: build chart từ input âm lịch Kỷ Hợi (theo mục 6), assert:
   - `menh_than.same_palace === true`, cung Mệnh = Hợi
   - `cuc.ngu_hanh === 'Thuy'`, `cuc.cuc_so` đúng (Nhị Cục)
   - `ban_menh_nap_am` chứa "Thành Đầu Thổ"
   - Mệnh có `THIEN_DONG` (major) + `DIA_KHONG`, `DIA_KIEP` (minor)
   - Cung Phúc Đức đúng vị trí Sửu với Thái Âm + Thái Dương
-  - **Cả 12 cung** trong bảng mục 6: chính tinh + độ sáng (miếu/vượng/đắc/hãm) khớp từng cung,
-    không bỏ sót cung nào — đúng chuẩn "sai 1 cung là fail" ở trên.
+  - **Cả 12 cung** trong bảng mục 6: chính tinh + độ sáng (miếu/vượng/đắc/hãm) — chạy qua quy
+    trình 2 bước ở trên, không bỏ sót cung nào ở bước phát hiện.
 - Không viết test cho input dương lịch ở bản này (chỉ cần cơ chế build được, không có case nền
   dương lịch để đối chiếu) — nhưng code vẫn hỗ trợ input đó theo mục 4 vì tương lai cần.
 
