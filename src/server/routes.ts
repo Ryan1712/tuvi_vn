@@ -21,6 +21,8 @@ router.post('/charts/rules', (req, res) => {
 
   const rules_by_palace = Object.fromEntries(
     BRANCHES.map((branch) => {
+      // Keep matched unfiltered (including matched: false entries) for full traceability;
+      // filtering to matched-only happens separately in matchedRules for resolveConflicts.
       const matched = matchRules(chart, branch, KNOWLEDGE_BASE);
       const matchedRules = matched
         .filter((r) => r.matched)
