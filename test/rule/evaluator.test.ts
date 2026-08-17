@@ -142,6 +142,21 @@ describe('evaluateRule — scope chua co evaluator', () => {
     const chart = buildChart(PHAM_DUY);
     expect(() => evaluateRule(chart, 'Hoi', RULE_UNSUPPORTED_SCOPE)).toThrowError(/scope.*decade.*chua co evaluator/i);
   });
+
+  it('scope palace_relationship van throw trong evaluateRule (dung evaluateRelationRule thay the)', () => {
+    const chart = buildChart(PHAM_DUY);
+    const relationRule: Rule = {
+      rule_id: 'T_RELATION_VIA_WRONG_FN',
+      conflict_group_id: null,
+      scope: 'palace_relationship',
+      subject: { type: 'palace', id: 'Menh' },
+      conditions: [],
+      modifiers: [], exceptions: [],
+      conclusion: { text: 't', valence: 'trung_tinh', magnitude: 'nhe' },
+      school: 't', sources: [], consensus: 'cao', notes: '',
+    };
+    expect(() => evaluateRule(chart, 'Hoi', relationRule)).toThrowError(/relation-evaluator/i);
+  });
 });
 
 describe('matchRules', () => {
