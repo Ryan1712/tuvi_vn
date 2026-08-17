@@ -61,9 +61,12 @@ test/server/
   middleware bắt mọi lỗi ném ra từ route handler). Export `app` (không tự `listen()` ở đây) —
   để `test/server/routes.test.ts` import `app` và test qua `supertest(app)` mà không cần mở
   cổng mạng thật.
-- **`routes.ts`**: export `router: express.Router` với 2 route. Mỗi handler bọc logic trong
-  `try/catch`, lỗi bắt được gọi `next(err)` để error middleware tập trung xử lý — không tự viết
-  response lỗi rải rác trong từng handler.
+- **`routes.ts`**: export `router: express.Router` với 2 route. Dùng **Express 5** (đã xác minh
+  bằng test thật trong lúc lên plan): Express 5 tự động bắt lỗi throw ra từ handler — kể cả
+  handler `async` throw không có `try/catch` — và chuyển thẳng vào error middleware tiếp theo.
+  Route handler vì vậy **không cần `try/catch` + `next(err)` thủ công** (khác Express 4, nơi
+  async handler throw sẽ không tới được error middleware nếu thiếu `next(err)`); chỉ cần gọi
+  thẳng `buildChart`/`matchRules`/`resolveConflicts`, để lỗi tự nổi lên.
 - **`server.ts`**: file duy nhất gọi `app.listen(PORT)`. Tách riêng khỏi `app.ts` để test không
   vô tình mở cổng mạng thật khi chỉ import app.
 
