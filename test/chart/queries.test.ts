@@ -40,6 +40,11 @@ describe('buildChart', () => {
       c.palaces.map((p) => `${p.branch}:${p.major_stars.map((s) => s.star_id).sort().join(',')}`).sort();
     expect(norm(a)).toEqual(norm(b));
   });
+
+  it('throw khi calendar_type khong phai duong_lich hay am_lich', () => {
+    const badInput = { ...PHAM_DUY, calendar_type: 'khong_hop_le' } as unknown as BuildChartInput;
+    expect(() => buildChart(badInput)).toThrowError(/calendar_type.*khong hop le/i);
+  });
 });
 
 describe('queries', () => {

@@ -20,12 +20,17 @@ export function callIztro(input: BuildChartInput): IFunctionalAstrolabe {
   if (input.calendar_type === 'duong_lich') {
     return astro.bySolar(input.date, input.time_index, gender, input.fix_leap ?? true, 'vi-VN');
   }
-  return astro.byLunar(
-    input.date,
-    input.time_index,
-    gender,
-    input.is_leap_month ?? false,
-    input.fix_leap ?? true,
-    'vi-VN',
+  if (input.calendar_type === 'am_lich') {
+    return astro.byLunar(
+      input.date,
+      input.time_index,
+      gender,
+      input.is_leap_month ?? false,
+      input.fix_leap ?? true,
+      'vi-VN',
+    );
+  }
+  throw new Error(
+    `calendar_type "${(input as { calendar_type: unknown }).calendar_type}" khong hop le. Chi chap nhan "duong_lich" hoac "am_lich".`,
   );
 }
