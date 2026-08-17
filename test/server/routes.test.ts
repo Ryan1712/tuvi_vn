@@ -34,3 +34,55 @@ describe('POST /charts', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('POST /charts/rules', () => {
+  it('tra ve 200, ca RULE_A va RULE_B match tren cung Hoi, gom vao 1 conflict group', async () => {
+    const res = await request(app).post('/charts/rules').send(PHAM_DUY_INPUT);
+    expect(res.status).toBe(200);
+
+    expect(res.body.chart.menh_than.menh_branch).toBe('Hoi');
+
+    const hoiResult = res.body.rules_by_palace.Hoi;
+    const matchedIds = hoiResult.matched
+      .filter((r: { matched: boolean }) => r.matched)
+      .map((r: { rule_id: string }) => r.rule_id)
+      .sort();
+    expect(matchedIds).toEqual([
+      'RULE_A_THIEN_DONG_KHONG_KIEP_BAT_CAT',
+      'RULE_B_KHONG_KIEP_TY_HOI_PHAN_VI_GIAI',
+    ]);
+
+    expect(hoiResult.conflicts).toHaveLength(1);
+    expect(hoiResult.conflicts[0].conflict_group_id).toBe('CG_001');
+    expect(hoiResult.conflicts[0].rules.map((r: { rule_id: string }) => r.rule_id).sort()).toEqual([
+      'RULE_A_THIEN_DONG_KHONG_KIEP_BAT_CAT',
+      'RULE_B_KHONG_KIEP_TY_HOI_PHAN_VI_GIAI',
+    ]);
+  });
+
+  it('co ket qua cho ca 12 cung, kho ng chi cung Hoi', async () => {
+    const res = await request(app).post('/charts/rules').send(PHAM_DUY_INPUT);
+    expect(res.status).toBe(200);
+    const branches = Object.keys(res.body.rules_by_palace).sort();
+    expect(branches).toEqual(
+      ['Dan', 'Dau', 'Hoi', 'Mao', 'Mui', 'Ngo', 'Suu', 'Than', 'Thin', 'Tuat', 'Ty', 'Ty2'].sort(),
+    );
+  });
+
+  it('cung khong match rule nao van co matched voi toan bo ket qua false, conflicts rong', async () => {
+    const res = await request(app).post('/charts/rules').send(PHAM_DUY_INPUT);
+    // Cung Dan (Dien Trach) khong co Thien Dong/Khong/Kiep -> khong rule nao match
+    const danResult = res.body.rules_by_palace.Dan;
+    expect(danResult.matched).toHaveLength(2); // ca RULE_A, RULE_B deu duoc danh gia
+    expect(danResult.matched.every((r: { matched: boolean }) => r.matched === false)).toBe(true);
+    expect(danResult.conflicts).toHaveLength(0);
+  });
+
+  it('tra ve 400 khi input sai', async () => {
+    const res = await request(app)
+      .post('/charts/rules')
+      .send({ calendar_type: 'duong_lich', time_index: 12, gender: 'nam' });
+    expect(res.status).toBe(400);
+    expect(typeof res.body.error).toBe('string');
+  });
+});
