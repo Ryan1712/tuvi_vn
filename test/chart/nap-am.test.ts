@@ -14,4 +14,32 @@ describe('nap-am', () => {
     expect(napAm.raw).toBe('白蜡金');
     expect(napAm.vi).toBe('白蜡金');
   });
+
+  it('nem loi khi thang khong phai so (NaN khong duoc lot qua guard)', () => {
+    expect(() => napAmFromSolarDate('1998-12-abc')).toThrow(
+      'Ngay duong lich khong hop le: "1998-12-abc"',
+    );
+  });
+
+  it('nem loi khi ngay khong phai so (NaN khong duoc lot qua guard)', () => {
+    expect(() => napAmFromSolarDate('1998-xx-17')).toThrow(
+      'Ngay duong lich khong hop le: "1998-xx-17"',
+    );
+  });
+
+  it('nem loi khi chuoi rong', () => {
+    expect(() => napAmFromSolarDate('')).toThrow(
+      'Ngay duong lich khong hop le: ""',
+    );
+  });
+
+  it('nem loi khi khong dung 3 phan tach boi dau "-"', () => {
+    expect(() => napAmFromSolarDate('1998-12-17-05')).toThrow(
+      'Ngay duong lich khong hop le: "1998-12-17-05"',
+    );
+  });
+
+  it('van nem loi cho thang/ngay ngoai khoang (do lunar-typescript bat)', () => {
+    expect(() => napAmFromSolarDate('1998-13-40')).toThrow();
+  });
 });

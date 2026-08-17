@@ -17,8 +17,19 @@ const NAP_AM_VI: Readonly<Record<string, string>> = {
 };
 
 export function napAmFromSolarDate(solarDate: string): { raw: string; vi: string } {
-  const [y, m, d] = solarDate.split('-').map((s) => Number.parseInt(s, 10));
-  if (y === undefined || m === undefined || d === undefined || Number.isNaN(y)) {
+  const parts = solarDate.split('-');
+  if (parts.length !== 3) {
+    throw new Error(`Ngay duong lich khong hop le: "${solarDate}"`);
+  }
+  const [y, m, d] = parts.map((s) => Number.parseInt(s, 10));
+  if (
+    y === undefined ||
+    m === undefined ||
+    d === undefined ||
+    Number.isNaN(y) ||
+    Number.isNaN(m) ||
+    Number.isNaN(d)
+  ) {
     throw new Error(`Ngay duong lich khong hop le: "${solarDate}"`);
   }
   const raw = Solar.fromYmd(y, m, d).getLunar().getYearNaYin();
