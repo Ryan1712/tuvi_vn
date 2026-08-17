@@ -77,6 +77,7 @@ Input tương đương qua âm lịch: `astro.byLunar('1998-10-30', 0, 'male', f
 | `src/chart/index.ts` | Public API `buildChart(input)` |
 | `test/chart/fixtures/pham-duy.ts` | Transcript reference #1 (tuvi.vn) dạng dữ liệu |
 | `test/chart/*.test.ts` | Test theo từng task |
+| `scripts/crosscheck-report.ts` | Công cụ chẩn đoán in danh sách điểm lệch (không phải test) |
 | `docs/superpowers/reports/2026-08-16-cross-check-pham-duy.md` | Báo cáo phân loại điểm lệch (Task 7) |
 
 ---
@@ -1327,6 +1328,16 @@ export function starsIn(chart: Chart, branch: Branch): Set<string> {
  *
  * Luu y: `surroundedPalaces` tra ve tam phuong tu chinh (target + doi cung + tai bach + quan loc),
  * KHONG dong nghia "tam hop" thuan tuy theo nhom dia chi.
+ *
+ * DANH DOI DA CAN NHAC VA CHAP NHAN O v0.1: ham nay nhan `BuildChartInput` va goi lai
+ * `callIztro`, tuc TINH LAI TOAN BO la so cho moi lan truy van quan he. Cach nay ton kem
+ * hon viec luu san quan he vao Chart, nhung:
+ *  - design doc muc 3 quy dinh quan he giua cung la static knowledge, KHONG luu trong Chart;
+ *  - quan he nay chi phu thuoc dia chi, giong nhau o moi la so — luu vao tung Chart la
+ *    nhan ban cung mot thong tin tinh;
+ *  - Rule Engine (noi se goi nhieu lan) nam NGOAI pham vi phase nay (build spec muc 13).
+ * Khi Rule Engine thuc su can, phuong an toi uu la dung bang quan he 12 chi MOT LAN tu
+ * iztro roi tra bang — van khong tu go bang bang tay. Doi sau khong kho vi chi 1 ham.
  */
 export function relatedPalaces(
   input: BuildChartInput,
@@ -1368,9 +1379,9 @@ git commit -m "feat: add buildChart public API + palace query helpers"
 ### Task 7: Fixture reference #1 + cross-check 12 cung + báo cáo phân loại
 
 **Files:**
-- Create: `test/chart/fixtures/pham-duy.ts`, `test/chart/pham-duy-crosscheck.test.ts`
+- Create: `test/chart/fixtures/pham-duy.ts`, `scripts/crosscheck-report.ts`, `test/chart/pham-duy-crosscheck.test.ts`
 - Create: `docs/superpowers/reports/2026-08-16-cross-check-pham-duy.md`
-- Modify: `docs/superpowers/specs/2026-08-16-chart-engine-design.md` (đóng mục Known Issues đã xử lý)
+- Modify: `package.json` (thêm script `crosscheck`), `docs/superpowers/specs/2026-08-16-chart-engine-design.md` (cập nhật Known Issues)
 
 **Interfaces:**
 - Consumes: `buildChart` từ `src/chart/index.ts`; `palaceOfBranch` từ `queries.ts`
@@ -1429,17 +1440,28 @@ export const PHAM_DUY_REFERENCE = {
 };
 ```
 
-- [ ] **Step 2: Viết test BƯỚC PHÁT HIỆN — in ra toàn bộ điểm lệch, chưa chốt đúng/sai**
+- [ ] **Step 2: Viết SCRIPT chẩn đoán cho BƯỚC PHÁT HIỆN**
 
-Tạo `test/chart/pham-duy-crosscheck.test.ts`:
+Bước phát hiện là **công cụ chẩn đoán**, không phải test: mục đích của nó là in ra danh sách điểm lệch để con người phân loại, chứ không phải để pass/fail. Viết nó thành test sẽ buộc phải có 1 assertion giả luôn đúng (`expect(Array.isArray(diffs)).toBe(true)`) — một test không kiểm chứng gì. Vì vậy đặt nó là script chạy riêng.
+
+Tạo `scripts/crosscheck-report.ts`:
 
 ```ts
-import { describe, it, expect } from 'vitest';
-import { buildChart } from '../../src/chart/index.js';
-import { palaceOfBranch } from '../../src/chart/queries.js';
-import { starIdFromVi } from '../../src/chart/star-id-map.js';
-import { PHAM_DUY_REFERENCE } from './fixtures/pham-duy.js';
-import type { BuildChartInput } from '../../src/chart/types.js';
+/**
+ * Cong cu chan doan cho BUOC 1 cua quy trinh cross-check (design doc muc 8).
+ *
+ * In ra TOAN BO diem lech giua output iztro va reference #1 de con nguoi phan loai
+ * theo 3 nhom o muc 7. KHONG phai test — khong pass/fail, khong assert.
+ * Assertion cuoi cung nam trong test/chart/pham-duy-crosscheck.test.ts, viet SAU
+ * khi da phan loai xong.
+ *
+ * Chay: npm run crosscheck
+ */
+import { buildChart } from '../src/chart/index.js';
+import { palaceOfBranch } from '../src/chart/queries.js';
+import { starIdFromVi } from '../src/chart/star-id-map.js';
+import { PHAM_DUY_REFERENCE } from '../test/chart/fixtures/pham-duy.js';
+import type { BuildChartInput } from '../src/chart/types.js';
 
 const PHAM_DUY: BuildChartInput = {
   calendar_type: 'duong_lich',
@@ -1449,67 +1471,71 @@ const PHAM_DUY: BuildChartInput = {
   fix_leap: true,
 };
 
-/** Ky hieu do sang trong anh -> gia tri Brightness cua ta. */
-const REF_BRIGHTNESS: Record<string, string> = {
+/** Ky hieu do sang trong anh reference #1 -> gia tri Brightness cua ta. */
+const REF_BRIGHTNESS: Readonly<Record<string, string>> = {
   M: 'mieu', V: 'vuong', D: 'dac', B: 'binh', H: 'ham',
 };
 
-describe('BUOC 1 — phat hien diem lech giua iztro va reference #1', () => {
-  it('in bao cao lech (khong assert dung/sai o buoc nay)', () => {
-    const chart = buildChart(PHAM_DUY);
-    const diffs: string[] = [];
+function collectDiffs(): string[] {
+  const chart = buildChart(PHAM_DUY);
+  const diffs: string[] = [];
 
-    for (const ref of PHAM_DUY_REFERENCE.palaces) {
-      const actual = palaceOfBranch(chart, ref.branch);
+  for (const ref of PHAM_DUY_REFERENCE.palaces) {
+    const actual = palaceOfBranch(chart, ref.branch);
 
-      if (actual.palace_name !== ref.palace_name) {
-        diffs.push(`[TEN CUNG] ${ref.branch}: iztro="${actual.palace_name}" ref="${ref.palace_name}"`);
-      }
-
-      const actualMajors = actual.major_stars.map((s) => s.star_id).sort();
-      const refMajors = ref.major_stars.map((s) => s.name).sort();
-      if (actualMajors.length !== refMajors.length) {
-        diffs.push(`[SO CHINH TINH] ${ref.branch}: iztro=${actualMajors.length} ref=${refMajors.length}`);
-      }
-
-      for (const refStar of ref.major_stars) {
-        const match = actual.major_stars.find(
-          (s) => s.star_id === starIdFromVi(refStar.name),
-        );
-        if (!match) {
-          diffs.push(`[THIEU SAO] ${ref.branch}: ref co "${refStar.name}", iztro khong co`);
-          continue;
-        }
-        const expectedBrightness = REF_BRIGHTNESS[refStar.brightness];
-        if (match.strength !== expectedBrightness) {
-          diffs.push(
-            `[DO SANG] ${ref.branch} ${refStar.name}: iztro="${match.strength}" ref="${expectedBrightness}"`,
-          );
-        }
-      }
+    if (actual.palace_name !== ref.palace_name) {
+      diffs.push(`[TEN CUNG] ${ref.branch}: iztro="${actual.palace_name}" ref="${ref.palace_name}"`);
     }
 
-    if (chart.menh_than.soul_star !== PHAM_DUY_REFERENCE.soul_star) {
-      diffs.push(`[CHU MENH] iztro="${chart.menh_than.soul_star}" ref="${PHAM_DUY_REFERENCE.soul_star}"`);
-    }
-    if (chart.menh_than.body_star !== PHAM_DUY_REFERENCE.body_star) {
-      diffs.push(`[CHU THAN] iztro="${chart.menh_than.body_star}" ref="${PHAM_DUY_REFERENCE.body_star}"`);
+    const actualIds = actual.major_stars.map((s) => s.star_id).sort();
+    const refIds = ref.major_stars.map((s) => starIdFromVi(s.name)).sort();
+    if (JSON.stringify(actualIds) !== JSON.stringify(refIds)) {
+      diffs.push(`[CHINH TINH] ${ref.branch}: iztro=[${actualIds}] ref=[${refIds}]`);
     }
 
-    console.log('\n===== BAO CAO DIEM LECH =====');
-    console.log(diffs.length === 0 ? '(khong co diem lech)' : diffs.join('\n'));
-    console.log(`Tong: ${diffs.length} diem lech\n`);
+    for (const refStar of ref.major_stars) {
+      const match = actual.major_stars.find((s) => s.star_id === starIdFromVi(refStar.name));
+      if (!match) continue; // da bao o dong [CHINH TINH] o tren
+      const expected = REF_BRIGHTNESS[refStar.brightness];
+      if (match.strength !== expected) {
+        diffs.push(`[DO SANG] ${ref.branch} ${refStar.name}: iztro="${match.strength}" ref="${expected}"`);
+      }
+    }
+  }
 
-    // Buoc nay CHI phat hien, khong fail. Viec chot dung/sai o buoc 2.
-    expect(Array.isArray(diffs)).toBe(true);
-  });
-});
+  if (chart.menh_than.soul_star !== PHAM_DUY_REFERENCE.soul_star) {
+    diffs.push(`[CHU MENH] iztro="${chart.menh_than.soul_star}" ref="${PHAM_DUY_REFERENCE.soul_star}"`);
+  }
+  if (chart.menh_than.body_star !== PHAM_DUY_REFERENCE.body_star) {
+    diffs.push(`[CHU THAN] iztro="${chart.menh_than.body_star}" ref="${PHAM_DUY_REFERENCE.body_star}"`);
+  }
+  if (chart.cuc.raw !== PHAM_DUY_REFERENCE.cuc) {
+    diffs.push(`[CUC] iztro="${chart.cuc.raw}" ref="${PHAM_DUY_REFERENCE.cuc}"`);
+  }
+  if (chart.ban_menh_nap_am !== PHAM_DUY_REFERENCE.ban_menh_nap_am) {
+    diffs.push(`[NAP AM] iztro="${chart.ban_menh_nap_am}" ref="${PHAM_DUY_REFERENCE.ban_menh_nap_am}"`);
+  }
+
+  return diffs;
+}
+
+const diffs = collectDiffs();
+console.log('===== BAO CAO DIEM LECH: iztro vs reference #1 =====');
+console.log(diffs.length === 0 ? '(khong co diem lech)' : diffs.join('\n'));
+console.log(`\nTong: ${diffs.length} diem lech`);
 ```
 
-- [ ] **Step 3: Chạy để thu thập danh sách điểm lệch**
+Thêm script vào `package.json`:
 
-Run: `npm test -- crosscheck`
-Expected: PASS, và in ra console danh sách điểm lệch. **Ghi lại nguyên văn danh sách này** — nó là đầu vào cho bước phân loại.
+```bash
+npm pkg set scripts.crosscheck="npx tsx scripts/crosscheck-report.ts"
+npm install -D tsx@^4.19.0
+```
+
+- [ ] **Step 3: Chạy script để thu thập danh sách điểm lệch**
+
+Run: `npm run crosscheck`
+Expected: in ra danh sách điểm lệch. **Ghi lại nguyên văn output** — nó là đầu vào bắt buộc cho bước phân loại. Không sửa gì ở bước này.
 
 - [ ] **Step 4: Phân loại từng điểm lệch theo mục 7 design doc**
 
@@ -1573,9 +1599,24 @@ Tạo `docs/superpowers/reports/2026-08-16-cross-check-pham-duy.md`. Dùng khung
 
 - [ ] **Step 6: Viết assertion cuối cùng theo kết quả phân loại**
 
-Thêm vào `test/chart/pham-duy-crosscheck.test.ts`:
+Tạo `test/chart/pham-duy-crosscheck.test.ts`. Đây là nơi DUY NHẤT có assertion — viết SAU khi đã phân loại xong ở Step 4, mỗi assertion phản ánh kết quả phân loại chứ không tự động theo reference #1:
 
 ```ts
+import { describe, it, expect } from 'vitest';
+import { buildChart } from '../../src/chart/index.js';
+import { palaceOfBranch } from '../../src/chart/queries.js';
+import { starIdFromVi } from '../../src/chart/star-id-map.js';
+import { PHAM_DUY_REFERENCE } from './fixtures/pham-duy.js';
+import type { BuildChartInput } from '../../src/chart/types.js';
+
+const PHAM_DUY: BuildChartInput = {
+  calendar_type: 'duong_lich',
+  date: '1998-12-17',
+  time_index: 12,
+  gender: 'nam',
+  fix_leap: true,
+};
+
 describe('BUOC 2 — assertion cuoi cung theo ket qua phan loai', () => {
   const chart = buildChart(PHAM_DUY);
 
@@ -1646,7 +1687,7 @@ Trong `docs/superpowers/specs/2026-08-16-chart-engine-design.md`, mục "Known i
 - [ ] **Step 9: Commit**
 
 ```bash
-git add test/chart/fixtures/pham-duy.ts test/chart/pham-duy-crosscheck.test.ts docs/superpowers/reports/2026-08-16-cross-check-pham-duy.md docs/superpowers/specs/2026-08-16-chart-engine-design.md
+git add test/chart/fixtures/pham-duy.ts scripts/crosscheck-report.ts test/chart/pham-duy-crosscheck.test.ts package.json package-lock.json docs/superpowers/reports/2026-08-16-cross-check-pham-duy.md docs/superpowers/specs/2026-08-16-chart-engine-design.md
 git commit -m "test: cross-check 12 palaces vs reference #1 with discrepancy classification"
 ```
 
