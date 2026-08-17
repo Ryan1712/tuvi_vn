@@ -36,6 +36,12 @@ describe('star-id-map', () => {
     expect(brightnessFromVi('')).toBeUndefined();
   });
 
+  it('nem loi ro rang khi gap do sang khong hop le', () => {
+    expect(() => brightnessFromVi('Do Sang Bịa')).toThrowError(
+      /khong nam trong 7 muc cua iztro/i,
+    );
+  });
+
   it('map tu hoa', () => {
     expect(sihuaTypeFromVi('Lộc')).toBe('Loc');
     expect(sihuaTypeFromVi('Quyền')).toBe('Quyen');
@@ -43,10 +49,22 @@ describe('star-id-map', () => {
     expect(sihuaTypeFromVi('Kỵ')).toBe('Ky');
   });
 
+  it('nem loi ro rang khi gap tu hoa khong hop le', () => {
+    expect(() => sihuaTypeFromVi('Tu Hoa Bịa')).toThrowError(
+      /khong hop le/i,
+    );
+  });
+
   it('map 12 dia chi, phan biet Ty (Tý) va Ty2 (Tỵ)', () => {
     expect(branchFromVi('Tý')).toBe('Ty');
     expect(branchFromVi('Tỵ')).toBe('Ty2');
     expect(branchFromVi('Hợi')).toBe('Hoi');
     expect(branchFromVi('Sửu')).toBe('Suu');
+  });
+
+  it('nem loi ro rang khi gap dia chi khong hop le', () => {
+    expect(() => branchFromVi('Dia Chi Bịa')).toThrowError(
+      /khong hop le/i,
+    );
   });
 });
