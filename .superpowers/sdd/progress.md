@@ -115,3 +115,13 @@ Task 9 (UI, FINAL): complete (commit 27f564a)
   Manual end-to-end verification performed for real: started actual Express server (port 3000) + actual Vite dev server (port 5173, /api proxy), POSTed to the proxied /api/charts/rules endpoint via curl. Base Pham Duy case: 12 palaces, Hoi = Menh with THIEN_DONG (mieu) major star, both RULE_A/RULE_B matched + 1 conflict group (CG_001), no luu_nien. Same case + view_year=2026-01-01: luu_nien present (year 2026, At Ty, 12 luu-nien palaces). Both servers stopped cleanly after verification. Backend suite: 97/97 passing.
 
 ALL 10 UI TASKS (0-9) COMPLETE. Phase 5 (UI) plan finished — stopping per plan's explicit scope boundary (no LLM integration, no additional Rules, no CSS polish/animation, no deployment config, no automated frontend tests).
+Task 9 (UI) review: clean, approved. Reviewer independently cross-checked Hoi/Menh/THIEN_DONG brightness (mieu, correctly differs from tuvi.vn image's dac per already-documented Phase 2 cross-check finding, not a new bug) and both rule IDs against src/rule/knowledge-base.ts. Carried forward to final review: Th.1 unexplained field + Thien Khoi divergence (both already logged open in design doc known-issues), frontend has zero automated tests (accepted scoped gap per plan), web/src/types.ts is hand-maintained drift risk (documented, out of scope).
+
+ALL 10 UI TASKS (0-9) REVIEWED CLEAN. Proceeding to final whole-branch review.
+
+FINAL WHOLE-BRANCH REVIEW (UI): complete (range 4cc9fa3..84e0898, 13 commits)
+  Verdict: Ready to merge = Yes. 0 Critical, 1 Important (sihua/Tu Hoa never rendered in PalaceCell despite being in the data model), 2 Minor (harmless .gitignore duplication, unrelated pending .gitignore/.superpowers working-tree state noted but not in scope).
+  Reviewer independently ran full backend suite (97/97), typecheck, frontend tsc -b + vite build + oxlint, all clean. Confirmed no other type drift between backend types.ts and web/src/types.ts beyond the already-fixed engine_meta gap. Confirmed no XSS/injection surface introduced.
+  Post-review fix (commit a00445c): added Tu Hoa markers to PalaceCell (matched by star_id, both major and minor stars), legend line added to App.tsx. Verified against real Pham Duy data: all 4 sihua types correctly matched to their stars. Design doc Known Issues updated to log this as resolved. 97/97 tests, tsc -b + vite build clean after fix.
+
+ALL 10 UI TASKS + FINAL REVIEW + POST-REVIEW FIX COMPLETE. Phase 5 (UI) done.
