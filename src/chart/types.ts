@@ -46,9 +46,20 @@ export interface MajorStar {
   strength?: Brightness;
 }
 
+/**
+ * Phan loai sao phu theo iztro (StarType), chi 6 gia tri thuc su xuat hien tren
+ * minor_stars ('major' va 'adjective' luon thuoc ve major_stars/adjective_stars,
+ * khong bao gio xuat hien o day trong thuc te, nhung giu du 8 gia tri cua iztro
+ * de khop chinh xac voi nguon, tranh tu y thu hep enum).
+ */
+export type MinorStarType =
+  | 'major' | 'soft' | 'tough' | 'adjective' | 'flower' | 'helper' | 'lucun' | 'tianma';
+
 export interface MinorStar {
   star_id: string;
   strength?: Brightness;
+  /** Phan loai cat/hung tu iztro — 'soft' = cat tinh, 'tough' = sat tinh (dung de UI chia 2 cot). */
+  type: MinorStarType;
 }
 
 /** Tap tinh / sao le — iztro tra trong `adjectiveStars`. */
@@ -74,6 +85,22 @@ export interface ChartPalace {
   minor_stars: MinorStar[];
   adjective_stars: AdjectiveStar[];
   sihua: Sihua[];
+  /** Ngu hanh cua chi cung nay — bang tinh 12 dia chi, xem branch-element.ts. */
+  branch_element: NguHanh;
+  /** Vong Trang Sinh (iztro: changsheng12), vd "Lam Quan", "De Vuong". */
+  truong_sinh: string;
+  /**
+   * Vong Bac Sy 12 than (iztro: boshi12), vd "Phi Liem", "Bac Sy".
+   * Giu nguyen chuoi tieng Viet co dau tu iztro, KHONG qua starIdFromVi — day la
+   * ten TRANG THAI/VI TRI trong vong sao, khong phai "sao" dung de Rule Engine
+   * match, va nhieu ten TRUNG nhau giua cac vong voi y nghia khac nhau (vd "Dai
+   * Hao" xuat hien o ca boshi va suiqian).
+   */
+  boshi: string;
+  /** Vong Tuong Tien 12 than (iztro: jiangqian12). Giu nguyen chuoi, cung ly do tren. */
+  jiangqian: string;
+  /** Vong Tue Tien 12 than (iztro: suiqian12). Giu nguyen chuoi, cung ly do tren. */
+  suiqian: string;
 }
 
 export interface DaiVan {
@@ -149,6 +176,26 @@ export interface EngineMeta {
   notes: string[];
 }
 
+export interface LuuNienPalace {
+  branch: Branch;
+  /** Ten cung theo Luu Nien (khac ten cung goc — vong Luu Nien xoay theo nam xem). */
+  palace_name: string;
+  stars: { star_id: string }[];
+}
+
+/**
+ * Luu Nien — CHI ton tai khi BuildChartInput co `view_year`. Khong phai fact tinh
+ * cua la so (phu thuoc nam tra cuu), nen KHONG nam trong LuckCycles (dai_van/tieu_van
+ * la fact tinh, xem ghi chu tren LuckCycles). Day la du lieu DAN XUAT theo 1 nam cu the.
+ */
+export interface LuuNien {
+  year: number;
+  heavenly_stem: string;
+  earthly_branch: string;
+  mutagen: string[];
+  palaces: LuuNienPalace[];
+}
+
 export interface Chart {
   chart_id: string;
   metadata: ChartMetadata;
@@ -159,9 +206,11 @@ export interface Chart {
   palaces: ChartPalace[];
   luck_cycles: LuckCycles;
   engine_meta: EngineMeta;
+  /** Luu Nien — chi co khi BuildChartInput kem view_year. Xem LuuNien. */
+  luu_nien?: LuuNien;
 }
 
-export type BuildChartInput =
+export type BuildChartInput = (
   | {
       calendar_type: 'duong_lich';
       /** YYYY-M-D duong lich. */
@@ -179,4 +228,11 @@ export type BuildChartInput =
       gender: Gender;
       is_leap_month?: boolean;
       fix_leap?: boolean;
-    };
+    }
+) & {
+  /**
+   * Nam xem cu the, duong lich (vd "2026-01-01"). Neu co, Chart.luu_nien duoc dien.
+   * Neu khong co, Chart.luu_nien la undefined — khong loi, hoan toan tuong thich nguoc.
+   */
+  view_year?: string;
+};
