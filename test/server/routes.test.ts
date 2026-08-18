@@ -85,4 +85,20 @@ describe('POST /charts/rules', () => {
     expect(res.status).toBe(400);
     expect(typeof res.body.error).toBe('string');
   });
+
+  it('tra ve luu_nien khi request co view_year', async () => {
+    const res = await request(app)
+      .post('/charts/rules')
+      .send({ ...PHAM_DUY_INPUT, view_year: '2026-01-01' });
+    expect(res.status).toBe(200);
+    expect(res.body.chart.luu_nien).toBeDefined();
+    expect(res.body.chart.luu_nien.year).toBe(2026);
+    expect(res.body.chart.luu_nien.palaces).toHaveLength(12);
+  });
+
+  it('luu_nien la undefined (khong co key trong JSON) khi khong co view_year', async () => {
+    const res = await request(app).post('/charts/rules').send(PHAM_DUY_INPUT);
+    expect(res.status).toBe(200);
+    expect(res.body.chart.luu_nien).toBeUndefined();
+  });
 });
