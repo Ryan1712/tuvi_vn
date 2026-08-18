@@ -10,7 +10,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "crosscheck": "npx tsx scripts/crosscheck-report.ts",
-    "start": "node --experimental-strip-types src/server/server.ts"
+    "start": "tsx src/server/server.ts"
   },
   "keywords": [],
   "author": "",
