@@ -1,5 +1,42 @@
+import { useState } from 'react';
+import { ChartForm } from './components/ChartForm';
+import { PalaceGrid } from './components/PalaceGrid';
+import { fetchChartWithRules } from './api';
+import type { BuildChartInput, ChartRulesResponse } from './types';
+
 function App() {
-  return <div>Placeholder — replaced in Task 9</div>
+  const [data, setData] = useState<ChartRulesResponse | null>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(input: BuildChartInput, name: string) {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await fetchChartWithRules(input);
+      setData(result);
+      setDisplayName(name);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Lỗi không xác định');
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="app">
+      <h1>Tử Vi</h1>
+      <ChartForm onSubmit={handleSubmit} />
+      {loading && <p>Đang tính...</p>}
+      {error && <p className="error">Lỗi: {error}</p>}
+      {data && <PalaceGrid data={data} displayName={displayName} />}
+      <div className="legend">
+        M:Miếu V:Vượng Đ:Đắc Lợi:Lợi B:Bình Bất:Bất H:Hãm
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
