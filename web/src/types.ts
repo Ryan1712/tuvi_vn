@@ -111,6 +111,13 @@ export interface Cuc {
   raw: string;
 }
 
+export interface EngineMeta {
+  engine: string;
+  engine_version: string;
+  language: string;
+  notes: string[];
+}
+
 export interface Chart {
   chart_id: string;
   metadata: ChartMetadata;
@@ -119,6 +126,7 @@ export interface Chart {
   ban_menh_nap_am: string;
   palaces: ChartPalace[];
   luck_cycles: { dai_van: DaiVan[]; tieu_van: TieuVan[] };
+  engine_meta: EngineMeta;
   luu_nien?: LuuNien;
 }
 
