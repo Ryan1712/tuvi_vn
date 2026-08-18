@@ -123,4 +123,53 @@ describe('adaptFromIztro — case Pham Duy', () => {
     const chart = buildPhamDuy();
     expect(chart.engine_meta.notes.some((n) => n.includes('luu_nien'))).toBe(true);
   });
+
+  it('map type cho minor_stars — Dia Khong va Dia Kiep la tough', () => {
+    const chart = buildPhamDuy();
+    const menh = chart.palaces.find((p) => p.branch === 'Hoi')!;
+    const diaKhong = menh.minor_stars.find((s) => s.star_id === 'DIA_KHONG');
+    const diaKiep = menh.minor_stars.find((s) => s.star_id === 'DIA_KIEP');
+    expect(diaKhong?.type).toBe('tough');
+    expect(diaKiep?.type).toBe('tough');
+  });
+
+  it('map ngu hanh cung va vong 12 than cho cung Menh (Hoi)', () => {
+    const chart = buildPhamDuy();
+    const menh = chart.palaces.find((p) => p.branch === 'Hoi')!;
+    expect(menh.branch_element).toBe('Thuy');
+    expect(menh.truong_sinh).toBe('Lâm Quan');
+    expect(menh.boshi).toBe('Phi Liêm');
+    expect(menh.jiangqian).toBe('Kiếp Sát');
+    expect(menh.suiqian).toBe('Thiên Đức');
+  });
+
+  it('luu_nien la undefined khi khong co view_year', () => {
+    const chart = buildPhamDuy();
+    expect(chart.luu_nien).toBeUndefined();
+  });
+});
+
+describe('adaptFromIztro — Luu Nien (view_year)', () => {
+  it('dien Chart.luu_nien dung khi co view_year, index khop astrolabe.palaces', () => {
+    const chart = adaptFromIztro(
+      astro.bySolar('1998-12-17', 12, 'male', true, 'vi-VN'),
+      {
+        calendar_type: 'duong_lich',
+        date: '1998-12-17',
+        time_index: 12,
+        gender: 'nam',
+        fix_leap: true,
+        view_year: '2026-01-01',
+      },
+    );
+    expect(chart.luu_nien).toBeDefined();
+    expect(chart.luu_nien!.year).toBe(2026);
+    expect(chart.luu_nien!.palaces).toHaveLength(12);
+    // Cung Hoi (index 9 trong astrolabe.palaces) mang ten Luu Nien "Thiên Di" cho nam 2026
+    // (re-verified for real while writing this plan — an earlier brainstorming pass had
+    // mixed up results between two different view_year runs and briefly wrote "Mệnh" here;
+    // caught by actually running the assertion, not by re-deriving it from memory).
+    const hoiLuuNien = chart.luu_nien!.palaces.find((p) => p.branch === 'Hoi');
+    expect(hoiLuuNien?.palace_name).toBe('Thiên Di');
+  });
 });

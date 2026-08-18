@@ -79,6 +79,24 @@ const STAR_ID_BY_VI: Readonly<Record<string, string>> = {
   'Thiên Hư': 'THIEN_HU',
   'Niên Giải': 'NIEN_GIAI',
   'Phá Toái': 'PHA_TOAI',
+
+  // Luu tinh (vong Luu Nien) — quan sat duoc khi goi astrolabe.horoscope() cho nam xem.
+  // Doi chieu voi key goc cua iztro (lib/i18n/locales/vi-VN/star.js): liukui/liuyue/
+  // liuchang/liuqu/liuluan/liuxi/liulu/liuyang/liutuo/liuma — la phien ban "luu nien"
+  // cua 10 sao goc (Thien Khoi, Thien Viet, Van Xuong, Van Khuc, Hong Loan, Thien Hy,
+  // Loc Ton, Kinh Duong, Da La, Thien Ma). star_id dat theo tien to LUU_ + ten sao goc
+  // da chuan hoa, KHONG dung chung star_id voi sao goc (Luu Xuong != Van Xuong, la 2
+  // thuc the khac nhau ve scope: 'yearly' vs 'origin').
+  'Lưu Khôi': 'LUU_THIEN_KHOI',
+  'Lưu Việt': 'LUU_THIEN_VIET',
+  'Lưu Xương': 'LUU_VAN_XUONG',
+  'Lưu Khúc': 'LUU_VAN_KHUC',
+  'Lưu Loan': 'LUU_HONG_LOAN',
+  'Lưu Hỷ': 'LUU_THIEN_HY',
+  'Lưu Lộc': 'LUU_LOC_TON',
+  'Lưu Dương': 'LUU_KINH_DUONG',
+  'Lưu Đà': 'LUU_DA_LA',
+  'Lưu Mã': 'LUU_THIEN_MA',
 };
 
 export function starIdFromVi(viName: string): string {

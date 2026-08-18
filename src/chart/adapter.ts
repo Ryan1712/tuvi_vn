@@ -7,12 +7,15 @@ import {
   starIdFromVi,
 } from './star-id-map.js';
 import { napAmFromSolarDate } from './nap-am.js';
+import { branchElement } from './branch-element.js';
 import type {
   BuildChartInput,
   Chart,
   ChartPalace,
   Cuc,
   DaiVan,
+  LuuNien,
+  LuuNienPalace,
   MajorStar,
   MinorStar,
   NguHanh,
@@ -65,9 +68,11 @@ function adaptPalace(palace: IFunctionalPalace): ChartPalace {
   const minor: MinorStar[] = palace.minorStars.map((s) => ({
     star_id: starIdFromVi(s.name),
     strength: brightnessFromVi(s.brightness),
+    type: s.type,
   }));
+  const branch = branchFromVi(palace.earthlyBranch);
   return {
-    branch: branchFromVi(palace.earthlyBranch),
+    branch,
     palace_name: palace.name,
     palace_stem: palace.heavenlyStem,
     is_body_palace: palace.isBodyPalace,
@@ -76,6 +81,11 @@ function adaptPalace(palace: IFunctionalPalace): ChartPalace {
     minor_stars: minor,
     adjective_stars: palace.adjectiveStars.map((s) => ({ star_id: starIdFromVi(s.name) })),
     sihua: extractSihua(palace),
+    branch_element: branchElement(branch),
+    truong_sinh: palace.changsheng12,
+    boshi: palace.boshi12,
+    jiangqian: palace.jiangqian12,
+    suiqian: palace.suiqian12,
   };
 }
 
@@ -95,6 +105,29 @@ function adaptTieuVan(astrolabe: IFunctionalAstrolabe): TieuVan[] {
     branch: branchFromVi(p.earthlyBranch),
     ages: [...p.ages],
   }));
+}
+
+/**
+ * Luu Nien cho 1 nam xem cu the. `iztro.astrolabe.horoscope(dateStr, timeIndex).yearly`
+ * co `palaceNames[i]`/`stars[i]` DUNG CHUNG index voi `astrolabe.palaces[i]` (theo vi
+ * tri, khong phai theo branch) — da xac minh thuc te trong luc lap ke hoach.
+ */
+function adaptLuuNien(astrolabe: IFunctionalAstrolabe, viewYear: string): LuuNien {
+  const horoscope = astrolabe.horoscope(viewYear, 0);
+  const yearly = horoscope.yearly;
+  const year = Number.parseInt(viewYear.split('-')[0] ?? '', 10);
+  const palaces: LuuNienPalace[] = astrolabe.palaces.map((p, i) => ({
+    branch: branchFromVi(p.earthlyBranch),
+    palace_name: yearly.palaceNames[i] ?? '',
+    stars: (yearly.stars?.[i] ?? []).map((s) => ({ star_id: starIdFromVi(s.name) })),
+  }));
+  return {
+    year,
+    heavenly_stem: yearly.heavenlyStem,
+    earthly_branch: yearly.earthlyBranch,
+    mutagen: [...yearly.mutagen],
+    palaces,
+  };
 }
 
 export function adaptFromIztro(
@@ -148,5 +181,6 @@ export function adaptFromIztro(
       language: 'vi-VN',
       notes,
     },
+    luu_nien: input.view_year !== undefined ? adaptLuuNien(astrolabe, input.view_year) : undefined,
   };
 }
