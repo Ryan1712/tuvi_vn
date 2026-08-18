@@ -1,4 +1,4 @@
-import type { ChartPalace, PalaceRuleResult } from '../types';
+import type { ChartPalace, PalaceRuleResult, Sihua } from '../types';
 import { RuleResults } from './RuleResults';
 
 interface PalaceCellProps {
@@ -18,8 +18,18 @@ const BRIGHTNESS_LABEL: Record<string, string> = {
   mieu: 'M', vuong: 'V', dac: 'Đ', loi: 'Lợi', binh: 'B', bat: 'Bất', ham: 'H',
 };
 
-function formatMinorStar(s: { star_id: string; strength?: string }): string {
-  return s.strength ? `${s.star_id} (${BRIGHTNESS_LABEL[s.strength]})` : s.star_id;
+const SIHUA_LABEL: Record<Sihua['type'], string> = {
+  Loc: 'Hóa Lộc', Quyen: 'Hóa Quyền', Khoa: 'Hóa Khoa', Ky: 'Hóa Kỵ',
+};
+
+function formatSihua(starId: string, sihua: Sihua[]): string {
+  const hit = sihua.find((s) => s.star_id === starId);
+  return hit ? ` [${SIHUA_LABEL[hit.type]}]` : '';
+}
+
+function formatMinorStar(s: { star_id: string; strength?: string }, sihua: Sihua[]): string {
+  const brightness = s.strength ? ` (${BRIGHTNESS_LABEL[s.strength]})` : '';
+  return `${s.star_id}${brightness}${formatSihua(s.star_id, sihua)}`;
 }
 
 export function PalaceCell({
@@ -44,21 +54,25 @@ export function PalaceCell({
         <span className="palace-age">{ageAtDecadalStart}</span>
       </div>
       <div className="palace-element">-{palace.branch_element}</div>
-      {palace.major_stars.map((s) => (
-        <div key={s.star_id} className="palace-major">
-          +{s.star_id}
-          {s.strength ? ` (${BRIGHTNESS_LABEL[s.strength]})` : ''}
-        </div>
-      ))}
+      {palace.major_stars.map((s) => {
+        const sihuaText = formatSihua(s.star_id, palace.sihua);
+        return (
+          <div key={s.star_id} className="palace-major">
+            +{s.star_id}
+            {s.strength ? ` (${BRIGHTNESS_LABEL[s.strength]})` : ''}
+            {sihuaText && <span className="sihua-marker">{sihuaText}</span>}
+          </div>
+        );
+      })}
       <div className="palace-minor-grid">
         <div className="palace-minor-col-cat">
           {catStars.map((s) => (
-            <div key={s.star_id}>{formatMinorStar(s)}</div>
+            <div key={s.star_id}>{formatMinorStar(s, palace.sihua)}</div>
           ))}
         </div>
         <div className="palace-minor-col-other">
           {otherStars.map((s) => (
-            <div key={s.star_id}>{formatMinorStar(s)}</div>
+            <div key={s.star_id}>{formatMinorStar(s, palace.sihua)}</div>
           ))}
         </div>
       </div>

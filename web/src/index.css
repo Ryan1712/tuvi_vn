@@ -141,6 +141,11 @@ code {
   color: #d94f4f;
 }
 
+.sihua-marker {
+  color: #2f9e44;
+  font-weight: 600;
+}
+
 .palace-minor-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

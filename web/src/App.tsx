@@ -34,6 +34,8 @@ function App() {
       {data && <PalaceGrid data={data} displayName={displayName} />}
       <div className="legend">
         M:Miếu V:Vượng Đ:Đắc Lợi:Lợi B:Bình Bất:Bất H:Hãm
+        <br />
+        [Hóa Lộc/Quyền/Khoa/Kỵ]: Tứ Hóa của sao
       </div>
     </div>
   );
