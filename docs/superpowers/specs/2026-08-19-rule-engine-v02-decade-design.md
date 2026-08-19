@@ -157,12 +157,12 @@ tới, cả hai đều là entry thật) đủ để xác nhận evaluator dùng
 
 ## 5. Ngoài phạm vi (Known Issues)
 
-- **[MỞ, cố ý tách riêng] Scope `annual` (Lưu Niên).** KHÔNG nằm trong phase này. Cần 1
-  evaluator riêng (`evaluateAnnualRule`?) nhận `view_year`/dữ liệu Lưu Niên làm tham số NGOÀI
-  `Chart` (vì `Chart` cố ý không mang `luu_nien` — xem `src/chart/types.ts` dòng 120-133), theo
-  đúng mẫu `evaluateRelationRule(input: BuildChartInput, ...)` đã nhận `BuildChartInput` thay vì
-  chỉ `Chart`. Thiết kế riêng, không gộp vào "v0.2", tránh hiểu nhầm sau này rằng annual đã xong
-  cùng lúc với decade.
+- **[MỞ, cố ý tách riêng — ĐÃ CHUYỂN THÀNH v0.3] Scope `annual` (Lưu Niên).** Thiết kế đầy đủ
+  tại `docs/superpowers/specs/2026-08-19-rule-engine-v03-annual-design.md`. Xác nhận lúc thiết
+  kế v0.3: không tái dùng nguyên vẹn `evalCondition` được (khác dự đoán ban đầu ở đây) — vì
+  `LuuNienPalace` không có cấu trúc `major_stars`/`minor_stars`/`adjective_stars` như
+  `ChartPalace` (đúng bản chất tri thức: chính tinh không "lưu" theo năm), cần thêm 1 giá trị
+  `ChartField` mới (`'luu_nien_stars'`) và 1 evaluator riêng không qua `evalCondition`.
 - **[MỞ, cố ý hoãn] Sao "vận" riêng (Vận Đà, Vận Lộc, Vận Xương...).** v0.2 chỉ dùng chính/phụ
   tinh BẢN MỆNH tại cung Đại Vận đang chạy — không dùng các sao "vận" tạm thời trong
   `horoscope()`, vì chưa persist vào Chart Data Shape. Đây là kỹ thuật đọc Đại Vận nâng cao,
@@ -189,7 +189,12 @@ tới, cả hai đều là entry thật) đủ để xác nhận evaluator dùng
   không tuyên bố "duy nhất toàn cục"), và hiện chưa có caller nào trong codebase khai thác được
   lỗ hổng này (Tầng 2 chưa tồn tại). Cần ghi nhớ khi thiết kế `resolveQuery`: caller đó nên tự
   truyền/kiểm tra định danh lá số (VD `chart_id`) một cách tường minh, không dựa vào guard này
-  làm tuyến phòng thủ duy nhất chống trộn nhầm `Chart`.
+  làm tuyến phòng thủ duy nhất chống trộn nhầm `Chart`. **Cập nhật:** thiết kế v0.3 (`annual`)
+  xác nhận đây là 1 nguyên nhân gốc chung — `LuuNien` cũng không có cách phân biệt across-chart
+  nào (thậm chí không viết được guard nào có tác dụng thật, khác `decade` còn viết được guard
+  tuy có giới hạn). Xem `2026-08-19-rule-engine-v03-annual-design.md` mục 5 — gộp chung thành 1
+  Known Issue: cần `chart_id` tường minh trong Chart Data Shape, brainstorm riêng lúc thiết kế
+  Tầng 2/`resolveQuery`, không vá lẻ tẻ ở từng evaluator.
 - **Tầng 2 (domain-mapping + `resolveQuery`) phụ thuộc vào phase này.** Phase v0.2 phải xong và
   có test pass trước khi domain-mapping/`resolveQuery` của Tầng 2 có ý nghĩa thực tế — nếu
   không có Rule nào dùng được scope `decade`, `resolveQuery` dù đúng cũng không trả về
