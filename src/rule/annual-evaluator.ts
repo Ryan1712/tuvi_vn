@@ -46,6 +46,7 @@ function evalAnnualField(
  * CO Y THUC de mo — xem design doc muc 5 Known Issues, chua du nguon de chot 1 cach doc.
  */
 export function evaluateAnnualRule(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   chart: Chart,
   luuNien: LuuNien,
   branch: Branch,
@@ -56,6 +57,14 @@ export function evaluateAnnualRule(
       `evaluateAnnualRule chi xu ly scope "annual", nhan duoc "${rule.scope}"`,
     );
   }
+
+  // `chart` khong duoc dung truc tiep trong than ham nay (branch da la tham so rieng, khong
+  // can palaceOfBranch(chart, ...) nhu decade). Giu lai trong chu ky ham CO Y THUC — nhat
+  // quan voi evaluateRule/evaluateDecadeRule/evaluateRelationRule (deu nhan Chart dau tien),
+  // giup cac ham nay hoan doi cho nhau de trong 1 dispatcher chung sau nay (VD Tang 2's
+  // resolveQuery se can goi dung 1 trong 4 evaluator theo scope, chu ky dong nhat giam nguy co
+  // goi sai tham so). Da can nhac bo tham so nay (design doc muc 4 de ngo) — quyet dinh giu,
+  // khong bo, ghi ro tai day de dong lai cau hoi con mo do.
 
   // KHONG co guard chart-mismatch — xem design doc muc 3. Khong co tieu chi that o tang du
   // lieu nay de phan biet LuuNien thuoc la so nao (year/heavenly_stem/earthly_branch chi phu
