@@ -158,6 +158,20 @@ QUY TẮC BẮT BUỘC:
 
 5. Đây là bài đọc mở đầu, không phải trả lời 1 câu hỏi cụ thể — không đưa ra lời khuyên quyết
    định cá nhân (nghỉ việc, kết hôn...), chỉ trình bày xu hướng theo dữ liệu.
+
+6. Diễn đạt mức độ chắc chắn theo field "consensus" của MỖI interpretation — ĐỘC LẬP với quy
+   tắc 3 (quy tắc 3 xử lý trường hợp có nhiều quan điểm đối lập cùng conflict_group_id; quy tắc
+   này xử lý 1 interpretation ĐƠN LẺ, kể cả khi không có quan điểm đối lập nào đi kèm):
+   - consensus = "cao": có thể trình bày dứt khoát.
+   - consensus = "trung_binh": dùng ngôn từ dè dặt hơn ("có xu hướng", "thường được cho là").
+   - consensus = "tranh_cai": LUÔN kèm cụm từ thể hiện chưa đồng thuận ("theo 1 số quan điểm",
+     "chưa được xác nhận rộng rãi"), NGAY CẢ KHI chỉ có 1 mình interpretation đó xuất hiện,
+     không có conflict_group_id, không có quan điểm đối lập nào khác trong response.
+
+   Ví dụ SAI: "Tổ hợp này cho thấy X" (với consensus: tranh_cai nhưng không có
+   conflict_group_id — nghe như đã chốt, vì quy tắc 3 không kích hoạt).
+   Ví dụ ĐÚNG: "Có quan điểm cho rằng tổ hợp này thể hiện X, tuy đây chưa phải điều được đồng
+   thuận rộng rãi."
 ```
 
 ## 6. Kiến trúc kỹ thuật
@@ -223,13 +237,27 @@ không phải quyết định thiết kế).
 - Chưa có test tự động gọi LLM thật trong CI (tốn phí, không deterministic) — test unit cho
   `evidence-pack.ts` (thuần code, không gọi API) vẫn cần; test tích hợp gọi LLM thật chỉ chạy
   thủ công lúc verify, không đưa vào `npm test` mặc định. Chi tiết trong implementation plan.
+- **[MỞ] `current_dai_van`/`nominal_age` mới verify 1 case (Phạm Duy, năm xem 2026, tuổi 29 —
+  giữa 1 khoảng Đại Vận, không sát biên).** Chưa test case biên: tuổi đúng ranh giới
+  `age_from`/`age_to` giữa 2 Đại Vận liền kề, hoặc tuổi ngoài phạm vi 12 Đại Vận đã liệt kê
+  (VD tuổi rất cao). Nếu `horoscope()` xử lý sai ở biên, `current_dai_van` có thể trỏ nhầm
+  Đại Vận — áp dụng cùng logic "case biên cần test" mà build spec mục 10 đã đặt ra cho Chart
+  Engine, chưa làm ở spec này. Cần thêm case biên khi viết test cho `evidence-pack.ts`.
+- **[MỞ, chấp nhận có ý thức] `/charts/overview` tính toán trùng lặp với `/charts/rules`.**
+  Endpoint mới tự chạy lại toàn bộ `buildChart` + `matchRules` + `resolveConflicts` thay vì
+  tái dùng kết quả nếu client đã gọi `/charts/rules` trước đó — không chia sẻ state giữa 2
+  request. Chấp nhận được ở v0.1 (nhất quán với các quyết định YAGNI/không-cache khác trong dự
+  án, VD `queries.ts::relatedPalaces()` cũng tính lại toàn bộ mỗi lần gọi), KHÔNG phải bị bỏ
+  sót — tối ưu (cache, hoặc gộp 2 endpoint) chỉ làm khi có nhu cầu thật.
 
 ## 9. Testing
 
 - `evidence-pack.ts`: unit test thuần code (không gọi LLM) — assert `EvidencePack` dựng đúng
   từ 1 `Chart` + `rules_by_palace` mẫu (case Phạm Duy), đặc biệt: `interpretations` chỉ chứa
   rule `matched:true`, `current_dai_van.nominal_age` khớp giá trị đã verify (29 cho năm xem
-  2026), palaces đủ 12 cung không thiếu/thừa.
+  2026), palaces đủ 12 cung không thiếu/thừa. Kèm ít nhất 1 case biên cho `current_dai_van`
+  (tuổi sát ranh giới `age_from`/`age_to` giữa 2 Đại Vận liền kề — xem Known Issues mục 8) để
+  xác nhận `horoscope()` chọn đúng Đại Vận, không lệch 1 khoảng.
 - `overview.ts`/`anthropic-client.ts`: KHÔNG gọi LLM thật trong test tự động. Verify thủ công
   lúc implementation (gọi thật 1 lần với case Phạm Duy, đọc kết quả, xác nhận không vi phạm
   ranh giới Facts/Interpretation bằng mắt) — ghi lại kết quả verify trong plan/report, không
