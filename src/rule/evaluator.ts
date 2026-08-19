@@ -18,7 +18,7 @@ export function resolveField(palace: ChartPalace, field: ChartField): Set<string
   return new Set(palace.sihua.map((s) => s.type));
 }
 
-function evalOperator(values: Set<string>, operator: Condition['operator'] | Modifier['operator'], value: string): boolean {
+export function evalOperator(values: Set<string>, operator: Condition['operator'] | Modifier['operator'], value: string): boolean {
   if (operator === 'contains') return values.has(value);
   if (operator === 'not_contains') return !values.has(value);
   if (operator === 'equals') return values.size === 1 && values.has(value);

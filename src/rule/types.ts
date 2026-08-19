@@ -28,7 +28,14 @@ export type ConditionOperator = 'contains' | 'not_contains' | 'equals' | 'in' | 
  * Sao la se bi TypeScript chan luc viet Rule thay vi loi runtime. Mo rong enum nay
  * neu can field khac tren Chart — khong dung field: string tu do.
  */
-export type ChartField = 'major_stars' | 'minor_stars' | 'adjective_stars' | 'all_stars' | 'sihua_type';
+/**
+ * 'luu_nien_stars' doc LuuNienPalace.stars (mang phang, khong phan loai chinh/phu/tap —
+ * dung ban chat Tu Vi: chinh tinh khong "luu" theo nam, chi phu tinh/tap dieu moi luu.
+ * CHI hop le cho Rule.scope === 'annual' — evaluateAnnualRule throw neu dung field khac.
+ */
+export type ChartField =
+  | 'major_stars' | 'minor_stars' | 'adjective_stars' | 'all_stars' | 'sihua_type'
+  | 'luu_nien_stars';
 
 export interface Condition {
   field: ChartField;
