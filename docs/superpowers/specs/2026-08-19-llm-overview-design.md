@@ -205,9 +205,15 @@ thuộc ngược từ 2 module đó vào `src/llm/`, chỉ 1 chiều `src/llm/` 
 - `src/llm/overview.ts` — hàm `generateOverview(input: BuildChartInput): Promise<ChartOverviewResponse>`
   điều phối toàn bộ (build chart → build evidence pack → gọi LLM → trả response).
 
-**Xử lý lỗi:** nếu gọi LLM API thất bại (network, rate limit, timeout...), route trả lỗi rõ
-ràng (500 kèm message), KHÔNG trả về `overview_text` rỗng/giả — người dùng biết ngay là lỗi hệ
-thống, không nhầm là "lá số không có gì để nói".
+**Xử lý lỗi — cần sửa error middleware hiện có:** `src/server/app.ts`'s error middleware hiện
+tại trả **400 cho MỌI lỗi thrown**, không phân biệt lỗi input sai (đúng 400) với lỗi hệ thống
+(nên 500). Đây không phải khác biệt trường phái hợp lệ — 400 vs 500 là ngữ nghĩa HTTP chuẩn có
+đáp án đúng, hành vi hiện tại là nợ kỹ thuật cần sửa. Kế hoạch: định nghĩa `LlmApiError` (class
+mới trong `src/llm/`, extends `Error`), mọi lỗi từ gọi Anthropic API (network, timeout, rate
+limit, auth...) throw dưới dạng `LlmApiError`. Middleware kiểm tra `err instanceof LlmApiError`
+→ trả 500; các lỗi khác (input sai, v.v.) giữ nguyên 400 như hiện tại. KHÔNG trả về
+`overview_text` rỗng/giả khi lỗi — người dùng biết ngay là lỗi hệ thống, không nhầm là "lá số
+không có gì để nói".
 
 ## 7. UI
 
@@ -249,6 +255,12 @@ không phải quyết định thiết kế).
   request. Chấp nhận được ở v0.1 (nhất quán với các quyết định YAGNI/không-cache khác trong dự
   án, VD `queries.ts::relatedPalaces()` cũng tính lại toàn bộ mỗi lần gọi), KHÔNG phải bị bỏ
   sót — tối ưu (cache, hoặc gộp 2 endpoint) chỉ làm khi có nhu cầu thật.
+- **[MỞ, chấp nhận có ý thức] Mọi lỗi gọi Anthropic API gộp chung thành 1 `LlmApiError` → 500.**
+  Chưa phân biệt lỗi tạm thời nên retry (network, timeout, rate limit 429) với lỗi cấu hình
+  vĩnh viễn (API key sai/hết hạn, 401). Chấp nhận được ở v0.1 — không over-engineer phân loại
+  lỗi con khi chưa có nhu cầu thật (VD UI tự động retry). Log nội bộ (console.error hoặc
+  tương đương) PHẢI giữ đủ chi tiết (status code gốc từ Anthropic, error type) dù response ra
+  ngoài là 500 chung — tránh mất thông tin debug khi cần phân loại lại sau này.
 
 ## 9. Testing
 
