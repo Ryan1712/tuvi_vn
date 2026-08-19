@@ -72,6 +72,21 @@ export function evaluateDecadeRule(chart: Chart, daiVan: DaiVan, rule: Rule): Ru
       `evaluateDecadeRule chi xu ly scope "decade", nhan duoc "${rule.scope}"`,
     );
   }
+  // Fail loud neu daiVan khong khop bat ky entry nao trong chinh chart.luck_cycles.dai_van
+  // cua chart nay — tranh evaluate im lang tren du lieu treo lo lung (VD Tang 2 sau nay tu
+  // resolveQuery lo truyen nham DaiVan cua 1 la so khac, hoac object tu tao sai branch). So
+  // theo branch + age_from + age_to (khong dung reference identity — caller co the hop le
+  // clone object), khop dung tinh than "fail loud" da ap dung cho loi API key/calendar_type.
+  const belongsToChart = chart.luck_cycles.dai_van.some(
+    (d) => d.branch === daiVan.branch && d.age_from === daiVan.age_from && d.age_to === daiVan.age_to,
+  );
+  if (!belongsToChart) {
+    throw new Error(
+      `evaluateDecadeRule: daiVan (branch=${daiVan.branch}, age_from=${daiVan.age_from}, ` +
+      `age_to=${daiVan.age_to}) khong khop entry nao trong chart.luck_cycles.dai_van cua chart ` +
+      `nay — co the dang truyen nham DaiVan cua 1 chart khac.`,
+    );
+  }
   const targetPalace = palaceOfBranch(chart, daiVan.branch);
   const matched = rule.conditions.every((c) => evalCondition(targetPalace, c));
   const matched_modifiers = rule.modifiers.filter((m) => evalModifier(targetPalace, m));
@@ -84,6 +99,12 @@ export function evaluateDecadeRule(chart: Chart, daiVan: DaiVan, rule: Rule): Ru
 
 Tái dùng `evalCondition`/`evalModifier` từ `evaluator.ts` nguyên vẹn (giống
 `relation-evaluator.ts` đã làm), không viết lại logic đọc sao từ `ChartPalace` lần 2.
+
+**Vì sao guard này không phá nguyên tắc "hàm thuần túy, không tự suy luận Đại Vận nào" (mục 2):**
+guard KHÔNG tự chọn/tìm Đại Vận nào — nó chỉ xác minh `daiVan` được truyền vào THẬT SỰ thuộc về
+`chart` được truyền vào (2 tham số phải nhất quán với nhau), không quyết định thay caller "Đại
+Vận nào nên dùng". Phía gọi vẫn hoàn toàn tự do chọn "hiện tại" hay "năm được hỏi" — guard chỉ
+chặn trường hợp 2 tham số đến từ 2 nguồn không liên quan.
 
 **Lưu ý:** `evalExceptionConditions` trong `evaluator.ts` hiện là hàm private (không export) —
 implementation plan cần hoặc export nó, hoặc lặp lại 1 dòng `.every(evalCondition)` như trên
@@ -116,13 +137,23 @@ const TEST_RULE_DECADE: Rule = {
 };
 ```
 
-Case Phạm Duy đã verify (từ Tầng 1 design doc): Đại Vận hiện tại (tuổi 29) trỏ vào cung Phúc
-Đức (Sửu). Cung Phúc Đức có Thái Dương + Thái Âm, KHÔNG có Thiên Đồng — Rule test trên phải
-`matched: false` khi đánh giá tại Đại Vận này. Cung Mệnh (Hợi) CÓ Thiên Đồng — dùng 1 `DaiVan`
-giả lập trỏ vào Hợi (không cần đúng tuổi thật, chỉ cần đúng field `branch: 'Hoi'`) để xác nhận
-`matched: true` khi trỏ đúng cung. 2 case này (matched:true và matched:false, cùng 1 Rule, khác
-Đại Vận trỏ tới) đủ để xác nhận evaluator dùng đúng cung đích, không lẫn với cung được truyền
-trực tiếp.
+Case Phạm Duy đã verify (từ Tầng 1 design doc, và xác nhận lại bằng script thật lúc soạn spec
+này): `chart.luck_cycles.dai_van` có 12 entry tĩnh, trong đó entry tuổi 2-11 (`age_from: 2,
+age_to: 11`) có `branch: 'Hoi'`, và entry tuổi 22-31 (bao gồm tuổi hiện tại 29) có `branch:
+'Suu'`. Cung Hợi (Mệnh) CÓ Thiên Đồng; cung Sửu (Phúc Đức) có Thái Dương + Thái Âm, KHÔNG có
+Thiên Đồng. Test lấy CẢ HAI entry này TRỰC TIẾP từ `chart.luck_cycles.dai_van` (không tự tạo
+object giả lập nữa — guard mới ở mục 3 sẽ throw nếu `daiVan` không khớp entry thật của chart):
+
+```ts
+const daiVanTaiHoi = chart.luck_cycles.dai_van.find((d) => d.branch === 'Hoi')!; // tuoi 2-11
+const daiVanTaiSuu = chart.luck_cycles.dai_van.find((d) => d.branch === 'Suu')!; // tuoi 22-31, gom tuoi 29
+```
+
+`evaluateDecadeRule(chart, daiVanTaiHoi, TEST_RULE_DECADE)` → `matched: true` (Hợi có Thiên
+Đồng). `evaluateDecadeRule(chart, daiVanTaiSuu, TEST_RULE_DECADE)` → `matched: false` (Sửu
+không có Thiên Đồng). 2 case này (matched:true và matched:false, cùng 1 Rule, khác Đại Vận trỏ
+tới, cả hai đều là entry thật) đủ để xác nhận evaluator dùng đúng cung đích, không lẫn với cung
+được truyền trực tiếp — đồng thời tự động đi qua guard mới mà không cần entry giả lập riêng.
 
 ## 5. Ngoài phạm vi (Known Issues)
 
@@ -156,8 +187,13 @@ trực tiếp.
   verify), Rule test mẫu (mục 4). Assert:
   - `evaluateDecadeRule` throw khi `rule.scope !== 'decade'` (nhất quán với
     `evaluateRelationRule`'s guard).
-  - Khi `DaiVan.branch` trỏ vào cung CÓ Thiên Đồng (Hợi) → `matched: true`.
-  - Khi `DaiVan.branch` trỏ vào cung KHÔNG có Thiên Đồng (Đại Vận thật tại tuổi 29, cung Phúc
-    Đức) → `matched: false`.
+  - `evaluateDecadeRule` throw khi `daiVan` KHÔNG khớp entry nào trong
+    `chart.luck_cycles.dai_van` của chính `chart` đó — dùng 1 object `DaiVan` tự tạo với
+    `branch`/`age_from`/`age_to` không trùng bất kỳ entry thật nào (VD `age_from: 999`) để kích
+    hoạt guard mới (mục 3). Đây là test bắt buộc cho phần "fail loud" — không được bỏ qua.
+  - Khi `daiVan` là entry thật của Hợi (tuổi 2-11, lấy trực tiếp từ
+    `chart.luck_cycles.dai_van`) → `matched: true` (Hợi có Thiên Đồng).
+  - Khi `daiVan` là entry thật của Sửu (tuổi 22-31, gồm tuổi hiện tại 29) → `matched: false`
+    (Sửu không có Thiên Đồng).
   - `matched_modifiers`/`triggered_exceptions` (nếu Rule test có) được đánh giá đúng trên cung
     đích, không phải cung gốc theo `branch` truyền trực tiếp (khác `evaluateRule` thường).
