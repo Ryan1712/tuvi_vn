@@ -188,3 +188,35 @@ REAL-LLM MANUAL VERIFICATION (Tasks 3/5 follow-up): complete, closed
   - Spot-checked 4 of the 11 non-matched palaces (Tuat, Ty, Suu, Mao) against real chart.palaces star/brightness data -- 100% match, zero hallucinated facts, zero interpretive language attached to unmatched-Rule content.
   - current_dai_van correctly surfaced ("Dai van Phuc Duc, tuoi 29").
   Standing gap from Tasks 3/5/final review is now closed. .env file (gitignored) added for local API key storage going forward.
+
+=== RULE ENGINE v0.2 - DECADE SCOPE (plan: docs/superpowers/plans/2026-08-19-rule-engine-v02-decade.md) ===
+Started: 2026-08-19
+Task 1 (Rule Engine v0.2): complete (commits 9597509..92390e8, review clean)
+  Exported evalExceptionConditions (was private) in src/rule/evaluator.ts, pure visibility change, zero behavior change. 112/112 tests, typecheck clean.
+Task 2 (Rule Engine v0.2, final): complete (commit 1654bdb)
+  Added evaluateDecadeRule(chart, daiVan, rule) in new src/rule/decade-evaluator.ts, following the
+  relation-evaluator.ts pattern (points evalCondition/evalModifier/evalExceptionConditions at the
+  palace the given DaiVan's branch falls into, rather than changing the Rule Schema). Fail-loud
+  guard: throws if the daiVan argument doesn't match any real entry in chart.luck_cycles.dai_van
+  (branch + age_from + age_to) -- prevents silent-wrong-answer bug from a caller passing a DaiVan
+  from an unrelated chart. TDD: 5 tests written first in test/rule/decade-evaluator.test.ts, watched
+  fail (Cannot find module), then implemented verbatim per task-2-brief.md; all 5 passed on first
+  implementation. Full suite: 117/117 tests (112 existing + 5 new), typecheck clean. No Rule using
+  scope 'decade' added to src/rule/knowledge-base.ts -- TEST_ONLY_RULE_DECADE stays test-file-only
+  per build spec muc 13 (no new Rules without separate authorization).
+ALL RULE ENGINE v0.2 TASKS COMPLETE. Scope 'decade' (Dai Van) now has a working evaluator; the other
+  5 unused RuleScope enum values (star_pair, pattern, annual, spouse_matching, plus palace_relationship
+  which already has relation-evaluator.ts) remain out of scope per plan boundary (build spec muc 13 /
+  CLAUDE.md muc 7) -- annual/Luu Nien, Tang 2 domain-mapping/resolveQuery, and "sao van" star data are
+  explicitly deferred, not started.
+Task 2 (Rule Engine v0.2, FINAL): complete (commits 92390e8..1654bdb, review clean)
+  evaluateDecadeRule(chart, daiVan, rule) in new decade-evaluator.ts. Follows relation-evaluator.ts pattern exactly (points evalCondition/evalModifier/evalExceptionConditions at DaiVan.branch's palace). Fail-loud guard verified real by reviewer (checked all 3 fields branch+age_from+age_to against a genuinely-mismatched fixture, not an accidentally-valid one). No Rule Schema changes, no production Rule added to knowledge-base.ts (TEST_ONLY fixture only, matches relation-evaluator.test.ts convention). 117/117 tests, typecheck clean.
+
+ALL 2 RULE ENGINE v0.2 TASKS REVIEWED CLEAN. Proceeding to final whole-branch review.
+
+FINAL WHOLE-BRANCH REVIEW (Rule Engine v0.2): complete (range 9597509..1654bdb, 2 commits)
+  Verdict: Ready to merge = Yes. 0 Critical, 0 Important, 2 Minor (guard's branch+age_from+age_to comparison is same-Cuc-blind, not chart-unique -- reviewer constructed a real 2-different-people-same-Cuc counter-example; test fixture note, no action).
+  Reviewer independently re-ran full suite (117/117) and typecheck, both clean. Confirmed decade-evaluator.ts faithfully mirrors relation-evaluator.ts's pattern side-by-side, confirmed zero diff in rule/types.ts and rule/knowledge-base.ts.
+  Post-review fix: logged the same-Cuc guard limitation in design doc Known Issues -- guard still correct for its stated purpose (2 args mutually consistent), but future Tang 2 resolveQuery caller should thread chart_id explicitly rather than relying on this guard alone to prevent cross-chart mixups.
+
+ALL 2 RULE ENGINE v0.2 TASKS + FINAL REVIEW + POST-REVIEW DOC FIX COMPLETE.

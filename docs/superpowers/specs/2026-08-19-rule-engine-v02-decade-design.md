@@ -175,6 +175,21 @@ tới, cả hai đều là entry thật) đủ để xác nhận evaluator dùng
   phân biệt được 2 loại interpretation này khi trình bày ("đặc điểm bản chất của bạn" khác hẳn
   "trong giai đoạn này"). Không liên quan phase v0.2 (thuần code, chưa đụng LLM) — chỉ ghi lại
   để không quên khi tới lúc.
+- **[GHI NHỚ, phát hiện lúc review cuối] Guard `evaluateDecadeRule` không phân biệt được 2
+  `Chart` khác nhau CÙNG Cục.** Guard so `daiVan` với `chart.luck_cycles.dai_van` qua 3 field
+  (`branch`+`age_from`+`age_to`) — nhưng 3 field này là hàm thuần túy của Cục (`cuc_so`) và
+  hướng khởi Đại Vận, KHÔNG phụ thuộc ngày sinh cụ thể của người đó. Reviewer đã dựng phản ví dụ
+  thật: 2 lá số khác nhau (nữ sinh 1990-05-10 và nam sinh 1985-03-15), cùng Cục Thổ Ngũ Cục, cho
+  ra `DaiVan` giống hệt nhau ở cả 3 field được guard so sánh (`branch: 'Hoi', age_from: 5,
+  age_to: 14`). Nếu 1 caller tương lai (VD `resolveQuery` của Tầng 2) lỡ trộn nhầm `Chart`/
+  `DaiVan` của 2 người khác nhau CÙNG Cục, guard sẽ KHÔNG bắt được — vì `DaiVan` tự thân không
+  mang thông tin định danh lá số (`chart_id`), không có tổ hợp field nào của nó phân biệt được
+  "chart nào". Đây không phải lỗi của v0.2 (guard vẫn đúng mục đích thiết kế: xác nhận 2 tham số
+  truyền cùng lúc nhất quán với nhau — mục 3 đã ghi rõ "2 tham số phải nhất quán với nhau",
+  không tuyên bố "duy nhất toàn cục"), và hiện chưa có caller nào trong codebase khai thác được
+  lỗ hổng này (Tầng 2 chưa tồn tại). Cần ghi nhớ khi thiết kế `resolveQuery`: caller đó nên tự
+  truyền/kiểm tra định danh lá số (VD `chart_id`) một cách tường minh, không dựa vào guard này
+  làm tuyến phòng thủ duy nhất chống trộn nhầm `Chart`.
 - **Tầng 2 (domain-mapping + `resolveQuery`) phụ thuộc vào phase này.** Phase v0.2 phải xong và
   có test pass trước khi domain-mapping/`resolveQuery` của Tầng 2 có ý nghĩa thực tế — nếu
   không có Rule nào dùng được scope `decade`, `resolveQuery` dù đúng cũng không trả về
