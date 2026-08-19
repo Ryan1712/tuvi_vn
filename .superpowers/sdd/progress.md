@@ -220,3 +220,19 @@ FINAL WHOLE-BRANCH REVIEW (Rule Engine v0.2): complete (range 9597509..1654bdb, 
   Post-review fix: logged the same-Cuc guard limitation in design doc Known Issues -- guard still correct for its stated purpose (2 args mutually consistent), but future Tang 2 resolveQuery caller should thread chart_id explicitly rather than relying on this guard alone to prevent cross-chart mixups.
 
 ALL 2 RULE ENGINE v0.2 TASKS + FINAL REVIEW + POST-REVIEW DOC FIX COMPLETE.
+
+=== RULE ENGINE v0.3 - ANNUAL SCOPE (plan: docs/superpowers/plans/2026-08-19-rule-engine-v03-annual.md) ===
+Started: 2026-08-19
+Task 1 (Rule Engine v0.3): complete (commits f8eb858..727180e, review clean)
+  Exported evalOperator (was private) in evaluator.ts. Added 'luu_nien_stars' to ChartField (additive, existing 5 members unchanged). 117/117 tests, typecheck clean.
+Task 2 (Rule Engine v0.3, FINAL): complete (commits 727180e..2d80a33, review clean after 1 fix round)
+  evaluateAnnualRule(chart, luuNien, branch, rule) in new annual-evaluator.ts. Own condition-checking logic (evalAnnualField), not reusing evalCondition (LuuNienPalace has no major/minor/adjective structure -- correct per real Tu Vi knowledge). Reviewer confirmed both historical bug classes absent: branch flows through as real parameter (proven by 2-different-branches test), no bad Modifier-as-Condition cast (separate field/operator/value params instead). Field guard throws for both conditions and modifiers. Review found Minor real bug: modifier field='branch' ignored modifier.operator (hardcoded 'in' behavior) -- fixed to delegate to evalOperator matching evaluator.ts's evalModifier pattern, 2 new tests (not_in, equals) added and independently re-verified correct by reviewer. No production Rule added to knowledge-base.ts. 125/125 tests, typecheck clean.
+
+ALL 2 RULE ENGINE v0.3 TASKS REVIEWED CLEAN. Proceeding to final whole-branch review.
+
+FINAL WHOLE-BRANCH REVIEW (Rule Engine v0.3): complete (range f8eb858..2d80a33, 3 commits)
+  Verdict: Ready to merge = Yes. 0 Critical, 0 Important, 2 Minor (unused chart param silently kept without resolving design doc's open question; wrong-field guard test only covers conditions path, not modifiers/exceptions -- low priority, shared implementation).
+  Reviewer independently verified LuuNienPalace's flat-stars shape justifies the architectural divergence from decade-evaluator.ts (not carelessness), confirmed no hard-coded palace, no unsafe casts, modifier-operator fix matches evaluator.ts's evalModifier pattern exactly. 125/125 tests, typecheck clean, both re-run independently.
+  Post-review fix: added comment resolving the "keep or drop chart param" open question from design doc muc 4 -- decided to keep for signature consistency across all 4 evaluators (evaluateRule/evaluateDecadeRule/evaluateRelationRule/evaluateAnnualRule), useful for a future uniform dispatcher. Comment-only, no behavior change.
+
+ALL 2 RULE ENGINE v0.3 TASKS + FINAL REVIEW + POST-REVIEW FIX COMPLETE. Rule Engine now has both decade and annual evaluators -- the two blocks Tang 2 (LLM domain+time deep-dive) depends on.
