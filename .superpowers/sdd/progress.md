@@ -125,3 +125,59 @@ FINAL WHOLE-BRANCH REVIEW (UI): complete (range 4cc9fa3..84e0898, 13 commits)
   Post-review fix (commit a00445c): added Tu Hoa markers to PalaceCell (matched by star_id, both major and minor stars), legend line added to App.tsx. Verified against real Pham Duy data: all 4 sihua types correctly matched to their stars. Design doc Known Issues updated to log this as resolved. 97/97 tests, tsc -b + vite build clean after fix.
 
 ALL 10 UI TASKS + FINAL REVIEW + POST-REVIEW FIX COMPLETE. Phase 5 (UI) done.
+
+=== LLM OVERVIEW / TANG 1 (plan: docs/superpowers/plans/2026-08-19-llm-overview.md) ===
+Started: 2026-08-19
+Task 0 (LLM Overview): complete (commits a507350..ac364fd, review clean)
+  Fixed pre-existing bug: error middleware returned 400 for ALL thrown errors. Added LlmApiError class (src/llm/errors.ts), middleware now checks instanceof to route 500 vs 400. Verified: existing 400 tests unchanged, 99/99 tests, typecheck clean.
+Task 1 (LLM Overview): complete (commits ac364fd..44ac518, review clean)
+  Installed @anthropic-ai/sdk@^0.117.1. anthropic-client.ts: callAnthropic() wrapper, throws LlmApiError on missing key/network/auth/bad response shape. Test covers deterministic missing-key path only (no real API call per Global Constraints). 100/100 tests, typecheck clean.
+Task 2 (LLM Overview): complete (commits 44ac518..2fb97f5, review clean)
+  evidence-pack.ts: buildEvidencePack() splits Facts (all 12 palaces, unrestricted) from Interpretation (matched:true Rules only, no leakage). currentDaiVan() confirmed using the CORRECTED decadalList()+ageRange approach (matches already-tested adapter.ts pattern), not the wrong horoscope().decadal.palaceNames[index] approach. nominalAge (tuoi mu) used, never manual calendar age. Boundary-age test cross-checks against chart.luck_cycles.dai_van for internal consistency. Type casts use real RuleEvalResult/ConflictGroup (structural widening, not narrowed subset). 106/106 tests, typecheck clean.
+Task 3 (LLM Overview): DONE_WITH_CONCERNS (commit 77c9cbc)
+  overview-prompt.ts: OVERVIEW_SYSTEM_PROMPT (6 rules) + buildUserMessage(). Rule 6 enforces consensus-based hedging INDEPENDENTLY of conflict_group_id (design-review-caught gap: a single tranh_cai interpretation with no conflict partner must still be hedged). overview.ts: generateOverview() orchestrates buildChart -> matchRules/resolveConflicts per branch -> buildEvidencePack -> callAnthropic. Object.fromEntries(...) cast to Record<Branch, {matched: RuleEvalResult[]; conflicts: ConflictGroup[]}> using the REAL types (not a narrowed subset) to avoid TS2352. 110/110 tests, typecheck clean.
+  Step 7 (manual verification against real Anthropic API) SKIPPED: ANTHROPIC_API_KEY not set in this environment (checked process.env and .env — neither present). Steps 1-6 are fully self-contained and verified; Step 7 requires a human/session with real API credentials to run the npx tsx command in the brief and manually check the output against the Facts/Interpretation checklist. Status recorded as DONE_WITH_CONCERNS rather than DONE for this reason — not a code defect.
+Task 3 (LLM Overview): complete (commits 2fb97f5..77c9cbc, review clean; Step 7 manual real-API verification skipped, no ANTHROPIC_API_KEY in this environment)
+  overview-prompt.ts: OVERVIEW_SYSTEM_PROMPT with all 6 rules verbatim, reviewer confirmed rule 6 (consensus-independence, the key fix) correctly framed as independent of rule 3. overview.ts: generateOverview() orchestrates buildChart+matchRules+resolveConflicts+buildEvidencePack+callAnthropic, matches routes.ts's existing pattern. Type cast uses real RuleEvalResult/ConflictGroup. 110/110 tests, typecheck clean. FOLLOW-UP (not blocking): whoever has a real ANTHROPIC_API_KEY should run Task 3 Step 7's manual check before considering the feature production-validated.
+Task 4 (LLM Overview): complete (commits 77c9cbc..9a1bd52, review clean)
+  POST /charts/overview route added, routes.ts otherwise unchanged. First mock in codebase (vi.mock on callAnthropic only), reviewer confirmed no leakage into anthropic-client.test.ts/evidence-pack.test.ts and real pipeline (buildChart/matchRules/resolveConflicts/buildEvidencePack) still exercised unmocked. 112/112 tests, typecheck clean.
+
+BACKEND (Tasks 0-4) COMPLETE. Proceeding to frontend (Task 5).
+Task 5 (LLM Overview, FINAL): DONE_WITH_CONCERNS (commit 6e70016)
+  ChartOverviewResponse type + fetchChartOverview (shares postChart<T> helper with
+  fetchChartWithRules, DRY refactor, same error-handling behavior) + OverviewSection component
+  + App.tsx wiring: two independent fetches per submit, /charts/rules still gates the palace
+  grid unchanged, /charts/overview updates its own loading/error state without blocking the
+  grid. tsc -b + vite build clean. Backend suite 112/112 (unaffected, no backend files touched).
+  Step 7 manual verification: ANTHROPIC_API_KEY NOT set in this environment (same gap as Task
+  3). Performed everything not requiring a real LLM call: started real Express + Vite servers,
+  confirmed pre-existing /api/charts/rules still proxies correctly (200, valid
+  ChartRulesResponse, Menh@Hoi Pham Duy case) — frontend build/wiring not broken by this task.
+  Also probed /api/charts/overview through the proxy: reaches the real route handler and fails
+  fast with the expected 500 "ANTHROPIC_API_KEY khong duoc set" error (correct behavior per
+  Task 1's LlmApiError, not a bug) — confirms the new endpoint is wired through the proxy, but
+  the actual overview_text/Facts-Interpretation checklist could not be exercised. Both servers
+  stopped cleanly after verification.
+  Gap confirmed for reporting: no project-root README.md exists, and ANTHROPIC_API_KEY is not
+  documented anywhere in CLAUDE.md or any README (same gap noted, not silently fixed, per
+  brief's after-completion instructions).
+  FOLLOW-UP (not blocking, carried over from Task 3): whoever has a real ANTHROPIC_API_KEY
+  should run Task 3 Step 7 AND Task 5 Step 7's manual checks before considering the LLM
+  Overview feature production-validated.
+
+ALL 6 LLM OVERVIEW TASKS (0-5) COMPLETE (code). Step 7 LLM-dependent manual verification for
+Tasks 3 and 5 both deferred — no ANTHROPIC_API_KEY available in this environment. Not starting
+final whole-branch review here; that decision belongs to whoever picks this up next, per the
+brief's own scope note (Tang 1 only, no Tang 2/salience/Knowledge Base expansion).
+Task 5 (LLM Overview, FINAL): complete (commits 9a1bd52..6e70016, review clean; LLM-dependent portion of Step 7 skipped, no ANTHROPIC_API_KEY in this environment)
+  ChartOverviewResponse type, fetchChartOverview (api.ts refactored to share postChart<T> helper, fetchChartWithRules behavior byte-for-byte preserved), OverviewSection.tsx, App.tsx wired with 2 independent fetches (rules gates grid unchanged, overview never blocks grid, early-return confirmed on rules failure). No new deps, plain CSS. tsc -b + vite build clean. Manually verified through real running servers: pre-existing /api/charts/rules proxy still works, new /api/charts/overview proxy reaches generateOverview and correctly surfaces 500 LlmApiError end-to-end (proves Task 0's middleware fix works through the full stack even without a real API key). FOLLOW-UP (not blocking, carried from Task 3): run the real-LLM Facts/Interpretation checklist with a real ANTHROPIC_API_KEY. Also noted: ANTHROPIC_API_KEY undocumented, no project-root README exists.
+
+ALL 6 LLM OVERVIEW TASKS (0-5) REVIEWED CLEAN. Proceeding to final whole-branch review.
+
+FINAL WHOLE-BRANCH REVIEW (LLM Overview): complete (range a507350..6e70016, 6 commits)
+  Verdict: Ready to merge = Yes. 0 Critical, 0 Important, 2 Minor (unreachable-in-practice missing runtime guard in evidence-pack.ts, unrelated pre-existing .gitignore working-tree state).
+  Reviewer traced buildEvidencePack()'s Facts/Interpretation split end-to-end in the actual code (not just comments) and confirmed no leak path. Confirmed one-directional src/llm/ -> src/chart/+src/rule/ architecture (grep verified). Confirmed mocked route test doesn't leak (real callAnthropic test still passes same run). 112/112 tests, typecheck + frontend build clean, independently re-run.
+  Post-review fix: added README.md documenting ANTHROPIC_API_KEY requirement and setup/run/test commands (project had no README at all before this) — the one actionable recommendation from the final review.
+
+ALL 6 LLM OVERVIEW TASKS + FINAL REVIEW + POST-REVIEW FIX COMPLETE. Tang 1 (Overview) done.
+  Standing follow-up (not blocking, carried across Tasks 3/5/final review): run the real-LLM manual verification (Facts/Interpretation checklist) once ANTHROPIC_API_KEY is available.
