@@ -67,7 +67,7 @@ export function evaluateAnnualRule(
   );
   const matched_modifiers = rule.modifiers.filter((m) => {
     if (m.field === 'branch') {
-      return branch === m.value || m.value.split(',').includes(branch);
+      return evalOperator(new Set([branch]), m.operator, m.value);
     }
     return evalAnnualField(luuNien, branch, m.field, m.operator, m.value);
   });

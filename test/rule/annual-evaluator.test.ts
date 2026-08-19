@@ -110,4 +110,61 @@ describe('evaluateAnnualRule', () => {
       evaluateAnnualRule(chart, brokenLuuNien, 'Hoi', TEST_ONLY_RULE_ANNUAL),
     ).toThrow(/khong tim thay cung/);
   });
+
+  it('modifier operator "not_in" hoat dong dung — branch NOT in excluded list thi khop', () => {
+    const chart = buildChart(PHAM_DUY_2026);
+    const ruleWithNotIn: Rule = {
+      rule_id: 'TEST_ONLY_ANNUAL_BRANCH_NOT_IN',
+      conflict_group_id: null,
+      scope: 'annual',
+      subject: { type: 'star', id: 'LUU_THIEN_MA' },
+      conditions: [
+        { field: 'luu_nien_stars', operator: 'contains', value: 'LUU_THIEN_MA', required: true },
+      ],
+      modifiers: [
+        { field: 'branch', operator: 'not_in', value: 'Suu', effect: 'test only', weight: 0.5 },
+      ],
+      exceptions: [],
+      conclusion: { text: 'test fixture', valence: 'trung_tinh', magnitude: 'nhe' },
+      school: 'test', sources: [], consensus: 'cao', notes: 'TEST-ONLY, branch not_in test',
+    };
+
+    const chart_ = buildChart(PHAM_DUY_2026);
+    // Hoi is NOT in excluded list 'Suu' — modifier should match
+    const resultHoi = evaluateAnnualRule(chart_, chart_.luu_nien!, 'Hoi', ruleWithNotIn);
+    expect(resultHoi.matched_modifiers).toHaveLength(1);
+    expect(resultHoi.matched_modifiers.at(0)?.field).toBe('branch');
+
+    // Suu is in excluded list 'Suu' — modifier should NOT match
+    const resultSuu = evaluateAnnualRule(chart_, chart_.luu_nien!, 'Suu', ruleWithNotIn);
+    expect(resultSuu.matched_modifiers).toHaveLength(0);
+  });
+
+  it('modifier operator "equals" for branch hoat dong dung — chi khop chi chinh xac khi chi 1 gia tri', () => {
+    const chart = buildChart(PHAM_DUY_2026);
+    const ruleWithEquals: Rule = {
+      rule_id: 'TEST_ONLY_ANNUAL_BRANCH_EQUALS',
+      conflict_group_id: null,
+      scope: 'annual',
+      subject: { type: 'star', id: 'LUU_THIEN_MA' },
+      conditions: [
+        { field: 'luu_nien_stars', operator: 'contains', value: 'LUU_THIEN_MA', required: true },
+      ],
+      modifiers: [
+        { field: 'branch', operator: 'equals', value: 'Hoi', effect: 'test only', weight: 0.5 },
+      ],
+      exceptions: [],
+      conclusion: { text: 'test fixture', valence: 'trung_tinh', magnitude: 'nhe' },
+      school: 'test', sources: [], consensus: 'cao', notes: 'TEST-ONLY, branch equals test',
+    };
+
+    const chart_ = buildChart(PHAM_DUY_2026);
+    // Hoi matches exactly
+    const resultHoi = evaluateAnnualRule(chart_, chart_.luu_nien!, 'Hoi', ruleWithEquals);
+    expect(resultHoi.matched_modifiers).toHaveLength(1);
+
+    // Ty does not match
+    const resultTy = evaluateAnnualRule(chart_, chart_.luu_nien!, 'Ty', ruleWithEquals);
+    expect(resultTy.matched_modifiers).toHaveLength(0);
+  });
 });
