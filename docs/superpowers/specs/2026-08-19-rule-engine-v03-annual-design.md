@@ -56,15 +56,30 @@ không khớp cấu trúc đó — ép dùng field cũ mới là hành động "
 `rule.scope === 'annual'` — fail loud, bắt lỗi tác giả Rule gõ nhầm field (VD lỡ để
 `major_stars` vì quen tay) ngay lúc evaluate, không âm thầm bỏ qua.
 
-## 2. Chữ ký hàm — nhận `LuuNien` đã build sẵn (giống `decade`, khác `relation`)
+## 2. Chữ ký hàm — nhận `LuuNien` VÀ `branch` đã xác định sẵn (không tự suy luận gì)
 
 ```ts
-export function evaluateAnnualRule(chart: Chart, luuNien: LuuNien, rule: Rule): RuleEvalResult
+export function evaluateAnnualRule(
+  chart: Chart,
+  luuNien: LuuNien,
+  branch: Chart['palaces'][number]['branch'],
+  rule: Rule,
+): RuleEvalResult
 ```
 
-**Quyết định:** nhận `LuuNien` đã build sẵn từ phía gọi, KHÔNG tự gọi lại `buildChart`/
+**Quyết định 1:** nhận `LuuNien` đã build sẵn từ phía gọi, KHÔNG tự gọi lại `buildChart`/
 `adaptLuuNien` bên trong (khác mẫu `evaluateRelationRule(input: BuildChartInput, ...)` đã dùng
 cho `palace_relationship`).
+
+**Quyết định 2 (sửa sau khi tự phát hiện mâu thuẫn nội tại — xem lịch sử revision):** `branch`
+(cung cần tra Lưu Niên) cũng là tham số tường minh, KHÔNG mặc định cứng
+`chart.menh_than.menh_branch` bên trong hàm. Bản thảo đầu tiên đã hard-code cung Mệnh, mâu thuẫn
+trực tiếp với chính nguyên tắc "hàm thuần túy, không tự suy luận ngữ cảnh" vừa chốt cho
+`LuuNien` — "cung nào cần tra" là quyết định của phía gọi (Tầng 2 sau này: domain "sức khỏe" →
+tra cung Tật Ách, domain "công việc" → tra cung Quan Lộc, KHÔNG phải luôn là Mệnh), y hệt lý do
+`relation`'s `RelationTarget` không hard-code 1 quan hệ cố định. Case Phạm Duy dùng cung Mệnh ở
+Rule test mẫu (mục 6) chỉ vì đó là giá trị TRUYỀN VÀO lúc test, không phải giá trị mặc định
+trong chữ ký hàm.
 
 **Vì sao 2 mẫu hình khác nhau cùng tồn tại trong dự án — không phải thiếu nhất quán cần "dọn
 cho giống nhau":**
@@ -142,9 +157,19 @@ function evalAnnualCondition(luuNien: LuuNien, branch: Chart['palaces'][number][
  * Evaluator rieng cho scope annual. KHONG tai dung evalCondition/evalModifier nguyen ven
  * (khac decade) — vi LuuNienPalace khong co cau truc major_stars/minor_stars/adjective_stars
  * nhu ChartPalace (dung ban chat tri thuc: chinh tinh khong "luu" theo nam). Xem design doc
- * muc 1. Ham THUAN TUY: nhan LuuNien da xac dinh san, khong tu build lai (xem muc 2).
+ * muc 1. Ham THUAN TUY: nhan CA LuuNien LAN branch da xac dinh san tu phia goi, khong tu suy
+ * luan "cung nao can tra" ben trong — dung nguyen tac da giu nhat quan o muc 2 (khong tu build
+ * lai LuuNien) va o decade (khong tu chon Dai Van). "Cung nao" la quyet dinh cua phia goi (VD
+ * Tang 2 sau nay: domain "suc khoe" -> tra cung Tat Ach, domain "cong viec" -> tra cung Quan
+ * Loc — KHONG phai luon la Menh). Rule test mau (muc 6) dung cung Menh cho case Pham Duy chi vi
+ * do la gia tri truyen vao luc test, KHONG phai gia tri mac dinh trong evaluator.
  */
-export function evaluateAnnualRule(chart: Chart, luuNien: LuuNien, rule: Rule): RuleEvalResult {
+export function evaluateAnnualRule(
+  chart: Chart,
+  luuNien: LuuNien,
+  branch: Chart['palaces'][number]['branch'],
+  rule: Rule,
+): RuleEvalResult {
   if (rule.scope !== 'annual') {
     throw new Error(
       `evaluateAnnualRule chi xu ly scope "annual", nhan duoc "${rule.scope}"`,
@@ -154,20 +179,21 @@ export function evaluateAnnualRule(chart: Chart, luuNien: LuuNien, rule: Rule): 
   // KHONG co guard chart-mismatch — xem design doc muc 3 (khong co tieu chi that o tang du lieu
   // nay de phan biet LuuNien thuoc lá so nao). Trach nhiem dam bao Chart+LuuNien khop nhau
   // thuoc ve phia goi (build ca 2 tu CUNG 1 input trong CUNG 1 request).
-
-  // branch dung de tra cuu phai la cung Menh cua CHART GOC (khong phai cung Menh cua nam Luu
-  // Nien — 2 khai niem khac nhau). V0.3 mac dinh dung Chart.menh_than.menh_branch — Rule test
-  // mau (muc 5) xac nhan gia tri nay dung cho case Pham Duy. Rule that (annual) co the can
-  // tham so branch rieng thay vi luon la Menh — quyet dinh cu the o implementation plan.
-  const branch = chart.menh_than.menh_branch;
+  //
+  // Tham so `chart` hien khong duoc dung truc tiep trong than ham (branch da truyen san,
+  // khong can palaceOfBranch(chart, ...) nhu decade) — giu lai trong chu ky ham de nhat quan
+  // voi cac evaluator khac (deu nhan Chart dau tien) va de danh cho viec kiem tra sau nay neu
+  // can (VD validate branch hop le). Implementation plan xac nhan lai co thuc su can `chart`
+  // hay co the bo tham so nay — khong quyet ngam, ghi ro neu bo.
 
   const matched = rule.conditions.every((c) => evalAnnualCondition(luuNien, branch, c));
   const matched_modifiers = rule.modifiers.filter((m) => {
     if (m.field === 'branch') {
-      // Modifier field 'branch' kiem tra dia chi cung Menh goc, giong evalModifier hien co.
+      // Modifier field 'branch' kiem tra branch DUOC TRUYEN VAO (khong con ngam dinh la Menh
+      // nhu ban thao truoc) co khop danh sach mong muon hay khong — VD 1 Rule annual muon
+      // modifier chi ap dung khi dang tra cuu tai 1 vai cung cu the.
       return branch === m.value || m.value.split(',').includes(branch);
     }
-    // Modifier field khac 'branch' cho scope annual: cung logic evalAnnualCondition, tai su dung.
     return evalAnnualCondition(luuNien, branch, m as Condition);
   });
   const triggered_exceptions = rule.exceptions.filter((e: Exception) =>
@@ -183,11 +209,9 @@ export function evaluateAnnualRule(chart: Chart, luuNien: LuuNien, rule: Rule): 
   `evaluator.ts`) — cân nhắc export `evalOperator` (giống Task 1 của v0.2 export
   `evalExceptionConditions`) thay vì viết lại 5 nhánh if/else lần 2. Quyết định cụ thể ở
   implementation plan.
-- Field `branch` mặc định là `chart.menh_than.menh_branch` (cung Mệnh gốc) — cần xác nhận đây
-  đúng là ý nghĩa "annual" mong muốn (VD "Lưu Kình Dương có xuất hiện tại cung Mệnh năm nay
-  không") trước khi viết Rule test mẫu, hay cần tham số `branch` linh hoạt như `relation`'s
-  `RelationTarget`. Việc này ảnh hưởng trực tiếp chữ ký hàm — làm rõ ở implementation plan
-  trước khi code, không tự quyết ngầm.
+- Tham số `chart` trong `evaluateAnnualRule` hiện không được dùng trực tiếp trong thân hàm sau
+  khi `branch` trở thành tham số tường minh (xem comment trong code mẫu) — implementation plan
+  xác nhận lại có thực sự cần giữ tham số này hay có thể bỏ, không quyết ngầm lúc code.
 
 ## 5. Ngoài phạm vi (Known Issues)
 
@@ -216,15 +240,22 @@ export function evaluateAnnualRule(chart: Chart, luuNien: LuuNien, rule: Rule): 
 
 - `test/rule/annual-evaluator.test.ts`: dùng case Phạm Duy thật, Rule TEST-ONLY (không thêm
   vào `knowledge-base.ts`, theo đúng convention `TEST_ONLY_*` đã dùng ở `relation-evaluator
-  .test.ts`/`decade-evaluator.test.ts`). Cần xác định `view_year` cụ thể + sao Lưu Niên thật
-  tại cung Mệnh của Phạm Duy cho năm đó (verify bằng code thật lúc viết plan, không đoán) trước
+  .test.ts`/`decade-evaluator.test.ts`). Cần xác định `view_year` cụ thể + sao Lưu Niên thật tại
+  1 cung cụ thể của Phạm Duy cho năm đó (verify bằng code thật lúc viết plan, không đoán) trước
   khi viết assertion — implementation plan phải verify giá trị thật, không copy số liệu từ đây
-  nếu design doc chưa tự chạy code xác nhận.
+  nếu design doc chưa tự chạy code xác nhận. Cung dùng để test là giá trị TRUYỀN VÀO qua tham
+  số `branch` (VD dùng cung Mệnh của Phạm Duy cho tiện đối chiếu với case đã quen thuộc), không
+  phải mặc định trong evaluator (xem mục 2, quyết định 2) — nên cũng nên có ít nhất 1 test dùng
+  1 cung KHÁC Mệnh (VD Tật Ách) để xác nhận `branch` thực sự là tham số hoạt động, không bị lờ
+  đi bên trong hàm.
 - Assert bắt buộc:
   - `evaluateAnnualRule` throw khi `rule.scope !== 'annual'`.
   - `evalAnnualCondition` (hoặc qua `evaluateAnnualRule`) throw khi `Condition.field !==
     'luu_nien_stars'` cho scope `annual` — test riêng cho lỗi gõ nhầm field.
-  - Case `matched: true` khi sao Lưu Niên thật có mặt tại cung tra cứu.
-  - Case `matched: false` khi không có.
+  - Case `matched: true` khi sao Lưu Niên thật có mặt tại cung tra cứu (branch A).
+  - Case `matched: false` khi không có (branch A, hoặc cùng Rule nhưng branch B không có sao).
   - `matched_modifiers`/`triggered_exceptions` đánh giá đúng qua `evalAnnualCondition`, không
     lẫn với `evalCondition` gốc.
+  - Truyền 2 `branch` khác nhau (VD Mệnh và Tật Ách) cho CÙNG 1 `luuNien`, xác nhận kết quả
+    `matched` có thể khác nhau giữa 2 lần gọi — chứng minh evaluator thực sự đọc theo `branch`
+    tham số, không hard-code 1 cung cố định nào bên trong.
