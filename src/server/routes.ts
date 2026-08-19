@@ -6,6 +6,7 @@ import { resolveConflicts } from '../rule/conflict-resolver.js';
 import { KNOWLEDGE_BASE } from '../rule/knowledge-base.js';
 import { BRANCHES } from '../chart/types.js';
 import type { Rule } from '../rule/types.js';
+import { generateOverview } from '../llm/overview.js';
 
 export const router = Router();
 
@@ -34,4 +35,9 @@ router.post('/charts/rules', (req, res) => {
   );
 
   res.status(200).json({ chart, rules_by_palace });
+});
+
+router.post('/charts/overview', async (req, res) => {
+  const result = await generateOverview(req.body as BuildChartInput);
+  res.status(200).json(result);
 });

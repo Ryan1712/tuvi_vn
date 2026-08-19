@@ -1,6 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../../src/server/app.js';
+
+vi.mock('../../src/llm/anthropic-client.js', () => ({
+  callAnthropic: vi.fn().mockResolvedValue('Day la bai Tong quan gia lap cho test.'),
+}));
 
 const PHAM_DUY_INPUT = {
   calendar_type: 'duong_lich',
@@ -100,5 +104,21 @@ describe('POST /charts/rules', () => {
     const res = await request(app).post('/charts/rules').send(PHAM_DUY_INPUT);
     expect(res.status).toBe(200);
     expect(res.body.chart.luu_nien).toBeUndefined();
+  });
+});
+
+describe('POST /charts/overview', () => {
+  it('tra ve 200, chart dung, overview_text tu (mock) LLM', async () => {
+    const res = await request(app).post('/charts/overview').send(PHAM_DUY_INPUT);
+    expect(res.status).toBe(200);
+    expect(res.body.chart.menh_than.menh_branch).toBe('Hoi');
+    expect(res.body.overview_text).toBe('Day la bai Tong quan gia lap cho test.');
+  });
+
+  it('tra ve 400 khi input khong hop le (khong goi LLM)', async () => {
+    const res = await request(app)
+      .post('/charts/overview')
+      .send({ calendar_type: 'khong_hop_le', date: '1998-12-17', time_index: 12, gender: 'nam' });
+    expect(res.status).toBe(400);
   });
 });
