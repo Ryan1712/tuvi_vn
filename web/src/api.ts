@@ -1,9 +1,7 @@
-import type { BuildChartInput, ChartRulesResponse } from './types';
+import type { BuildChartInput, ChartRulesResponse, ChartOverviewResponse } from './types';
 
-export async function fetchChartWithRules(
-  input: BuildChartInput,
-): Promise<ChartRulesResponse> {
-  const res = await fetch('/api/charts/rules', {
+async function postChart<T>(path: string, input: BuildChartInput): Promise<T> {
+  const res = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
@@ -12,5 +10,13 @@ export async function fetchChartWithRules(
     const body = (await res.json()) as { error?: string };
     throw new Error(body.error ?? `HTTP ${res.status}`);
   }
-  return (await res.json()) as ChartRulesResponse;
+  return (await res.json()) as T;
+}
+
+export function fetchChartWithRules(input: BuildChartInput): Promise<ChartRulesResponse> {
+  return postChart<ChartRulesResponse>('/api/charts/rules', input);
+}
+
+export function fetchChartOverview(input: BuildChartInput): Promise<ChartOverviewResponse> {
+  return postChart<ChartOverviewResponse>('/api/charts/overview', input);
 }

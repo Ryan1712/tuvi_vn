@@ -200,3 +200,8 @@ export interface ChartRulesResponse {
   chart: Chart;
   rules_by_palace: Record<Branch, PalaceRuleResult>;
 }
+
+export interface ChartOverviewResponse {
+  chart: Chart;
+  overview_text: string;
+}
