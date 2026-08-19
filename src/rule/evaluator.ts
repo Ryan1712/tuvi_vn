@@ -44,7 +44,7 @@ export function evalModifier(palace: ChartPalace, modifier: Modifier): boolean {
   return evalOperator(values, modifier.operator, modifier.value);
 }
 
-function evalExceptionConditions(palace: ChartPalace, exception: Exception): boolean {
+export function evalExceptionConditions(palace: ChartPalace, exception: Exception): boolean {
   return exception.conditions.every((c) => evalCondition(palace, c));
 }
 
