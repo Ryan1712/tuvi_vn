@@ -181,3 +181,10 @@ FINAL WHOLE-BRANCH REVIEW (LLM Overview): complete (range a507350..6e70016, 6 co
 
 ALL 6 LLM OVERVIEW TASKS + FINAL REVIEW + POST-REVIEW FIX COMPLETE. Tang 1 (Overview) done.
   Standing follow-up (not blocking, carried across Tasks 3/5/final review): run the real-LLM manual verification (Facts/Interpretation checklist) once ANTHROPIC_API_KEY is available.
+
+REAL-LLM MANUAL VERIFICATION (Tasks 3/5 follow-up): complete, closed
+  Ran POST /charts/overview for real against a live Anthropic API key (user-provided), Pham Duy case. Cross-checked overview_text against real chart/rules data:
+  - Both CG_001 viewpoints (RULE_A + RULE_B) presented together, neither favored, both marked "chua duoc dong thuan rong rai" -- rule 6 (consensus hedging, the key fix) confirmed working on real output.
+  - Spot-checked 4 of the 11 non-matched palaces (Tuat, Ty, Suu, Mao) against real chart.palaces star/brightness data -- 100% match, zero hallucinated facts, zero interpretive language attached to unmatched-Rule content.
+  - current_dai_van correctly surfaced ("Dai van Phuc Duc, tuoi 29").
+  Standing gap from Tasks 3/5/final review is now closed. .env file (gitignored) added for local API key storage going forward.
