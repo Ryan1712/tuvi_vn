@@ -215,6 +215,24 @@ export function evaluateAnnualRule(
 
 ## 5. Ngoài phạm vi (Known Issues)
 
+- **[MỞ, phát hiện lúc verify số liệu thật cho Rule test mẫu] Ý nghĩa `branch` mơ hồ giữa "địa
+  chi cố định của lá số gốc" và "địa chi mà Lưu Niên xoay tới mang tên đó".** Chạy thử
+  `Chart.luu_nien` cho case Phạm Duy, `view_year: '2026-01-01'`: cung Mệnh GỐC
+  (`chart.menh_than.menh_branch = 'Hoi'`) và cung mang `palace_name: 'Mệnh'` theo Lưu Niên 2026
+  (`branch: 'Ty2'`) là 2 địa chi KHÁC NHAU — đúng bản chất "vòng Lưu Niên xoay theo năm xem" đã
+  ghi trong comment `LuuNienPalace.palace_name`. Vậy "xem Mệnh năm nay" có thể mang 2 nghĩa Tử
+  Vi khác nhau: (a) tra sao lưu tại ĐÚNG địa chi Mệnh gốc (Hợi) — cách đọc phổ biến, không cần
+  tính thêm Lưu Thái Tuế; (b) tra sao lưu tại địa chi mà vòng Lưu Niên GỌI LÀ "Mệnh" năm đó
+  (Tỵ2) — đã tra cứu nhanh: nguồn tham khảo theo hệ Trung Châu/Tam Hợp Phái (trường phái dự án
+  chọn làm nền, xem build spec) nghiêng về cách (b) khi luận vận hạn năm, nhưng nguồn khác gợi
+  ý cả 2 khái niệm cùng tồn tại song song trong thực hành — CHƯA đủ nguồn tin cậy (mới ở tier
+  diễn đàn/blog) để chốt 1 cách là "đúng". **Quyết định v0.3:** `evaluateAnnualRule`'s tham số
+  `branch` nhận thẳng kiểu `Branch`, KHÔNG ràng buộc theo 1 cách hiểu nào — phía gọi (Rule test,
+  hoặc Tầng 2 sau này) tự quyết định truyền địa chi cố định hay địa chi xoay theo Lưu Niên. Rule
+  test mẫu (mục 6) dùng `Hoi` (cố định) cho mục đích verify code chạy đúng kỹ thuật, KHÔNG phải
+  khẳng định đây là cách đọc Tử Vi "đúng" — ghi rõ trong comment test. Đây là ứng viên tốt cho
+  vòng structured hóa tri thức tiếp theo (encode như 1 Rule/quyết định trường phái thật, có
+  Source) khi có thời gian, KHÔNG tự quyết ngầm trong evaluator.
 - **[MỞ, phát hiện chung cho cả `decade` VÀ `annual`] Không có tiêu chí nào ở tầng dữ liệu hiện
   tại (`Chart`, `DaiVan`, `LuuNien`) để xác minh 1 object dữ liệu thực sự thuộc về lá số nào.**
   `decade`: 2 lá số khác nhau CÙNG Cục cho `DaiVan` giống hệt cả 3 field guard so sánh (branch+
@@ -240,22 +258,46 @@ export function evaluateAnnualRule(
 
 - `test/rule/annual-evaluator.test.ts`: dùng case Phạm Duy thật, Rule TEST-ONLY (không thêm
   vào `knowledge-base.ts`, theo đúng convention `TEST_ONLY_*` đã dùng ở `relation-evaluator
-  .test.ts`/`decade-evaluator.test.ts`). Cần xác định `view_year` cụ thể + sao Lưu Niên thật tại
-  1 cung cụ thể của Phạm Duy cho năm đó (verify bằng code thật lúc viết plan, không đoán) trước
-  khi viết assertion — implementation plan phải verify giá trị thật, không copy số liệu từ đây
-  nếu design doc chưa tự chạy code xác nhận. Cung dùng để test là giá trị TRUYỀN VÀO qua tham
-  số `branch` (VD dùng cung Mệnh của Phạm Duy cho tiện đối chiếu với case đã quen thuộc), không
-  phải mặc định trong evaluator (xem mục 2, quyết định 2) — nên cũng nên có ít nhất 1 test dùng
-  1 cung KHÁC Mệnh (VD Tật Ách) để xác nhận `branch` thực sự là tham số hoạt động, không bị lờ
-  đi bên trong hàm.
+  .test.ts`/`decade-evaluator.test.ts`).
+
+  **Số liệu thật đã verify lúc soạn design doc này** (`buildChart` case Phạm Duy,
+  `view_year: '2026-01-01'`): `chart.luu_nien.year === 2026`. `chart.luu_nien.palaces` gồm:
+
+  ```
+  Dan (Tử Nữ):    LUU_DA_LA
+  Mao (Phu Thê):   LUU_LOC_TON
+  Thin (Huynh Đệ): LUU_KINH_DUONG, LUU_THIEN_HY
+  Ty2 (Mệnh — theo Lưu Niên): NIEN_GIAI
+  Ngo (Phụ Mẫu):   LUU_VAN_XUONG
+  Mui (Phúc Đức):  (không có sao)
+  Than (Điền Trạch): LUU_THIEN_VIET, LUU_VAN_KHUC
+  Dau (Quan Lộc):  (không có sao)
+  Tuat (Nô Bộc):   LUU_HONG_LOAN
+  Hoi (Thiên Di — theo Lưu Niên; = Mệnh GỐC): LUU_THIEN_MA
+  Ty (Tật Ách):    LUU_THIEN_KHOI
+  Suu (Tài Bạch):  (không có sao)
+  ```
+
+  **Chọn `branch: 'Hoi'`** (Mệnh gốc, `chart.menh_than.menh_branch`) cho Rule test chính —
+  KHÔNG phải khẳng định đây là cách đọc Tử Vi "đúng" (xem mục 5, Known Issues mới), chỉ vì đây
+  là giá trị cố định, không cần tính thêm Lưu Thái Tuế, đơn giản nhất để verify code chạy đúng
+  kỹ thuật. Ghi rõ comment này trong test. Tại `Hoi`: có `LUU_THIEN_MA` — dùng làm sao test
+  `matched: true`. **Cung thứ 2 để test `branch` là tham số hoạt động thật:** `Ty` (Tật Ách),
+  có `LUU_THIEN_KHOI` — khác `Hoi` hoàn toàn, xác nhận `matched` đổi khi `branch` đổi. **Cung
+  test `matched: false`:** `Suu` (Tài Bạch), không có sao nào — Rule tìm `LUU_THIEN_MA` tại
+  `Suu` sẽ `matched: false`.
+
 - Assert bắt buộc:
   - `evaluateAnnualRule` throw khi `rule.scope !== 'annual'`.
   - `evalAnnualCondition` (hoặc qua `evaluateAnnualRule`) throw khi `Condition.field !==
     'luu_nien_stars'` cho scope `annual` — test riêng cho lỗi gõ nhầm field.
-  - Case `matched: true` khi sao Lưu Niên thật có mặt tại cung tra cứu (branch A).
-  - Case `matched: false` khi không có (branch A, hoặc cùng Rule nhưng branch B không có sao).
+  - `matched: true` khi tra tại `Hoi` (có `LUU_THIEN_MA`).
+  - `matched: false` khi tra tại `Suu` (không có sao nào, dùng CÙNG Rule tìm `LUU_THIEN_MA`).
   - `matched_modifiers`/`triggered_exceptions` đánh giá đúng qua `evalAnnualCondition`, không
     lẫn với `evalCondition` gốc.
+  - Truyền `branch: 'Hoi'` và `branch: 'Ty'` cho CÙNG 1 `luuNien`, 1 Rule tìm `LUU_THIEN_MA`
+    (chỉ có ở `Hoi`) hoặc `LUU_THIEN_KHOI` (chỉ có ở `Ty`) — xác nhận kết quả khác nhau giữa 2
+    lần gọi, chứng minh evaluator thực sự đọc theo `branch` tham số.
   - Truyền 2 `branch` khác nhau (VD Mệnh và Tật Ách) cho CÙNG 1 `luuNien`, xác nhận kết quả
     `matched` có thể khác nhau giữa 2 lần gọi — chứng minh evaluator thực sự đọc theo `branch`
     tham số, không hard-code 1 cung cố định nào bên trong.
