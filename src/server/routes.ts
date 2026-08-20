@@ -7,8 +7,15 @@ import { KNOWLEDGE_BASE } from '../rule/knowledge-base.js';
 import { BRANCHES } from '../chart/types.js';
 import type { Rule } from '../rule/types.js';
 import { generateOverview } from '../llm/overview.js';
+import { generateDomainQuery } from '../llm/query.js';
+import type { DomainKey } from '../rule/types.js';
 
 export const router = Router();
+
+const VALID_DOMAINS: DomainKey[] = [
+  'menh', 'phu_mau', 'phuc_duc', 'dien_trach', 'quan_loc', 'no_boc',
+  'thien_di', 'tat_ach', 'tai_bach', 'tu_tuc', 'phu_the', 'huynh_de',
+];
 
 router.post('/charts', (req, res) => {
   const chart = buildChart(req.body as BuildChartInput);
@@ -39,5 +46,15 @@ router.post('/charts/rules', (req, res) => {
 
 router.post('/charts/overview', async (req, res) => {
   const result = await generateOverview(req.body as BuildChartInput);
+  res.status(200).json(result);
+});
+
+router.post('/charts/query', async (req, res) => {
+  const { domain, ...chartInput } = req.body as BuildChartInput & { domain: DomainKey };
+  if (!VALID_DOMAINS.includes(domain)) {
+    res.status(400).json({ error: `domain khong hop le: "${domain}"` });
+    return;
+  }
+  const result = await generateDomainQuery(chartInput as BuildChartInput, domain);
   res.status(200).json(result);
 });

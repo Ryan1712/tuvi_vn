@@ -122,3 +122,40 @@ describe('POST /charts/overview', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('POST /charts/query', () => {
+  it('tra ve 200, chart dung, domain dung, overview_text tu (mock) LLM', async () => {
+    const res = await request(app)
+      .post('/charts/query')
+      .send({ ...PHAM_DUY_INPUT, domain: 'quan_loc' });
+    expect(res.status).toBe(200);
+    expect(res.body.chart.menh_than.menh_branch).toBe('Hoi');
+    expect(res.body.domain).toBe('quan_loc');
+    expect(res.body.overview_text).toBe('Day la bai Tong quan gia lap cho test.');
+  });
+
+  it('tra ve 400 khi domain khong hop le', async () => {
+    const res = await request(app)
+      .post('/charts/query')
+      .send({ ...PHAM_DUY_INPUT, domain: 'khong_ton_tai' });
+    expect(res.status).toBe(400);
+    expect(typeof res.body.error).toBe('string');
+  });
+
+  it('tra ve 400 khi input chart khong hop le (khong goi LLM)', async () => {
+    const res = await request(app)
+      .post('/charts/query')
+      .send({ calendar_type: 'khong_hop_le', date: '1998-12-17', time_index: 12, gender: 'nam', domain: 'quan_loc' });
+    expect(res.status).toBe(400);
+  });
+
+  it('domain mo ho (phu_mau) tra ve 2 cung trong chart.palaces filtered — kiem tra qua chart day du, khong qua QueryEvidencePack (khong nam trong response)', async () => {
+    const res = await request(app)
+      .post('/charts/query')
+      .send({ ...PHAM_DUY_INPUT, domain: 'phu_mau' });
+    expect(res.status).toBe(200);
+    // chart tra ve la FULL Chart (12 cung), khong bi cat theo domain — chi
+    // QueryEvidencePack (input cho LLM) moi bi thu hep, va no khong nam trong response.
+    expect(res.body.chart.palaces).toHaveLength(12);
+  });
+});
