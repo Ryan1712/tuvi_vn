@@ -111,6 +111,14 @@ describe('evaluateAnnualRule', () => {
     ).toThrow(/khong tim thay cung/);
   });
 
+  it('throw khi luuNien.chart_id khong khop chart.chart_id', () => {
+    const chart = buildChart(PHAM_DUY_2026);
+    const wrongChartLuuNien = { ...chart.luu_nien!, chart_id: 'khong-thuoc-chart-nao' };
+    expect(() =>
+      evaluateAnnualRule(chart, wrongChartLuuNien, 'Hoi', TEST_ONLY_RULE_ANNUAL),
+    ).toThrow(/chart_id/);
+  });
+
   it('modifier operator "not_in" hoat dong dung — branch NOT in excluded list thi khop', () => {
     const chart = buildChart(PHAM_DUY_2026);
     const ruleWithNotIn: Rule = {

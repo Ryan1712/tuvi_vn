@@ -46,7 +46,6 @@ function evalAnnualField(
  * CO Y THUC de mo — xem design doc muc 5 Known Issues, chua du nguon de chot 1 cach doc.
  */
 export function evaluateAnnualRule(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   chart: Chart,
   luuNien: LuuNien,
   branch: Branch,
@@ -66,10 +65,19 @@ export function evaluateAnnualRule(
   // goi sai tham so). Da can nhac bo tham so nay (design doc muc 4 de ngo) — quyet dinh giu,
   // khong bo, ghi ro tai day de dong lai cau hoi con mo do.
 
-  // KHONG co guard chart-mismatch — xem design doc muc 3. Khong co tieu chi that o tang du
-  // lieu nay de phan biet LuuNien thuoc la so nao (year/heavenly_stem/earthly_branch chi phu
-  // thuoc nam duong lich, branch ordering la hang so cau truc). Trach nhiem dam bao Chart+
-  // LuuNien khop nhau thuoc ve phia goi (build ca 2 tu CUNG 1 input trong CUNG 1 request).
+  // Fail loud neu luuNien.chart_id khong khop chart.chart_id — bat loi CROSS-CHART (luuNien
+  // den tu 1 la so khac). Truoc day (Rule Engine v0.3) KHONG the viet guard nao cho annual —
+  // khong co tieu chi that o tang gia tri (year/heavenly_stem/earthly_branch giong het moi
+  // la so cung nam; branch ordering la hang so cau truc). Voi chart_id (Rule Engine v0.4),
+  // gio co the — CHI 1 buoc, khac decade's 2 buoc: LuuNien la 1 object DUY NHAT cho 1 cap
+  // (chart, nam), khong phai mang nhieu entry nhu chart.luck_cycles.dai_van, nen khong co
+  // "danh sach entry that" nao de doi chieu them — xem design doc muc 3.
+  if (luuNien.chart_id !== chart.chart_id) {
+    throw new Error(
+      `evaluateAnnualRule: luuNien.chart_id ("${luuNien.chart_id}") khong khop chart.chart_id ` +
+      `("${chart.chart_id}") — dang truyen nham LuuNien cua 1 chart khac.`,
+    );
+  }
 
   const matched = rule.conditions.every((c) =>
     evalAnnualField(luuNien, branch, c.field, c.operator, c.value),
