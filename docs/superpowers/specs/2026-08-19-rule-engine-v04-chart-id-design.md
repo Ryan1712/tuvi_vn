@@ -138,11 +138,26 @@ export function adaptFromIztro(
 
 ## 3. Nâng cấp guard trong `evaluateDecadeRule`/`evaluateAnnualRule`
 
-**`decade-evaluator.ts`:** thay so 3 field (`branch`+`age_from`+`age_to`) bằng so `chart_id` —
-mạnh hơn nhiều (so đúng định danh lá số, không phụ thuộc trùng lặp giá trị) và đơn giản hơn:
+**Quan trọng — guard `chart_id` KHÔNG THAY THẾ guard field-theo-field cũ của `decade`, mà bổ
+sung thêm 1 bước TRƯỚC nó.** 2 guard bảo vệ 2 loại lỗi khác nhau, không phải 1 bản nâng cấp của
+1:
+- Guard `chart_id`: bắt lỗi **across-chart** — `daiVan` đến từ 1 lá số khác (đã bị chứng minh
+  guard field-theo-field cũ bỏ lọt khi 2 lá số cùng Cục).
+- Guard field-theo-field (branch+age_from+age_to khớp 1 entry thật trong
+  `chart.luck_cycles.dai_van`): bắt lỗi **entry tự dựng sai** — VD 1 caller tương lai (resolveQuery/
+  orchestrator có bug) tự tạo `DaiVan` bằng tay, copy đúng `chart_id` (dễ, có sẵn trong `chart`)
+  nhưng tính sai `age_from`/`age_to`/`branch` do lỗi khác (off-by-one, nhầm công thức...). Guard
+  `chart_id` một mình sẽ KHÔNG bắt được lỗi này (chart_id vẫn khớp), nhưng guard field-theo-field
+  sẽ bắt được, vì entry tự dựng gần như chắc chắn không khớp chính xác bất kỳ entry thật nào
+  trong 12 Đại Vận của chính người đó.
+
+**`decade-evaluator.ts`:** kết hợp cả 2 bước, theo thứ tự — lọc theo `chart_id` trước (giải
+quyết đúng lỗ hổng across-chart), rồi so field-theo-field TRONG PHẠM VI đã lọc (giờ không còn
+rủi ro trùng giữa 2 lá số khác nhau như guard cũ độc lập, vì chỉ so trong đúng 12 Đại Vận của 1
+người):
 
 ```ts
-// TRUOC:
+// TRUOC (chi 1 buoc, co lo hong across-chart da chung minh o final review v0.2):
 const belongsToChart = chart.luck_cycles.dai_van.some(
   (d) => d.branch === daiVan.branch && d.age_from === daiVan.age_from && d.age_to === daiVan.age_to,
 );
@@ -154,18 +169,33 @@ if (!belongsToChart) {
   );
 }
 
-// SAU:
+// SAU (2 buoc, ket hop ca chart_id LAN field-theo-field, khong thay the):
 if (daiVan.chart_id !== chart.chart_id) {
   throw new Error(
     `evaluateDecadeRule: daiVan.chart_id ("${daiVan.chart_id}") khong khop chart.chart_id ` +
     `("${chart.chart_id}") — dang truyen nham DaiVan cua 1 chart khac.`,
   );
 }
+const matchesRealEntry = chart.luck_cycles.dai_van.some(
+  (d) => d.branch === daiVan.branch && d.age_from === daiVan.age_from && d.age_to === daiVan.age_to,
+);
+if (!matchesRealEntry) {
+  throw new Error(
+    `evaluateDecadeRule: daiVan (branch=${daiVan.branch}, age_from=${daiVan.age_from}, ` +
+    `age_to=${daiVan.age_to}) co chart_id dung nhung khong khop entry THAT nao trong ` +
+    `chart.luck_cycles.dai_van — co the dang truyen 1 DaiVan tu dung sai (age_from/age_to/ ` +
+    `branch khong dung voi du lieu that cua chart nay).`,
+  );
+}
 ```
 
-**`annual-evaluator.ts`:** trước đây KHÔNG có guard (mục 3 design doc v0.3 xác nhận không có
-cách nào viết guard có tác dụng thật ở tầng giá trị). Với `chart_id`, giờ CÓ thể viết guard thật
-— thêm mới:
+**`annual-evaluator.ts`:** chỉ cần 1 bước (so `chart_id`), KHÔNG cần bước thứ 2 tương tự —
+`LuuNien` là **1 object duy nhất** cho 1 cặp (chart, năm), không phải mảng nhiều entry như
+`dai_van`, nên không có "danh sách entry thật" nào để đối chiếu thêm (không giống `DaiVan`, nơi
+`chart.luck_cycles.dai_van` là 1 mảng 12 phần tử cố định để so khớp). Bất đối xứng này là đúng
+bản chất cấu trúc dữ liệu, không phải thiếu sót — trước đây KHÔNG có guard nào cho `annual` (mục
+3 design doc v0.3 xác nhận không có cách nào viết guard có tác dụng thật ở tầng giá trị). Với
+`chart_id`, giờ CÓ thể viết guard thật — thêm mới:
 
 ```ts
 export function evaluateAnnualRule(
@@ -200,11 +230,15 @@ bằng comment mới, không để lại mô tả sai về hành vi hiện tại
   field riêng lẻ (`.age_from`, `.age_to`, `.branch`), không dùng `toEqual` toàn object — thêm
   `chart_id` KHÔNG phá test này. Thêm 1 assertion mới: `expect(first.chart_id).toBe(chart
   .chart_id)` để khóa hành vi mới.
-- `test/rule/decade-evaluator.test.ts`: dòng 55 (`fakeDaiVan: DaiVan = { age_from: 999, ... }`)
-  hiện dùng tuổi giả (999) để trigger guard cũ — với guard mới (so `chart_id`), object literal
-  này cần thêm `chart_id: 'khong-thuoc-chart-nao'` (giá trị KHÁC `chart.chart_id` thật) để vẫn
-  trigger đúng lỗi. Giữ nguyên các giá trị field khác (age_from=999 vẫn hợp lệ để giữ tính rõ
-  ràng "đây là dữ liệu giả", dù giờ guard không còn đọc field đó để quyết định).
+- `test/rule/decade-evaluator.test.ts`: guard giờ có 2 bước, cần 2 test case riêng biệt phủ cả
+  2:
+  - Test hiện có (dòng 55, `fakeDaiVan: DaiVan = { age_from: 999, ... }`) SỬA thêm
+    `chart_id: 'khong-thuoc-chart-nao'` (khác `chart.chart_id` thật) — trigger đúng bước 1
+    (`chart_id` không khớp).
+  - **Thêm 1 test case MỚI**: `DaiVan` có `chart_id` ĐÚNG (copy từ `chart.chart_id` thật) nhưng
+    `age_from`/`age_to`/`branch` SAI (không khớp bất kỳ entry nào trong `chart.luck_cycles
+    .dai_van`) — trigger đúng bước 2 (entry không thật), xác nhận bước 2 thực sự hoạt động độc
+    lập với bước 1, không bị bỏ qua.
 - `test/rule/annual-evaluator.test.ts`: dòng 108 (`brokenLuuNien = { ...chart.luu_nien!,
   palaces: [] }`) test "không tìm thấy cung" — KHÔNG đổi, vẫn hợp lệ vì spread giữ nguyên
   `chart_id` đúng (guard mới sẽ pass, rồi tới `resolveLuuNienStars` throw như cũ). **Thêm 1 test
