@@ -392,6 +392,29 @@ validate `domain` khớp 1 trong 12 `DomainKey` (fail loud nếu không, theo đ
 
 ## 8. Known Issues / chưa xử lý
 
+- **[ĐÃ XỬ LÝ — verify thật với LLM, 2026-08-20]** Chạy `POST /charts/query` thật (không mock)
+  với case Phạm Duy, 5 tình huống, xác nhận bằng mắt `QUERY_SYSTEM_PROMPT` (đặc biệt quy tắc 7)
+  hoạt động đúng khi vận hành thật, không chỉ đúng trên giấy:
+  1. `domain=phuc_duc` (decade ĐANG DIỄN RA, 22-31 tuổi, tuổi hiện tại 29): LLM nêu đúng mốc
+     tuổi "từ 22 đến 31, bạn đang 29 tuổi", KHÔNG tự bịa ý nghĩa khi `items` rỗng (nói rõ "chưa
+     đủ cơ sở để đưa ra nhận định cụ thể").
+  2. `domain=quan_loc` (decade SẮP TỚI, 42-51 tuổi, tuổi hiện tại 29 — case khó nhất, prompt
+     ban đầu chỉ có ví dụ minh họa cho "đã qua"/"đang diễn ra"): LLM tự suy luận đúng, viết
+     "Giai đoạn Đại Vận tại chính cung Quan Lộc sẽ đến TRONG TƯƠNG LAI, từ 42 đến 51 tuổi" —
+     dùng đúng thì tương lai, không viết như đang diễn ra. Xác nhận quy tắc 7 khái quát hóa
+     đúng ra ngoài 2 ví dụ đã cho, không chỉ học vẹt case cụ thể.
+  3. `domain=phu_mau` (domain mơ hồ, 2 cung): LLM tự gắn nhãn "Cung Phụ Mẫu (cung chính để xem
+     cha mẹ)" cho phần tử đầu, "Cung Huynh Đệ (góc nhìn bổ sung)" cho phần tử sau — đúng ngôn
+     ngữ quy tắc 7 yêu cầu, không đảo thứ tự, không coi 2 cung ngang hàng.
+  4. `domain=quan_loc` kèm `view_year=2026-01-01` (kiểm tra scope annual): LLM có câu riêng
+     "Riêng năm 2026: ..." tách biệt rõ với câu decade — đúng cụm từ quy tắc 7 yêu cầu.
+  5. Toàn bộ 4 case trên: KHÔNG có case nào LLM tự suy luận ý nghĩa cho scope có `items: []`
+     (KNOWLEDGE_BASE hiện chỉ có 2 Rule `star_combination`, nên phần lớn scope rỗng ở case
+     thật) — ranh giới Facts/Interpretation (quy tắc 1) giữ vững kể cả khi phần lớn dữ liệu
+     đưa vào rỗng, không phải chỉ đúng khi có nhiều `items` để "bận rộn".
+  Không phát hiện vấn đề cần sửa prompt — quy tắc 7 hoạt động đúng qua toàn bộ 5 tình huống
+  test. Đủ điều kiện coi việc verify của Task 6 (subagent-driven-development plan) là hoàn tất.
+
 - **Case biên: domain trả về 1 cung nhưng cung đó KHÔNG có Rule nào matched ở bất kỳ scope
   nào.** `interpretation_groups` sẽ có các `scope` với `items: []`. Cần quyết định lúc viết
   plan: có nên lược bỏ hẳn 1 `scope` khỏi mảng nếu `items` rỗng (giảm nhiễu cho LLM), hay giữ
