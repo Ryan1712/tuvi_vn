@@ -484,6 +484,24 @@ validate `domain` khớp 1 trong 12 `DomainKey` (fail loud nếu không, theo đ
   Không phát hiện vấn đề cần sửa prompt — quy tắc 7 hoạt động đúng qua toàn bộ 5 tình huống
   test. Đủ điều kiện coi việc verify của Task 6 (subagent-driven-development plan) là hoàn tất.
 
+- **[ĐÃ XỬ LÝ — verify thật với LLM cho quy tắc 8, 2026-08-20, 2 vòng]** Patch riêng cho
+  `matched_modifiers`/quy tắc 8 (đóng Known Issue trước đó về mất sắc thái modifier). Verify
+  thật `POST /charts/query` với `domain=menh` (case Phạm Duy, `RULE_B` matched thật với
+  modifier kích hoạt tại branch Hợi, CÙNG `conflict_group_id` với `RULE_A`):
+  - **Vòng 1 (trước fix):** LLM trình bày modifier của `RULE_B` như 1 "Quan điểm thứ hai"
+    riêng biệt, ngang hàng với `RULE_A` — SAI, vì đây là case chồng lấn quy tắc 3 (conflict
+    presentation) và quy tắc 8 (modifier wording) mà bản patch ban đầu chưa tính tới. Đây
+    không phải case hiếm — nó chính là cấu trúc của Entry 001 (`RULE_A`/`RULE_B`, cặp Rule
+    trung tâm và duy nhất của KB hiện tại), nên bất kỳ domain nào trả về cung Mệnh của lá số
+    có tổ hợp Thiên Đồng Không Kiếp đều gặp đúng case này.
+  - **Fix:** thêm sub-rule mới vào quy tắc 8 (yêu cầu modifier LỒNG BÊN TRONG phần diễn giải
+    của chính quan điểm đó khi cùng lúc có `conflict_group_id`, không tách thành mục ngang
+    hàng thứ 3) + 1 cặp ví dụ ĐÚNG/SAI mới dùng đúng `RULE_A`/`RULE_B` thật.
+  - **Vòng 2 (sau fix):** LLM trình bày đúng — modifier nằm lồng bên trong "(Quan điểm B)"
+    ("Ngược lại, một số nguồn khác... đặc biệt, vì tổ hợp này nằm ở đúng vị trí Tý/Hợi, xu
+    hướng bất lợi... được cho là giảm nhẹ hơn đáng kể..."), không còn xuất hiện dưới dạng
+    "quan điểm thứ 3" độc lập. Xác nhận fix hoạt động đúng.
+
 - **Case biên: domain trả về 1 cung nhưng cung đó KHÔNG có Rule nào matched ở bất kỳ scope
   nào.** `interpretation_groups` sẽ có các `scope` với `items: []`. Cần quyết định lúc viết
   plan: có nên lược bỏ hẳn 1 `scope` khỏi mảng nếu `items` rỗng (giảm nhiễu cho LLM), hay giữ

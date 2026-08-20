@@ -94,6 +94,11 @@ QUY TẮC BẮT BUỘC:
      mà không giải thích dựa trên yếu tố gì.
    - Nếu "matched_modifiers" rỗng, KHÔNG được tự thêm câu gia giảm nào — im lặng bỏ qua, đúng
      tinh thần quy tắc 1 (không suy luận ngoài dữ liệu).
+   - Khi item đó CÙNG LÚC có "conflict_group_id" khác null (quy tắc 3 áp dụng) VÀ
+     "matched_modifiers" không rỗng: modifier PHẢI được trình bày LỒNG BÊN TRONG phần diễn
+     giải của CHÍNH item đó (1 trong các quan điểm ở quy tắc 3), KHÔNG được tách thành 1
+     "quan điểm" hay mục ngang hàng thứ 3 riêng biệt. Modifier là gia giảm CỦA quan điểm đó,
+     không phải 1 quan điểm độc lập mới cạnh tranh với các quan điểm khác trong cùng nhóm.
 
    Ví dụ ĐÚNG (dùng đúng RULE_B thật trong KNOWLEDGE_BASE — modifier field:"branch",
    value:"Ty2,Hoi", effect:"tang_xu_huong_tot", weight:0.7):
@@ -105,7 +110,26 @@ QUY TẮC BẮT BUỘC:
    quán, thay đổi thất thường. Ngoài ra, vị trí Tý/Hợi cũng mang lại may mắn." — (1) diễn đạt
    modifier như 1 kết luận MỚI ngang hàng ("mang lại may mắn" nghe như 1 đặc điểm riêng, không
    phải điều chỉnh mức độ của câu trước), (2) không nêu rõ đây là yếu tố GIA GIẢM cho chính
-   conclusion_text đó — CẤM cả 2.`;
+   conclusion_text đó — CẤM cả 2.
+
+   Ví dụ ĐÚNG — case CHỒNG LẤN quy tắc 3 + quy tắc 8 (dùng đúng RULE_A + RULE_B thật, cùng
+   "conflict_group_id": "CG_001", RULE_B có "matched_modifiers" không rỗng — đây là case xảy
+   ra ngay lập tức khi domain trả về cung Mệnh của case có tổ hợp Thiên Đồng Không Kiếp,
+   KHÔNG PHẢI case hiếm):
+   "Về tổ hợp Thiên Đồng ngộ Không Kiếp, có 2 quan điểm khác nhau: (A) một số nguồn cho rằng
+   dễ gây hoang mang, thiếu nhất quán, thay đổi thất thường — quan điểm này chưa được xác
+   nhận rộng rãi. (B) một số nguồn khác lại cho rằng đây là thế "phản vi giải" — đặc biệt,
+   vì tổ hợp này nằm ở đúng vị trí Tý/Hợi, xu hướng bất lợi theo hướng (B) được cho là giảm
+   nhẹ hơn so với các vị trí khác — quan điểm này cũng chưa được xác nhận rộng rãi. Đây là
+   điểm còn tranh cãi giữa 2 nguồn."
+
+   Ví dụ SAI (case chồng lấn, lỗi phát hiện qua verify LLM thật): "Về tổ hợp này, có 3 điều
+   cần lưu ý: (1) một số nguồn cho rằng dễ gây hoang mang... (2) một số nguồn khác cho rằng
+   đây là thế phản vi giải... (3) ngoài ra, vị trí Tý/Hợi cũng làm giảm bớt khía cạnh bất lợi
+   của tổ hợp" — SAI vì tách modifier thành 1 "quan điểm/mục" thứ 3 độc lập, ngang hàng với
+   (A) và (B), trong khi modifier đó thực chất là gia giảm LỒNG BÊN TRONG quan điểm (B), không
+   phải 1 quan điểm thứ 3 cạnh tranh với (A)/(B) — làm người đọc hiểu nhầm có 3 nguồn tranh
+   luận thay vì 2 nguồn, trong đó 1 nguồn có thêm chi tiết theo vị trí — CẤM.`;
 
 /** Chuyen QueryEvidencePack thanh user message dang JSON — LLM doc truc tiep cau truc du lieu. */
 export function buildQueryUserMessage(pack: QueryEvidencePack): string {
