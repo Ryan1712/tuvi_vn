@@ -50,10 +50,22 @@ describe('evaluateDecadeRule', () => {
     expect(() => evaluateDecadeRule(chart, daiVanTaiHoi, WRONG_SCOPE_RULE)).toThrow(/scope "decade"/);
   });
 
-  it('throw khi daiVan khong khop entry nao trong chart.luck_cycles.dai_van', () => {
+  it('throw khi daiVan.chart_id khong khop chart.chart_id (buoc 1: cross-chart)', () => {
     const chart = buildChart(PHAM_DUY);
-    const fakeDaiVan: DaiVan = { age_from: 999, age_to: 1008, branch: 'Hoi', stem: 'Giáp', palace_name: 'Mệnh' };
-    expect(() => evaluateDecadeRule(chart, fakeDaiVan, TEST_ONLY_RULE_DECADE)).toThrow(/khong khop/);
+    const fakeDaiVan: DaiVan = {
+      chart_id: 'khong-thuoc-chart-nao',
+      age_from: 999, age_to: 1008, branch: 'Hoi', stem: 'Giáp', palace_name: 'Mệnh',
+    };
+    expect(() => evaluateDecadeRule(chart, fakeDaiVan, TEST_ONLY_RULE_DECADE)).toThrow(/chart_id/);
+  });
+
+  it('throw khi chart_id dung nhung khong khop entry THAT nao (buoc 2: entry tu dung sai)', () => {
+    const chart = buildChart(PHAM_DUY);
+    const wrongFieldsDaiVan: DaiVan = {
+      chart_id: chart.chart_id, // DUNG — buoc 1 phai pass
+      age_from: 999, age_to: 1008, branch: 'Hoi', stem: 'Giáp', palace_name: 'Mệnh', // SAI — khong khop entry that nao
+    };
+    expect(() => evaluateDecadeRule(chart, wrongFieldsDaiVan, TEST_ONLY_RULE_DECADE)).toThrow(/entry THAT/);
   });
 
   it('matched true khi Dai Van tro vao cung Hoi (co Thien Dong)', () => {
