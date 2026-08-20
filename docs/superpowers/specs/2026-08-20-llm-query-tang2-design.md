@@ -152,6 +152,16 @@ Lý do chạy hết thay vì lọc theo thời điểm câu hỏi (đã chốt t
 nằm ở tầng diễn giải (system prompt), không nằm ở tầng thu thập dữ kiện. Chi phí thêm 1-2
 evaluator thuần code gần như miễn phí (không gọi thêm LLM).
 
+**Bảo toàn thứ tự ưu tiên xuyên suốt pipeline (điểm dễ bị đánh rơi, nêu rõ ở đây để không lặp
+lại):** `resolveQuery` trả `Branch[]` theo đúng thứ tự `palace_names` trong `DOMAIN_PALACE_MAP`
+(phần tử đầu = cung quan trọng nhất — mục 1). Orchestrator PHẢI giữ nguyên thứ tự này khi build
+`QueryEvidencePack.palaces` — KHÔNG được sắp xếp lại theo `Branch` (VD theo thứ tự 12 địa chi cố
+định), vì làm vậy sẽ xóa mất tín hiệu "cung nào quan trọng hơn" mà `DOMAIN_PALACE_MAP` đã cố
+tình mã hóa qua thứ tự mảng. Cụ thể: `branches.map((b) => buildPalaceEntry(chart, b, ...))` —
+dùng `.map()` trên chính mảng `branches` đã nhận từ `resolveQuery`, không `.filter()` từ
+`chart.palaces` (thứ tự gốc của `chart.palaces` là theo `Branch`, không phải theo độ ưu tiên
+domain). Xem thêm mục 5 quy tắc 7 — system prompt cũng cần được hướng dẫn dùng đúng thứ tự này.
+
 ```ts
 export interface DomainQueryResponse {
   chart: Chart;
@@ -183,12 +193,17 @@ rủi ro khó bắt bằng test tự động (không assert được nội dung 
 đã áp dụng xuyên suốt dự án: khi 2 nhu cầu khác nhau về bản chất, tách interface riêng thay vì
 1 struct đa nghĩa dùng chung.
 
-`QueryEvidencePack` KHÁC `EvidencePack` ở đúng 2 điểm cốt lõi:
+`QueryEvidencePack` KHÁC `EvidencePack` ở đúng 3 điểm cốt lõi:
 1. `palaces`/interpretations chỉ gồm cung từ `resolveQuery`, không phải toàn bộ 12 cung.
 2. Interpretations **nhóm theo scope** thay vì để phẳng — để LLM phân biệt "đặc điểm bản
    chất" (star_combination/palace_relationship) vs "ý nghĩa giai đoạn" (decade) vs "riêng năm
    nay" (annual). Đây chính là insight đã ghi trong Known Issues của decade design doc
    (2026-08-19-rule-engine-v02-decade-design.md) — giờ là lúc dùng tới.
+3. Mảng `palaces` giữ ĐÚNG THỨ TỰ trả về từ `resolveQuery` (phần tử đầu = cung quan trọng
+   nhất theo `DOMAIN_PALACE_MAP` — mục 1, mục 3), KHÔNG sắp xếp lại theo `Branch`. `EvidencePack`
+   của Tầng 1 không có khái niệm thứ tự ưu tiên (luôn đủ 12 cung, không domain nào "quan trọng
+   hơn") — đây là điểm khác biệt riêng của `QueryEvidencePack`, chỉ có ý nghĩa khi domain trả
+   nhiều cung (VD `phu_mau`, `phu_the`).
 
 ```ts
 export type InterpretationScope = 'star_combination' | 'palace_relationship' | 'decade' | 'annual';
@@ -258,6 +273,13 @@ query LÀ trả lời có mục tiêu theo domain, không phải bài đọc m�
      (từ ... đến ... tuổi), ...").
    - scope "annual": ý nghĩa RIÊNG của năm được xem — PHẢI nêu rõ đây là đặc điểm CHỈ năm đó
      ("RIÊNG NĂM [năm], ...").
+
+   Nếu "palaces" có NHIỀU HƠN 1 cung (domain mơ hồ, VD hỏi về cha mẹ trả cả Phụ Mẫu lẫn Huynh
+   Đệ), PHẢI trình bày theo ĐÚNG THỨ TỰ xuất hiện trong "palaces" — cung xuất hiện TRƯỚC là cung
+   chính/quan trọng hơn cho domain này, trình bày trước và chi tiết hơn; cung xuất hiện SAU là
+   góc nhìn bổ sung, có thể trình bày ngắn gọn hơn hoặc nêu rõ đây là góc nhìn phụ ("xét thêm
+   góc độ...", "một số quan điểm còn xem thêm..."). KHÔNG đảo thứ tự, KHÔNG cho 2 cung mức độ
+   quan trọng ngang nhau khi dữ liệu đã sắp xếp có thứ tự.
 
    Ví dụ ĐÚNG (cùng 1 cung Quan Lộc có cả 2 nhóm):
    "Về sự nghiệp: bạn là người có tư duy độc lập, thích tự chủ trong công việc [star_combination].
