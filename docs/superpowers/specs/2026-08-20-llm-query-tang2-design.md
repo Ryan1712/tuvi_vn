@@ -84,15 +84,20 @@ export const DOMAIN_PALACE_MAP: DomainPalaceEntry[] = [
   { domain: 'thien_di', palace_names: ['Thiên Di'], ... },
   { domain: 'tat_ach', palace_names: ['Tật Ách'], ... },
   { domain: 'tai_bach', palace_names: ['Tài Bạch'], ... },
-  { domain: 'tu_tuc', palace_names: ['Tử Tức'], ... },
-  { domain: 'phu_the', palace_names: ['Phu Thê', 'Tử Tức'], ..., consensus: 'tranh_cai', notes: 'Hon nhan: cung chinh la Phu The. Mot so goc hoi (con cai anh huong hon nhan) tham chieu them Tu Tuc. Thu tu: Phu The truoc.' },
+  { domain: 'tu_tuc', palace_names: ['Tử Nữ'], ... },
+  { domain: 'phu_the', palace_names: ['Phu Thê', 'Tử Nữ'], ..., consensus: 'tranh_cai', notes: 'Hon nhan: cung chinh la Phu The. Mot so goc hoi (con cai anh huong hon nhan) tham chieu them Tu Nu (ten cung theo iztro — xem muc 8 Known Issues ve nhan "Tu Tuc" vs "Tu Nu"). Thu tu: Phu The truoc.' },
   { domain: 'huynh_de', palace_names: ['Huynh Đệ'], ... },
 ];
 ```
 
-Các chuỗi `palace_names` ở trên (VD `'Quan Lộc'`, `'Phụ Mẫu'`) là GIÁ TRỊ MINH HỌA — phải verify
-khớp CHÍNH XÁC với `ChartPalace.palace_name` thật sinh ra từ `iztro` khi viết plan (build 1 chart
-mẫu, đọc `chart.palaces[].palace_name` trực tiếp), không gõ theo trí nhớ — xem mục 8 Known Issues.
+**Đã verify bằng dữ liệu thật** (build 1 chart mẫu — case Phạm Duy — đọc trực tiếp
+`chart.palaces[].palace_name`, KHÔNG gõ theo trí nhớ, đúng CLAUDE.md mục 6): 11/12 giá trị khớp
+đúng trực giác ("Mệnh", "Phụ Mẫu", "Phúc Đức", "Điền Trạch", "Quan Lộc", "Nô Bộc", "Thiên Di",
+"Tật Ách", "Tài Bạch", "Phu Thê", "Huynh Đệ"). **1 giá trị SAI trong bản nháp trước, đã sửa**:
+tên cung thật từ `iztro` là **"Tử Nữ"**, KHÔNG PHẢI "Tử Tức" — đúng loại lỗi transcribe đã có
+tiền lệ trong dự án (CLAUDE.md mục 6, "nhãn Tý/Tỵ bị hoán đổi khi transcribe ảnh"). Bảng ở mục
+1.2 đã dùng giá trị đã verify, KHÔNG còn là giá trị minh họa — có thể dùng trực tiếp khi viết
+plan, không cần verify lại. Xem thêm mục 8 Known Issues.
 
 ## 2. `resolveQuery` — vì sao cần nhận `chart`, không chỉ `domain`
 
@@ -395,10 +400,13 @@ validate `domain` khớp 1 trong 12 `DomainKey` (fail loud nếu không, theo đ
   plan, không tự quyết ở đây.
 - **NLU (câu hỏi tự nhiên → domain)** — phase riêng sau này, không nằm trong v0.1. Ghi chú ở
   đây để không trôi mất (CLAUDE.md mục 10).
-- **`DOMAIN_PALACE_MAP`'s `palace_names` cụ thể (chuỗi tiếng Việt) cần khớp CHÍNH XÁC giá trị
-  thật `ChartPalace.palace_name` sinh ra từ `iztro`** — cần verify bằng dữ liệu thật (build
-  chart mẫu, đọc `chart.palaces[].palace_name`) khi viết plan, KHÔNG gõ theo trí nhớ (đúng
-  CLAUDE.md mục 6 — đã có tiền lệ lỗi loại này với tên cung Tử Tức/Tử Nữ trong session trước).
+- **[ĐÃ XỬ LÝ, ghi lại để tránh lặp]** `DOMAIN_PALACE_MAP`'s `palace_names` đã verify bằng dữ
+  liệu thật lúc viết implementation plan (build chart mẫu case Phạm Duy, đọc trực tiếp
+  `chart.palaces[].palace_name`). Phát hiện đúng lỗi CLAUDE.md mục 6 cảnh báo: bản nháp design
+  doc gõ theo trí nhớ "Tử Tức", giá trị thật từ `iztro` là **"Tử Nữ"** — đã sửa ở mục 1.2. 11/12
+  giá trị còn lại khớp đúng trực giác không cần sửa. Bài học: kể cả tên cung "nghe hiển nhiên"
+  vẫn phải verify bằng code thật, không suy ra từ kiến thức Tử Vi phổ thông (`iztro` có thể
+  dùng tên khác biến thể tiếng Việt phổ biến).
 - **Domain `phu_mau`/`phu_the` là tranh_cai ở CHÍNH việc "cung nào liên quan"** (không phải
   tranh cãi về nội dung luận giải như Rule thông thường) — cần xác nhận cách diễn đạt trong
   response khi 1 domain trả nhiều cung: có cần LLM tự nói rõ "trường phái khác nhau xem thêm
