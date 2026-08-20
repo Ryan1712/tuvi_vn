@@ -5,8 +5,8 @@
 Tầng 1 (`POST /charts/overview`) trả về bài đọc mở đầu, luôn phủ đủ 12 cung, không nhận câu
 hỏi cụ thể. Tầng 2 làm ngược lại: nhận 1 domain (chủ đề — "sự nghiệp", "hôn nhân", "sức
 khỏe"...), thu hẹp về đúng (những) cung liên quan, và trả lời sâu hơn cho domain đó — bao gồm
-CẢ đặc điểm bản chất (tĩnh) LẪN ý nghĩa theo giai đoạn (Đại Vận hiện tại) và theo năm (nếu có
-`view_year`).
+CẢ đặc điểm bản chất (tĩnh) LẪN ý nghĩa theo giai đoạn Đại Vận CỦA CHÍNH CUNG ĐÓ (không nhất
+thiết là Đại Vận hiện tại — xem mục 3) và theo năm (nếu có `view_year`).
 
 Phase này CHỈ làm được sau khi Rule Engine v0.4 (`chart_id` cho `DaiVan`/`LuuNien`) hoàn tất —
 `evaluateDecadeRule`/`evaluateAnnualRule` giờ mới có guard chart-mismatch đáng tin cậy để gọi
@@ -137,15 +137,42 @@ và với MỖI cung, chạy **tất cả scope hợp lệ** — không tự l�
 
 - **`star_combination`/`palace_relationship`** — LUÔN chạy (đặc điểm bản chất, không đổi theo
   thời gian). Dùng `matchRules`/`evaluateRelationRule` sẵn có.
-- **`decade`** — LUÔN chạy. `Chart.luck_cycles.dai_van: DaiVan[]` KHÔNG optional — mọi lá số
-  hợp lệ luôn có đủ 12 Đại Vận tĩnh. Không có nhánh code "nếu chart có Đại Vận" — decade luôn
-  được evaluate bằng cách tìm đúng 1 entry khớp tuổi hiện tại, cùng cách `currentDaiVan()`
-  trong `evidence-pack.ts` đã làm (dùng `astrolabe.decadalList()` + khớp `ageRange`, KHÔNG
-  suy ra từ index của `palaceNames` — xem `evidence-pack.ts` dòng 39-54 để tránh lặp lại bug
-  đã phát hiện ở Tầng 1). Case biên duy nhất: tuổi vượt quá phạm vi 12 Đại Vận — throw rõ
-  ràng (đã có tiền lệ, không phải nhánh "có/không có" mà là lỗi dữ liệu thật cần fail loud).
+- **`decade`** — LUÔN chạy, nhưng KHÔNG dùng Đại Vận hiện tại (xem phần "Decade dùng Đại Vận
+  nào" ngay dưới đây — đây là 1 quyết định ngữ nghĩa riêng, tách khỏi câu hỏi "chạy hay không
+  chạy").
 - **`annual`** — CHỈ chạy khi `input.view_year` được truyền (đây mới là phần thực sự có điều
   kiện — `chart.luu_nien` chỉ tồn tại khi `view_year` có). Đây là annual, KHÔNG PHẢI decade.
+
+**Decade dùng Đại Vận nào — KHÔNG PHẢI Đại Vận hiện tại (phát hiện qua review, khác giả định
+ban đầu của bản nháp trước):** `evaluateDecadeRule(chart, daiVan, rule)` (đã chốt ở v0.2) là
+hàm thuần túy — nhận `DaiVan` xác định sẵn từ caller, không tự chọn "Đại Vận nào". Với domain-
+query, câu hỏi thật KHÔNG PHẢI "hiện tại có đang là giai đoạn Quan Lộc không" (thường sẽ rỗng —
+Đại Vận hiện tại hiếm khi trùng branch của cung đang hỏi, gây cảm giác "thiếu" không rõ vì sao,
+gần như vô dụng cho mục đích sản phẩm), mà là **"giai đoạn Quan Lộc của cả đời là lúc nào, nó
+thế nào"** — tức là tìm entry trong `chart.luck_cycles.dai_van` có `branch` KHỚP với branch của
+CUNG ĐANG HỎI (không phải khớp tuổi hiện tại), rồi evaluate decade Rules cho đúng entry đó.
+
+```ts
+/** Tim Dai Van co branch khop cung dang hoi — KHAC currentDaiVan() cua evidence-pack.ts
+ *  (ham do tra loi cau hoi "tuoi hien tai", cau hoi o day la "giai doan nao trong doi"). */
+function daiVanAtBranch(chart: Chart, branch: Branch): DaiVan {
+  const entry = chart.luck_cycles.dai_van.find((d) => d.branch === branch);
+  if (entry === undefined) {
+    throw new Error(`daiVanAtBranch: khong tim thay Dai Van nao co branch "${branch}".`);
+  }
+  return entry;
+}
+```
+
+Vị trí: hàm mới, nhỏ, đặt cạnh `resolveQuery` trong `src/rule/query-resolver.ts` (không phải
+`evidence-pack.ts` — đây không phải "tuổi hiện tại", không dùng chung logic với
+`currentDaiVan()`). `evaluateDecadeRule` KHÔNG đổi — vẫn nhận `DaiVan` từ caller như đã chốt.
+
+**Cả 2 câu hỏi (a) "hiện tại có phải giai đoạn này" và (b) "giai đoạn này là khi nào" đều được
+giữ, không câu nào bị mất** — `QueryEvidencePack.current_dai_van` (mục 4, kế thừa từ
+`EvidencePack`) vẫn trả lời (a) như Facts bối cảnh chung (không gắn riêng domain nào), còn
+decade-scope `interpretation_groups` của domain-query giờ trả lời (b). 2 mục đích khác nhau,
+cùng có mặt trong response — không loại trừ nhau.
 
 Lý do chạy hết thay vì lọc theo thời điểm câu hỏi (đã chốt trong brainstorm): đúng tinh thần
 "Facts đầy đủ, Interpretation chỉ giới hạn ở Rule matched" của CLAUDE.md mục 2 — giới hạn nên
@@ -222,6 +249,14 @@ export interface QueryEvidencePack {
     /** Nhom interpretation THEO SCOPE cho dung cung nay — khong de phang. */
     interpretation_groups: {
       scope: InterpretationScope;
+      /**
+       * CHI co gia tri khi scope === 'decade' — age_from/age_to cua CHINH Dai Van dang
+       * dung de evaluate cung nay (tim theo branch, xem muc 3 "Decade dung Dai Van nao"),
+       * KHONG PHAI Dai Van hien tai. Bat buoc de LLM tu xac dinh THI (da qua/hien tai/
+       * tuong lai) theo quy tac 7 (muc 5) — thieu field nay, LLM khong the tuan thu quy
+       * tac do vi khong co du lieu de so sanh voi tuoi hien tai.
+       */
+      decade_age_range: { age_from: number; age_to: number } | null;
       /** Chi hien dien khi scope co du lieu that (VD decade luon co, annual chi co khi view_year). */
       items: {
         rule_id: string;
@@ -232,6 +267,12 @@ export interface QueryEvidencePack {
       }[];
     }[];
   }[];
+  /**
+   * Facts boi canh chung (khong gan domain nao) — tra loi cau hoi (a) "hien tai dang o giai
+   * doan nao" (xem muc 3). QUAN TRONG: `nominal_age` trong day la con so LLM PHAI dung de so
+   * sanh voi tung `decade_age_range` (trong interpretation_groups cua tung cung) de xac dinh
+   * THI theo quy tac 7 (muc 5) — 2 field nay lien quan truc tiep, khong doc lap.
+   */
   current_dai_van: EvidencePack['current_dai_van'];
   /** Chi co khi input.view_year duoc truyen. */
   current_luu_nien: { year: string; heavenly_stem: string; earthly_branch: string } | null;
@@ -268,9 +309,17 @@ query LÀ trả lời có mục tiêu theo domain, không phải bài đọc m�
    theo từng nhóm, không trộn lẫn thành 1 giọng văn duy nhất:
    - scope "star_combination"/"palace_relationship": đặc điểm BẢN CHẤT, KHÔNG đổi theo thời
      gian — dùng thì hiện tại ổn định ("bạn LÀ người...", "cung này CÓ đặc điểm...").
-   - scope "decade": ý nghĩa RIÊNG của giai đoạn Đại Vận hiện tại — PHẢI nêu rõ đây là đặc
-     điểm của giai đoạn này, không phải đặc điểm suốt đời ("TRONG GIAI ĐOẠN Đại Vận hiện tại
-     (từ ... đến ... tuổi), ...").
+   - scope "decade": ý nghĩa RIÊNG của 1 giai đoạn Đại Vận cụ thể (KHÔNG NHẤT THIẾT là Đại Vận
+     hiện tại — có thể đã qua hoặc chưa tới) — PHẢI nêu rõ đây là đặc điểm của giai đoạn đó,
+     không phải đặc điểm suốt đời, VÀ phải tự xác định đúng THÌ bằng cách so sánh
+     "decade_age_range" (age_from/age_to của CHÍNH nhóm decade đang đọc) với
+     "current_dai_van.nominal_age" (tuổi hiện tại của người xem):
+       - Nếu decade_age_range.age_to < current_dai_van.nominal_age: giai đoạn ĐÃ QUA — dùng
+         "trong giai đoạn Đại Vận từ ... đến ... tuổi (đã qua)" hoặc thì quá khứ.
+       - Nếu decade_age_range.age_from <= current_dai_van.nominal_age <= decade_age_range.age_to:
+         giai đoạn ĐANG DIỄN RA — dùng "trong giai đoạn Đại Vận hiện tại (từ ... đến ... tuổi)".
+       - Nếu decade_age_range.age_from > current_dai_van.nominal_age: giai đoạn SẮP TỚI — dùng
+         "trong giai đoạn Đại Vận sắp tới (từ ... đến ... tuổi)" hoặc thì tương lai.
    - scope "annual": ý nghĩa RIÊNG của năm được xem — PHẢI nêu rõ đây là đặc điểm CHỈ năm đó
      ("RIÊNG NĂM [năm], ...").
 
@@ -281,15 +330,22 @@ query LÀ trả lời có mục tiêu theo domain, không phải bài đọc m�
    góc độ...", "một số quan điểm còn xem thêm..."). KHÔNG đảo thứ tự, KHÔNG cho 2 cung mức độ
    quan trọng ngang nhau khi dữ liệu đã sắp xếp có thứ tự.
 
-   Ví dụ ĐÚNG (cùng 1 cung Quan Lộc có cả 2 nhóm):
+   Ví dụ ĐÚNG — decade là giai đoạn ĐANG DIỄN RA (age_from <= tuổi hiện tại <= age_to):
    "Về sự nghiệp: bạn là người có tư duy độc lập, thích tự chủ trong công việc [star_combination].
    Trong giai đoạn Đại Vận hiện tại (32-41 tuổi), có xu hướng thay đổi công việc hoặc hướng đi
    sự nghiệp [decade]."
 
-   Ví dụ SAI: "Về sự nghiệp: bạn là người có tư duy độc lập, thích tự chủ, và có xu hướng thay
-   đổi công việc" (gộp 2 nhóm scope thành 1 câu, không phân biệt đâu là bản chất suốt đời, đâu
-   là chỉ đúng giai đoạn hiện tại — người đọc không biết đặc điểm nào sẽ hết khi qua Đại Vận
-   này — CẤM).
+   Ví dụ ĐÚNG — decade là giai đoạn ĐÃ QUA (age_to < tuổi hiện tại, VD người xem hiện 35 tuổi
+   nhưng giai đoạn Đại Vận tại cung Quan Lộc là 12-21 tuổi):
+   "Về sự nghiệp: bạn là người có tư duy độc lập, thích tự chủ trong công việc [star_combination].
+   Trong giai đoạn Đại Vận tại cung này (12-21 tuổi, đã qua), từng có xu hướng thay đổi định
+   hướng nhiều lần [decade]."
+
+   Ví dụ SAI (2 lỗi cùng lúc): "Về sự nghiệp: bạn là người có tư duy độc lập, thích tự chủ, và
+   có xu hướng thay đổi công việc" — (1) gộp 2 nhóm scope thành 1 câu, không phân biệt đâu là
+   bản chất suốt đời, đâu là chỉ đúng 1 giai đoạn — người đọc không biết đặc điểm nào sẽ hết
+   khi qua Đại Vận đó; (2) không nêu mốc tuổi/thì của giai đoạn decade, mặc định ngầm là "hiện
+   tại" dù giai đoạn đó trong dữ liệu có thể đã qua từ lâu hoặc còn ở tương lai — CẤM cả 2.
 ```
 
 ## 6. API — `POST /charts/query`
