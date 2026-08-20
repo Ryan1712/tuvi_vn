@@ -39,3 +39,15 @@ describe('buildQueryUserMessage', () => {
     expect(msg).toContain('29');
   });
 });
+
+describe('QUERY_SYSTEM_PROMPT — quy tac 8 (matched_modifiers)', () => {
+  it('chua quy tac ve matched_modifiers nhu yeu to gia giam', () => {
+    expect(QUERY_SYSTEM_PROMPT).toContain('matched_modifiers');
+    expect(QUERY_SYSTEM_PROMPT).toMatch(/GIA GIẢM/);
+  });
+
+  it('vi du dung RULE_B that (branch Ty2,Hoi, effect tang_xu_huong_tot)', () => {
+    expect(QUERY_SYSTEM_PROMPT).toMatch(/Không Kiếp/);
+    expect(QUERY_SYSTEM_PROMPT).toMatch(/Tý\/Hợi/);
+  });
+});

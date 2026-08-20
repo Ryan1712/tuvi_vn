@@ -82,7 +82,30 @@ QUY TẮC BẮT BUỘC:
    có xu hướng thay đổi công việc" — (1) gộp 2 nhóm scope thành 1 câu, không phân biệt đâu là
    bản chất suốt đời, đâu là chỉ đúng 1 giai đoạn — người đọc không biết đặc điểm nào sẽ hết
    khi qua Đại Vận đó; (2) không nêu mốc tuổi/thì của giai đoạn decade, mặc định ngầm là "hiện
-   tại" dù giai đoạn đó trong dữ liệu có thể đã qua từ lâu hoặc còn ở tương lai — CẤM cả 2.`;
+   tại" dù giai đoạn đó trong dữ liệu có thể đã qua từ lâu hoặc còn ở tương lai — CẤM cả 2.
+
+8. Mỗi "item" trong "items" có thể kèm "matched_modifiers" — đây là các YẾU TỐ GIA GIẢM đã
+   kích hoạt cho Rule đó, KHÔNG PHẢI kết luận mới, KHÔNG được diễn đạt ngang hàng với
+   conclusion_text chính. Khi "matched_modifiers" không rỗng, PHẢI:
+   - Diễn đạt như phần bổ trợ/điều chỉnh mức độ cho conclusion_text chính, không phải 1 nhận
+     định độc lập mới.
+   - Nêu rõ ĐIỀU KIỆN kích hoạt modifier đó (dựa vào "field"/"value" của modifier — VD nếu
+     field là "branch", nói rõ "vì [cung này/vị trí này]..."), không chỉ nói "có gia giảm"
+     mà không giải thích dựa trên yếu tố gì.
+   - Nếu "matched_modifiers" rỗng, KHÔNG được tự thêm câu gia giảm nào — im lặng bỏ qua, đúng
+     tinh thần quy tắc 1 (không suy luận ngoài dữ liệu).
+
+   Ví dụ ĐÚNG (dùng đúng RULE_B thật trong KNOWLEDGE_BASE — modifier field:"branch",
+   value:"Ty2,Hoi", effect:"tang_xu_huong_tot", weight:0.7):
+   "Không Kiếp đồng cung tại cung này cho thấy xu hướng dễ hoang mang, thiếu nhất quán, thay
+   đổi thất thường. Tuy nhiên, vì cung này nằm ở vị trí Tý/Hợi, có xu hướng phần nào giảm nhẹ
+   hơn so với các vị trí khác — dù chính tinh đi kèm vẫn cần lưu ý."
+
+   Ví dụ SAI: "Không Kiếp đồng cung tại cung này cho thấy xu hướng dễ hoang mang, thiếu nhất
+   quán, thay đổi thất thường. Ngoài ra, vị trí Tý/Hợi cũng mang lại may mắn." — (1) diễn đạt
+   modifier như 1 kết luận MỚI ngang hàng ("mang lại may mắn" nghe như 1 đặc điểm riêng, không
+   phải điều chỉnh mức độ của câu trước), (2) không nêu rõ đây là yếu tố GIA GIẢM cho chính
+   conclusion_text đó — CẤM cả 2.`;
 
 /** Chuyen QueryEvidencePack thanh user message dang JSON — LLM doc truc tiep cau truc du lieu. */
 export function buildQueryUserMessage(pack: QueryEvidencePack): string {
