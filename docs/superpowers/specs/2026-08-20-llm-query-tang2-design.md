@@ -412,3 +412,14 @@ validate `domain` khớp 1 trong 12 `DomainKey` (fail loud nếu không, theo đ
   response khi 1 domain trả nhiều cung: có cần LLM tự nói rõ "trường phái khác nhau xem thêm
   cung X" không, hay chỉ cần trình bày cả 2 cung mà không giải thích lý do? Để ngỏ, quyết định
   lúc viết prompt chi tiết trong implementation plan.
+- **[Phát hiện lúc review Task 3, chưa xử lý]** `InterpretationItem` (bên trong
+  `QueryEvidencePack.interpretation_groups[].items`) không có field nào chứa kết quả
+  `matched_modifiers` của Rule — chỉ có `rule_id`/`conclusion_text`/`valence`/`consensus`/
+  `conflict_group_id`. Hệ quả: 1 Rule matched có modifier (VD `RULE_B` — "Không Kiếp tại
+  Tý/Hợi" có modifier "phân vị giải" weight 0.7, giảm nhẹ mức độ) sẽ xuất hiện trong `items`
+  giống hệt trường hợp modifier không kích hoạt — LLM không có dữ liệu để phân biệt sắc thái
+  giảm nhẹ đó. Đây là giới hạn của schema `QueryEvidencePack` (được thiết kế từ trước, không
+  phải lỗi implementation Task 3) — cần quyết định có mở rộng `InterpretationItem` thêm field
+  cho `matched_modifiers` không, hoặc chấp nhận giới hạn này ở v0.1 (giống Tầng 1's
+  `EvidencePack.interpretations` cũng không có field này). Chưa quyết định — không tự ý sửa,
+  cần xác nhận trước khi động vào schema đã qua nhiều vòng review.
