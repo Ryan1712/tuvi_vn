@@ -95,3 +95,35 @@ describe('buildQueryEvidencePack', () => {
     expect(pack.domain).toBe('quan_loc');
   });
 });
+
+describe('buildQueryEvidencePack — matched_modifiers', () => {
+  it('RULE_B matched tai cung Menh (branch Hoi) co matched_modifiers khong rong', () => {
+    const chart = buildChart(PHAM_DUY_2026);
+    const pack = buildQueryEvidencePack(PHAM_DUY_2026, chart, ['Hoi'], 'menh');
+    const staticGroup = pack.palaces[0]?.interpretation_groups.find((g) => g.scope === 'star_combination');
+    const ruleBItem = staticGroup?.items.find((i) => i.rule_id === 'RULE_B_KHONG_KIEP_TY_HOI_PHAN_VI_GIAI');
+    expect(ruleBItem).toBeDefined();
+    expect(ruleBItem?.matched_modifiers).toHaveLength(1);
+    expect(ruleBItem?.matched_modifiers[0]?.field).toBe('branch');
+    expect(ruleBItem?.matched_modifiers[0]?.value).toBe('Ty2,Hoi');
+    expect(ruleBItem?.matched_modifiers[0]?.effect).toBe('tang_xu_huong_tot');
+    expect(ruleBItem?.matched_modifiers[0]?.weight).toBe(0.7);
+  });
+
+  it('RULE_A matched (khong co modifier trong Rule) co matched_modifiers rong', () => {
+    const chart = buildChart(PHAM_DUY_2026);
+    const pack = buildQueryEvidencePack(PHAM_DUY_2026, chart, ['Hoi'], 'menh');
+    const staticGroup = pack.palaces[0]?.interpretation_groups.find((g) => g.scope === 'star_combination');
+    const ruleAItem = staticGroup?.items.find((i) => i.rule_id === 'RULE_A_THIEN_DONG_KHONG_KIEP_BAT_CAT');
+    expect(ruleAItem).toBeDefined();
+    expect(ruleAItem?.matched_modifiers).toEqual([]);
+  });
+
+  it('cung khong o Ty2/Hoi: RULE_B khong matched (conditions da khong khop, khong lien quan modifier)', () => {
+    const chart = buildChart(PHAM_DUY_2026);
+    // Dan = cung Dien Trach, khong co Khong/Kiep -> RULE_A, RULE_B deu khong matched
+    const pack = buildQueryEvidencePack(PHAM_DUY_2026, chart, ['Dan'], 'dien_trach');
+    const staticGroup = pack.palaces[0]?.interpretation_groups.find((g) => g.scope === 'star_combination');
+    expect(staticGroup?.items).toEqual([]);
+  });
+});

@@ -1,12 +1,12 @@
 import { callIztro } from '../chart/index.js';
 import type { Branch, BuildChartInput, Brightness, Chart, NguHanh } from '../chart/types.js';
 import { daiVanAtBranch } from '../rule/query-resolver.js';
-import { evalCondition } from '../rule/evaluator.js';
+import { evaluateRule } from '../rule/evaluator.js';
 import { evaluateRelationRule, type RelationTarget } from '../rule/relation-evaluator.js';
 import { evaluateDecadeRule } from '../rule/decade-evaluator.js';
 import { evaluateAnnualRule } from '../rule/annual-evaluator.js';
 import { KNOWLEDGE_BASE } from '../rule/knowledge-base.js';
-import type { DomainKey, Rule, Valence, Consensus } from '../rule/types.js';
+import type { DomainKey, Modifier, Rule, Valence, Consensus } from '../rule/types.js';
 import type { EvidencePack } from './evidence-pack.js';
 
 export type InterpretationScope = 'star_combination' | 'palace_relationship' | 'decade' | 'annual';
@@ -17,6 +17,7 @@ interface InterpretationItem {
   valence: Valence;
   consensus: Consensus;
   conflict_group_id: string | null;
+  matched_modifiers: Modifier[];
 }
 
 export interface QueryEvidencePack {
@@ -42,26 +43,23 @@ export interface QueryEvidencePack {
 
 const RELATION_TARGETS: RelationTarget[] = ['opposite', 'wealth', 'career'];
 
-function ruleToItem(rule: Rule): InterpretationItem {
+function ruleToItem(rule: Rule, matchedModifiers: Modifier[]): InterpretationItem {
   return {
     rule_id: rule.rule_id,
     conclusion_text: rule.conclusion.text,
     valence: rule.conclusion.valence,
     consensus: rule.consensus,
     conflict_group_id: rule.conflict_group_id,
+    matched_modifiers: matchedModifiers,
   };
 }
 
 function staticGroupItems(chart: Chart, branch: Branch): InterpretationItem[] {
-  const palace = chart.palaces.find((p) => p.branch === branch);
-  if (palace === undefined) {
-    throw new Error(`buildQueryEvidencePack: khong tim thay cung o branch "${branch}".`);
-  }
   const items: InterpretationItem[] = [];
   for (const rule of KNOWLEDGE_BASE) {
     if (rule.scope !== 'star_combination' && rule.scope !== 'star_palace' && rule.scope !== 'four_transform') continue;
-    const matched = rule.conditions.every((c) => evalCondition(palace, c));
-    if (matched) items.push(ruleToItem(rule));
+    const result = evaluateRule(chart, branch, rule);
+    if (result.matched) items.push(ruleToItem(rule, result.matched_modifiers));
   }
   return items;
 }
@@ -72,7 +70,7 @@ function relationGroupItems(input: BuildChartInput, branch: Branch): Interpretat
     if (rule.scope !== 'palace_relationship') continue;
     for (const relation of RELATION_TARGETS) {
       const result = evaluateRelationRule(input, branch, relation, rule);
-      if (result.matched) items.push(ruleToItem(rule));
+      if (result.matched) items.push(ruleToItem(rule, result.matched_modifiers));
     }
   }
   return items;
@@ -84,7 +82,7 @@ function decadeGroup(chart: Chart, branch: Branch): { decade_age_range: { age_fr
   for (const rule of KNOWLEDGE_BASE) {
     if (rule.scope !== 'decade') continue;
     const result = evaluateDecadeRule(chart, daiVan, rule);
-    if (result.matched) items.push(ruleToItem(rule));
+    if (result.matched) items.push(ruleToItem(rule, result.matched_modifiers));
   }
   return { decade_age_range: { age_from: daiVan.age_from, age_to: daiVan.age_to }, items };
 }
@@ -95,7 +93,7 @@ function annualGroupItems(chart: Chart, branch: Branch): InterpretationItem[] {
   for (const rule of KNOWLEDGE_BASE) {
     if (rule.scope !== 'annual') continue;
     const result = evaluateAnnualRule(chart, chart.luu_nien, branch, rule);
-    if (result.matched) items.push(ruleToItem(rule));
+    if (result.matched) items.push(ruleToItem(rule, result.matched_modifiers));
   }
   return items;
 }
