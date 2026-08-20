@@ -269,6 +269,17 @@ export interface QueryEvidencePack {
         valence: Valence;
         consensus: Consensus;
         conflict_group_id: string | null;
+        /**
+         * Modifier CUA CHINH Rule nay da kich hoat that (RuleEvalResult.matched_modifiers,
+         * khong phai toan bo Rule.modifiers) — dung nguyen Modifier[] (field/operator/value/
+         * effect/weight), KHONG rut gon chi con effect+weight, vi LLM can dieu kien kich hoat
+         * (VD field:'branch', value:'Ty2,Hoi') de dien dat DUNG boi canh "tai sao co gia
+         * giam nay", khong chi "co gia giam". Thuong rong ([]) khi Rule khong co modifier
+         * nao kich hoat — Phat hien sau final review (xem muc 8 Known Issues): RULE_B co
+         * modifier that (branch Ty2/Hoi, weight 0.7), truoc ban patch nay bi mat hoan toan
+         * khi vao QueryEvidencePack.
+         */
+        matched_modifiers: Modifier[];
       }[];
     }[];
   }[];
@@ -291,6 +302,17 @@ có trong `evidence-pack.ts` (đọc palace facts từ `ChartPalace`, join `Rule
 (`resolvePalaceFacts(palace): ...`, `resolveInterpretation(rule): ...`) rồi dùng lại ở cả 2
 nơi — tránh 2 đường độc lập cùng đọc `Chart`/`Rule` mà có thể lệch nhau nếu sau này 1 bên sửa
 quên đồng bộ (đúng nguyên tắc đã giữ với `chart_id`).
+
+**[Patch sau final review]** Nhóm `star_combination`/`star_palace`/`four_transform` (hàm
+`staticGroupItems` trong `query-evidence-pack.ts`) PHẢI đổi sang gọi `matchRules(chart, branch,
+KNOWLEDGE_BASE)` hoặc `evaluateRule` trực tiếp — KHÔNG tự viết lại `rule.conditions.every((c) =>
+evalCondition(palace, c))` như bản gốc. Lý do kép: (1) đóng Minor finding từ final whole-branch
+review (trùng lặp logic với evaluator đã có), (2) `evaluateRule`'s `RuleEvalResult` đã có sẵn
+`matched_modifiers` — tự viết lại `evalCondition` không có đường lấy field này, phải viết thêm
+logic riêng để bù. 3 nhóm còn lại (`relationGroupItems`/`decadeGroup`/`annualGroupItems`) ĐÃ
+gọi đúng evaluator đầy đủ (`evaluateRelationRule`/`evaluateDecadeRule`/`evaluateAnnualRule`) từ
+trước — chỉ cần sửa `ruleToItem` để nhận thêm `result.matched_modifiers` và truyền vào
+`InterpretationItem`, không cần đổi cách gọi evaluator ở 3 nhóm đó.
 
 ## 5. System prompt cho domain-query — `src/llm/query-prompt.ts`
 
@@ -351,6 +373,53 @@ query LÀ trả lời có mục tiêu theo domain, không phải bài đọc m�
    bản chất suốt đời, đâu là chỉ đúng 1 giai đoạn — người đọc không biết đặc điểm nào sẽ hết
    khi qua Đại Vận đó; (2) không nêu mốc tuổi/thì của giai đoạn decade, mặc định ngầm là "hiện
    tại" dù giai đoạn đó trong dữ liệu có thể đã qua từ lâu hoặc còn ở tương lai — CẤM cả 2.
+
+8. Mỗi "item" trong "items" có thể kèm "matched_modifiers" — đây là các YẾU TỐ GIA GIẢM đã
+   kích hoạt cho Rule đó, KHÔNG PHẢI kết luận mới, KHÔNG được diễn đạt ngang hàng với
+   conclusion_text chính. Khi "matched_modifiers" không rỗng, PHẢI:
+   - Diễn đạt như phần bổ trợ/điều chỉnh mức độ cho conclusion_text chính, không phải 1 nhận
+     định độc lập mới.
+   - Nêu rõ ĐIỀU KIỆN kích hoạt modifier đó (dựa vào "field"/"value" của modifier — VD nếu
+     field là "branch", nói rõ "vì [cung này/vị trí này]..."), không chỉ nói "có gia giảm"
+     mà không giải thích dựa trên yếu tố gì.
+   - Nếu "matched_modifiers" rỗng, KHÔNG được tự thêm câu gia giảm nào — im lặng bỏ qua, đúng
+     tinh thần quy tắc 1 (không suy luận ngoài dữ liệu).
+   - **Khi item đó CÙNG LÚC có "conflict_group_id" khác null (quy tắc 3 áp dụng) VÀ
+     "matched_modifiers" không rỗng**: modifier PHẢI được trình bày LỒNG BÊN TRONG phần
+     diễn giải của CHÍNH item đó (1 trong các quan điểm ở quy tắc 3), KHÔNG được tách thành 1
+     "quan điểm" hay mục ngang hàng thứ 3 riêng biệt. Modifier là gia giảm CỦA quan điểm đó,
+     không phải 1 quan điểm độc lập mới cạnh tranh với các quan điểm khác trong cùng nhóm.
+
+   Ví dụ ĐÚNG (dùng đúng RULE_B thật trong KNOWLEDGE_BASE — modifier field:"branch",
+   value:"Ty2,Hoi", effect:"tang_xu_huong_tot", weight:0.7):
+   "Không Kiếp đồng cung tại cung này cho thấy xu hướng dễ hoang mang, thiếu nhất quán, thay
+   đổi thất thường. Tuy nhiên, vì cung này nằm ở vị trí Tý/Hợi, có xu hướng phần nào giảm nhẹ
+   hơn so với các vị trí khác — dù chính tinh đi kèm vẫn cần lưu ý."
+
+   Ví dụ SAI: "Không Kiếp đồng cung tại cung này cho thấy xu hướng dễ hoang mang, thiếu nhất
+   quán, thay đổi thất thường. Ngoài ra, vị trí Tý/Hợi cũng mang lại may mắn." — (1) diễn đạt
+   modifier như 1 kết luận MỚI ngang hàng ("mang lại may mắn" nghe như 1 đặc điểm riêng, không
+   phải điều chỉnh mức độ của câu trước), (2) không nêu rõ đây là yếu tố GIA GIẢM cho chính
+   conclusion_text đó — CẤM cả 2.
+
+   Ví dụ ĐÚNG — case CHỒNG LẤN quy tắc 3 + quy tắc 8 (dùng đúng RULE_A + RULE_B thật, cùng
+   "conflict_group_id": "CG_001", RULE_B có "matched_modifiers" không rỗng — đây là case xảy
+   ra ngay lập tức khi domain trả về cung Mệnh của case có tổ hợp Thiên Đồng Không Kiếp,
+   KHÔNG PHẢI case hiếm):
+   "Về tổ hợp Thiên Đồng ngộ Không Kiếp, có 2 quan điểm khác nhau: (A) một số nguồn cho rằng
+   dễ gây hoang mang, thiếu nhất quán, thay đổi thất thường — quan điểm này chưa được xác
+   nhận rộng rãi. (B) một số nguồn khác lại cho rằng đây là thế "phản vi giải" — đặc biệt,
+   vì tổ hợp này nằm ở đúng vị trí Tý/Hợi, xu hướng bất lợi theo hướng (B) được cho là giảm
+   nhẹ hơn so với các vị trí khác — quan điểm này cũng chưa được xác nhận rộng rãi. Đây là
+   điểm còn tranh cãi giữa 2 nguồn."
+
+   Ví dụ SAI (case chồng lấn, lỗi phát hiện qua verify LLM thật): "Về tổ hợp này, có 3 điều
+   cần lưu ý: (1) một số nguồn cho rằng dễ gây hoang mang... (2) một số nguồn khác cho rằng
+   đây là thế phản vi giải... (3) ngoài ra, vị trí Tý/Hợi cũng làm giảm bớt khía cạnh bất lợi
+   của tổ hợp" — SAI vì tách modifier thành 1 "quan điểm/mục" thứ 3 độc lập, ngang hàng với
+   (A) và (B), trong khi modifier đó thực chất là gia giảm LỒNG BÊN TRONG quan điểm (B), không
+   phải 1 quan điểm thứ 3 cạnh tranh với (A)/(B) — làm người đọc hiểu nhầm có 3 nguồn tranh
+   luận thay vì 2 nguồn, trong đó 1 nguồn có thêm chi tiết theo vị trí — CẤM.
 ```
 
 ## 6. API — `POST /charts/query`
@@ -430,19 +499,27 @@ validate `domain` khớp 1 trong 12 `DomainKey` (fail loud nếu không, theo đ
   giá trị còn lại khớp đúng trực giác không cần sửa. Bài học: kể cả tên cung "nghe hiển nhiên"
   vẫn phải verify bằng code thật, không suy ra từ kiến thức Tử Vi phổ thông (`iztro` có thể
   dùng tên khác biến thể tiếng Việt phổ biến).
-- **Domain `phu_mau`/`phu_the` là tranh_cai ở CHÍNH việc "cung nào liên quan"** (không phải
-  tranh cãi về nội dung luận giải như Rule thông thường) — cần xác nhận cách diễn đạt trong
-  response khi 1 domain trả nhiều cung: có cần LLM tự nói rõ "trường phái khác nhau xem thêm
-  cung X" không, hay chỉ cần trình bày cả 2 cung mà không giải thích lý do? Để ngỏ, quyết định
-  lúc viết prompt chi tiết trong implementation plan.
-- **[Phát hiện lúc review Task 3, chưa xử lý]** `InterpretationItem` (bên trong
-  `QueryEvidencePack.interpretation_groups[].items`) không có field nào chứa kết quả
-  `matched_modifiers` của Rule — chỉ có `rule_id`/`conclusion_text`/`valence`/`consensus`/
-  `conflict_group_id`. Hệ quả: 1 Rule matched có modifier (VD `RULE_B` — "Không Kiếp tại
-  Tý/Hợi" có modifier "phân vị giải" weight 0.7, giảm nhẹ mức độ) sẽ xuất hiện trong `items`
-  giống hệt trường hợp modifier không kích hoạt — LLM không có dữ liệu để phân biệt sắc thái
-  giảm nhẹ đó. Đây là giới hạn của schema `QueryEvidencePack` (được thiết kế từ trước, không
-  phải lỗi implementation Task 3) — cần quyết định có mở rộng `InterpretationItem` thêm field
-  cho `matched_modifiers` không, hoặc chấp nhận giới hạn này ở v0.1 (giống Tầng 1's
-  `EvidencePack.interpretations` cũng không có field này). Chưa quyết định — không tự ý sửa,
-  cần xác nhận trước khi động vào schema đã qua nhiều vòng review.
+- **[ĐÃ QUYẾT ĐỊNH, không đổi code/prompt]** Domain `phu_mau`/`phu_the` là `tranh_cai` ở CHÍNH
+  việc "cung nào liên quan" (không phải tranh cãi về nội dung luận giải như Rule thông
+  thường). Quyết định: **KHÔNG cần LLM giải thích lý do trường phái** khi trình bày domain có
+  nhiều cung — chỉ trình bày đúng thứ tự (cung chính trước, "góc nhìn bổ sung" sau), không
+  nhắc "theo trường phái X..." hay giải thích tại sao có góc nhìn bổ sung đó. Lý do: thông tin
+  "vì sao domain-mapping có nhiều cung" nằm ở `DOMAIN_PALACE_MAP.notes` — đây là provenance
+  NỘI BỘ phục vụ minh bạch nguồn gốc tri thức (giống `Source`/`school`/`consensus` của Rule),
+  KHÔNG PHẢI nội dung luận giải cần đưa cho người dùng. Khác biệt với quy tắc 3 (bắt buộc
+  trình bày cả 2 phía khi `conflict_group_id` khác null): đó là 2 quan điểm luận giải khác
+  NGHĨA (người dùng cần biết để tự đánh giá), còn đây là tranh cãi về PHẠM VI tra cứu (người
+  dùng phổ thông không cần biết lý do biên soạn kỹ thuật). Xác nhận bằng hành vi thật đã quan
+  sát ở Task 6: LLM tự viết "Cung Huynh Đệ (góc nhìn bổ sung)" mà không giải thích lý do —
+  đúng hành vi mong muốn, không cần sửa `QUERY_SYSTEM_PROMPT` hay `QueryEvidencePack`.
+- **[ĐÃ QUYẾT ĐỊNH, đang patch — xem mục 4 "Patch sau final review" và mục 5 quy tắc 8]**
+  `InterpretationItem` (bên trong `QueryEvidencePack.interpretation_groups[].items`) trước
+  patch này không có field nào chứa `matched_modifiers` của Rule — phát hiện lúc review Task
+  3, xác nhận có tác động thật (không chỉ lý thuyết): `RULE_B` trong `KNOWLEDGE_BASE` CÓ
+  modifier thật (`field: 'branch', value: 'Ty2,Hoi', effect: 'tang_xu_huong_tot', weight:
+  0.7`) — trước patch, sắc thái giảm nhẹ này bị mất hoàn toàn khi vào `QueryEvidencePack`.
+  Quyết định: mở rộng `InterpretationItem` thêm `matched_modifiers: Modifier[]` (nguyên type
+  đầy đủ, không rút gọn — LLM cần điều kiện kích hoạt để diễn đạt đúng bối cảnh, không chỉ kết
+  quả). Kèm quy tắc 8 mới trong `QUERY_SYSTEM_PROMPT` (mục 5) hướng dẫn diễn đạt modifier như
+  yếu tố GIA GIẢM, không phải kết luận mới — có ví dụ ĐÚNG/SAI dùng chính `RULE_B` thật, đúng
+  kỷ luật đã áp dụng cho mọi quy tắc khác trong prompt này.
