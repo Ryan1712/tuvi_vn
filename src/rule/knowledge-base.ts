@@ -1,4 +1,4 @@
-import type { Rule, Source } from './types.js';
+import type { Rule, Source, DomainPalaceEntry } from './types.js';
 
 /**
  * Entry mau duy nhat cua Rule Engine v0.1 (build spec muc 9):
@@ -85,3 +85,107 @@ export const RULE_B: Rule = {
 
 export const KNOWLEDGE_BASE: Rule[] = [RULE_A, RULE_B];
 export const SOURCES: Source[] = [SRC_001, SRC_002];
+
+/**
+ * Tri thuc domain -> cung. 10 domain ro rang (1 cung), 2 domain mo ho (nhieu cung).
+ * Xem design doc 2026-08-20-llm-query-tang2-design.md muc 1. Gia tri palace_names da
+ * verify bang du lieu that tu iztro (khong go theo tri nho) — xem muc 8 Known Issues.
+ */
+export const DOMAIN_PALACE_MAP: DomainPalaceEntry[] = [
+  {
+    domain: 'menh',
+    palace_names: ['Mệnh'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Menh — tinh cach, ban chat con nguoi.',
+  },
+  {
+    domain: 'phu_mau',
+    palace_names: ['Phụ Mẫu', 'Huynh Đệ'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'tranh_cai',
+    notes: 'Cha me: 1 so truong phai chi xem Phu Mau, 1 so khac tinh ca Huynh De (anh chi em ho hang gan). Thu tu: Phu Mau truoc.',
+  },
+  {
+    domain: 'phuc_duc',
+    palace_names: ['Phúc Đức'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Phuc Duc — phuc phan, tam linh, to tien.',
+  },
+  {
+    domain: 'dien_trach',
+    palace_names: ['Điền Trạch'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Dien Trach — nha cua, bat dong san.',
+  },
+  {
+    domain: 'quan_loc',
+    palace_names: ['Quan Lộc'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Quan Loc — su nghiep, cong danh.',
+  },
+  {
+    domain: 'no_boc',
+    palace_names: ['Nô Bộc'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung No Boc — ban be, dong nghiep, cap duoi.',
+  },
+  {
+    domain: 'thien_di',
+    palace_names: ['Thiên Di'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Thien Di — di chuyen, xuat ngoai, thay doi moi truong.',
+  },
+  {
+    domain: 'tat_ach',
+    palace_names: ['Tật Ách'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Tat Ach — suc khoe, benh tat.',
+  },
+  {
+    domain: 'tai_bach',
+    palace_names: ['Tài Bạch'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Tai Bach — tien bac, tai chinh.',
+  },
+  {
+    domain: 'tu_tuc',
+    palace_names: ['Tử Nữ'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Tu Nu (iztro dung ten nay, khong phai "Tu Tuc") — con cai.',
+  },
+  {
+    domain: 'phu_the',
+    palace_names: ['Phu Thê', 'Tử Nữ'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'tranh_cai',
+    notes: 'Hon nhan: cung chinh la Phu The. Mot so goc hoi (con cai anh huong hon nhan) tham chieu them Tu Nu. Thu tu: Phu The truoc.',
+  },
+  {
+    domain: 'huynh_de',
+    palace_names: ['Huynh Đệ'],
+    school: 'pho_thong',
+    sources: [],
+    consensus: 'cao',
+    notes: 'Cung Huynh De — anh chi em.',
+  },
+];

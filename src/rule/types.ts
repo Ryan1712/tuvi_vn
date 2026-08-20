@@ -94,3 +94,35 @@ export interface Source {
   reliability_tier: ReliabilityTier;
   excerpt_or_link: string;
 }
+
+/**
+ * 12 domain — dat ten theo cung Han Viet (khong theo ngu nghia cau hoi tu nhien, vi
+ * NLU/map cau hoi tu do -> domain la 1 phase rieng sau nay, khong lam o v0.1). Xem
+ * docs/superpowers/specs/2026-08-20-llm-query-tang2-design.md muc 1.
+ */
+export type DomainKey =
+  | 'menh' | 'phu_mau' | 'phuc_duc' | 'dien_trach' | 'quan_loc' | 'no_boc'
+  | 'thien_di' | 'tat_ach' | 'tai_bach' | 'tu_tuc' | 'phu_the' | 'huynh_de';
+
+/**
+ * Tri thuc domain -> cung. KHONG PHAI Rule (khong co dieu kien evaluate tren Chart — xem
+ * design doc muc 1). Van giu truong provenance nhu Source vi day van la tri thuc that.
+ */
+export interface DomainPalaceEntry {
+  domain: DomainKey;
+  /**
+   * Ten cung LIEN QUAN, LUON la mang (ke ca domain khong mo ho chi co 1 phan tu). Thu tu
+   * phan tu = muc do quan trong (phan tu dau = quan trong nhat) — PHAI duoc bao toan
+   * xuyen suot resolveQuery() -> QueryEvidencePack -> system prompt, xem design doc muc 3,
+   * muc 4, muc 5.
+   *
+   * LUU THEO TEN CUNG (string, khop ChartPalace.palace_name that tu iztro), KHONG PHAI
+   * Branch truc tiep — vi ten cung co dinh nhung branch no roi vao THAY DOI theo tung la
+   * so (phu thuoc gio/ngay sinh).
+   */
+  palace_names: string[];
+  school: string;
+  sources: string[]; // ref(Source.source_id)
+  consensus: Consensus;
+  notes: string;
+}
