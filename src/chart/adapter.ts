@@ -89,8 +89,9 @@ function adaptPalace(palace: IFunctionalPalace): ChartPalace {
   };
 }
 
-function adaptDaiVan(astrolabe: IFunctionalAstrolabe): DaiVan[] {
+function adaptDaiVan(astrolabe: IFunctionalAstrolabe, chartId: string): DaiVan[] {
   return astrolabe.decadalList().map((d) => ({
+    chart_id: chartId,
     age_from: d.ageRange[0],
     age_to: d.ageRange[1],
     branch: branchFromVi(d.earthlyBranch),
@@ -112,7 +113,7 @@ function adaptTieuVan(astrolabe: IFunctionalAstrolabe): TieuVan[] {
  * co `palaceNames[i]`/`stars[i]` DUNG CHUNG index voi `astrolabe.palaces[i]` (theo vi
  * tri, khong phai theo branch) — da xac minh thuc te trong luc lap ke hoach.
  */
-function adaptLuuNien(astrolabe: IFunctionalAstrolabe, viewYear: string): LuuNien {
+function adaptLuuNien(astrolabe: IFunctionalAstrolabe, viewYear: string, chartId: string): LuuNien {
   const horoscope = astrolabe.horoscope(viewYear, 0);
   const yearly = horoscope.yearly;
   const year = Number.parseInt(viewYear.split('-')[0] ?? '', 10);
@@ -122,6 +123,7 @@ function adaptLuuNien(astrolabe: IFunctionalAstrolabe, viewYear: string): LuuNie
     stars: (yearly.stars?.[i] ?? []).map((s) => ({ star_id: starIdFromVi(s.name) })),
   }));
   return {
+    chart_id: chartId,
     year,
     heavenly_stem: yearly.heavenlyStem,
     earthly_branch: yearly.earthlyBranch,
@@ -138,6 +140,7 @@ export function adaptFromIztro(
   const thanBranch = branchFromVi(astrolabe.earthlyBranchOfBodyPalace);
   const napAm = napAmFromSolarDate(astrolabe.solarDate);
   const yearCanChi = astrolabe.chineseDate.split(' - ')[0] ?? '';
+  const chartId = `${astrolabe.solarDate}_t${input.time_index}_${input.gender}`;
 
   const notes: string[] = [
     'Do sang giu nguyen thang 7 muc cua iztro (Mieu/Vuong/Dac/Loi/Binh/Bat/Han), khong rut ve 5 muc.',
@@ -150,7 +153,7 @@ export function adaptFromIztro(
   }
 
   return {
-    chart_id: `${astrolabe.solarDate}_t${input.time_index}_${input.gender}`,
+    chart_id: chartId,
     metadata: {
       birth_solar_date: astrolabe.solarDate,
       birth_lunar_date: astrolabe.lunarDate,
@@ -172,7 +175,7 @@ export function adaptFromIztro(
     ban_menh_nap_am: napAm.vi,
     palaces: astrolabe.palaces.map(adaptPalace),
     luck_cycles: {
-      dai_van: adaptDaiVan(astrolabe),
+      dai_van: adaptDaiVan(astrolabe, chartId),
       tieu_van: adaptTieuVan(astrolabe),
     },
     engine_meta: {
@@ -181,6 +184,6 @@ export function adaptFromIztro(
       language: 'vi-VN',
       notes,
     },
-    luu_nien: input.view_year !== undefined ? adaptLuuNien(astrolabe, input.view_year) : undefined,
+    luu_nien: input.view_year !== undefined ? adaptLuuNien(astrolabe, input.view_year, chartId) : undefined,
   };
 }

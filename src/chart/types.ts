@@ -104,6 +104,8 @@ export interface ChartPalace {
 }
 
 export interface DaiVan {
+  /** De doi chieu voi Chart.chart_id — xac minh DaiVan nay thuoc dung la so nao. */
+  chart_id: string;
   age_from: number;
   age_to: number;
   branch: Branch;
@@ -189,6 +191,8 @@ export interface LuuNienPalace {
  * la fact tinh, xem ghi chu tren LuckCycles). Day la du lieu DAN XUAT theo 1 nam cu the.
  */
 export interface LuuNien {
+  /** De doi chieu voi Chart.chart_id — xac minh LuuNien nay thuoc dung la so nao. */
+  chart_id: string;
   year: number;
   heavenly_stem: string;
   earthly_branch: string;

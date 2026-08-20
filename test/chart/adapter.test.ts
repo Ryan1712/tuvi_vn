@@ -109,6 +109,7 @@ describe('adaptFromIztro — case Pham Duy', () => {
     expect(first.age_from).toBe(2);
     expect(first.age_to).toBe(11);
     expect(first.branch).toBe('Hoi');
+    expect(first.chart_id).toBe(chart.chart_id);
   });
 
   it('map tieu van — 12 cung, moi cung co danh sach tuoi', () => {
@@ -163,6 +164,7 @@ describe('adaptFromIztro — Luu Nien (view_year)', () => {
       },
     );
     expect(chart.luu_nien).toBeDefined();
+    expect(chart.luu_nien!.chart_id).toBe(chart.chart_id);
     expect(chart.luu_nien!.year).toBe(2026);
     expect(chart.luu_nien!.palaces).toHaveLength(12);
     // Cung Hoi (index 9 trong astrolabe.palaces) mang ten Luu Nien "Thiên Di" cho nam 2026
