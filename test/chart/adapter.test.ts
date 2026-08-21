@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { astro } from 'iztro';
+import { callIztro } from '../../src/chart/iztro-client.js';
 import { adaptFromIztro, parseFiveElementsClass } from '../../src/chart/adapter.js';
 import type { BuildChartInput } from '../../src/chart/types.js';
 
@@ -12,7 +12,7 @@ const PHAM_DUY_INPUT: BuildChartInput = {
 };
 
 function buildPhamDuy() {
-  const astrolabe = astro.bySolar('1998-12-17', 12, 'male', true, 'vi-VN');
+  const astrolabe = callIztro(PHAM_DUY_INPUT);
   return adaptFromIztro(astrolabe, PHAM_DUY_INPUT);
 }
 
@@ -152,17 +152,15 @@ describe('adaptFromIztro — case Pham Duy', () => {
 
 describe('adaptFromIztro — Luu Nien (view_year)', () => {
   it('dien Chart.luu_nien dung khi co view_year, index khop astrolabe.palaces', () => {
-    const chart = adaptFromIztro(
-      astro.bySolar('1998-12-17', 12, 'male', true, 'vi-VN'),
-      {
-        calendar_type: 'duong_lich',
-        date: '1998-12-17',
-        time_index: 12,
-        gender: 'nam',
-        fix_leap: true,
-        view_year: '2026-01-01',
-      },
-    );
+    const inputWithYear: BuildChartInput = {
+      calendar_type: 'duong_lich',
+      date: '1998-12-17',
+      time_index: 12,
+      gender: 'nam',
+      fix_leap: true,
+      view_year: '2026-01-01',
+    };
+    const chart = adaptFromIztro(callIztro(inputWithYear), inputWithYear);
     expect(chart.luu_nien).toBeDefined();
     expect(chart.luu_nien!.chart_id).toBe(chart.chart_id);
     expect(chart.luu_nien!.year).toBe(2026);

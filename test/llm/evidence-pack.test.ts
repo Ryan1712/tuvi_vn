@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { astro } from 'iztro';
+import { callIztro } from '../../src/chart/iztro-client.js';
 import { buildEvidencePack } from '../../src/llm/evidence-pack.js';
 import { adaptFromIztro } from '../../src/chart/adapter.js';
 import { matchRules } from '../../src/rule/evaluator.js';
@@ -18,7 +18,7 @@ const PHAM_DUY_INPUT: BuildChartInput = {
 };
 
 function buildPhamDuyChartAndRules() {
-  const astrolabe = astro.bySolar('1998-12-17', 12, 'male', true, 'vi-VN');
+  const astrolabe = callIztro(PHAM_DUY_INPUT);
   const chart = adaptFromIztro(astrolabe, PHAM_DUY_INPUT);
   const rulesByRuleId = new Map<string, Rule>(KNOWLEDGE_BASE.map((r) => [r.rule_id, r]));
   const rules_by_palace = Object.fromEntries(

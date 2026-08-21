@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { astro } from 'iztro';
+import { callIztro } from '../../src/chart/iztro-client.js';
 
 /**
  * Smoke test: xac nhan iztro cai dat dung va cho ra lá số Phạm Duy đã xác minh.
@@ -9,7 +9,13 @@ import { astro } from 'iztro';
  */
 describe('iztro smoke test', () => {
   it('tao duoc la so Pham Duy voi 4 tru khop reference #1', () => {
-    const astrolabe = astro.bySolar('1998-12-17', 12, 'male', true, 'vi-VN');
+    const astrolabe = callIztro({
+      calendar_type: 'duong_lich',
+      date: '1998-12-17',
+      time_index: 12,
+      gender: 'nam',
+      fix_leap: true,
+    });
 
     expect(astrolabe.chineseDate).toBe('Mậu Dần - Quý Hợi - Kỷ Hợi - Giáp Tý');
     expect(astrolabe.solarDate).toBe('1998-12-17');
@@ -21,7 +27,14 @@ describe('iztro smoke test', () => {
   });
 
   it('lunar input tuong duong cho cung 4 tru', () => {
-    const byLunar = astro.byLunar('1998-10-30', 0, 'male', false, true, 'vi-VN');
+    const byLunar = callIztro({
+      calendar_type: 'am_lich',
+      date: '1998-10-30',
+      time_index: 0,
+      gender: 'nam',
+      is_leap_month: false,
+      fix_leap: true,
+    });
     expect(byLunar.chineseDate).toBe('Mậu Dần - Quý Hợi - Kỷ Hợi - Giáp Tý');
   });
 });
