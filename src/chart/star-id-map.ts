@@ -80,6 +80,13 @@ const STAR_ID_BY_VI: Readonly<Record<string, string>> = {
   'Niên Giải': 'NIEN_GIAI',
   'Phá Toái': 'PHA_TOAI',
 
+  // Tap tinh THEM khi doi algorithm sang 'zhongzhou' (2026-08-21) — quan sat duoc khi
+  // build lai case Pham Duy voi zhongzhou, truoc do khong xuat hien (default khong co).
+  'Long Đức': 'LONG_DUC',
+  'Đại Hao': 'DAI_HAO',
+  'Kiếp Sát': 'KIEP_SAT',
+  'Triệt Không': 'TRIET_KHONG',
+
   // Luu tinh (vong Luu Nien) — quan sat duoc khi goi astrolabe.horoscope() cho nam xem.
   // Doi chieu voi key goc cua iztro (lib/i18n/locales/vi-VN/star.js): liukui/liuyue/
   // liuchang/liuqu/liuluan/liuxi/liulu/liuyang/liutuo/liuma — la phien ban "luu nien"

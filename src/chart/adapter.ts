@@ -145,8 +145,9 @@ export function adaptFromIztro(
   const notes: string[] = [
     'Do sang giu nguyen thang 7 muc cua iztro (Mieu/Vuong/Dac/Loi/Binh/Bat/Han), khong rut ve 5 muc.',
     'Nap am lay tu lunar-typescript vi iztro khong cung cap.',
-    'Tuan/Triet nam trong adjective_stars (TUAN_KHONG / TRIET_LO / KHONG_VONG), khong phai truong rieng.',
+    'Tuan/Triet nam trong adjective_stars (TUAN_KHONG / TRIET_KHONG / KHONG_VONG), khong phai truong rieng.',
     'luu_nien CO CHU DICH khong nam trong Chart: no la du lieu theo nam duoc hoi, khong phai fact tinh cua la so. Dung astrolabe.horoscope(date) khi can.',
+    'algorithm: zhongzhou (Trung Chau phai) — cau hinh toan cuc tai iztro-client.ts, xem design doc 2026-08-21-algorithm-zhongzhou-design.md.',
   ];
   if (napAm.vi === napAm.raw) {
     notes.push(`Nap am "${napAm.raw}" chua co ban dich tieng Viet da doi chieu — giu nguyen chuoi goc.`);
