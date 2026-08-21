@@ -502,12 +502,19 @@ validate `domain` khớp 1 trong 12 `DomainKey` (fail loud nếu không, theo đ
     hướng bất lợi... được cho là giảm nhẹ hơn đáng kể..."), không còn xuất hiện dưới dạng
     "quan điểm thứ 3" độc lập. Xác nhận fix hoạt động đúng.
 
-- **Case biên: domain trả về 1 cung nhưng cung đó KHÔNG có Rule nào matched ở bất kỳ scope
-  nào.** `interpretation_groups` sẽ có các `scope` với `items: []`. Cần quyết định lúc viết
-  plan: có nên lược bỏ hẳn 1 `scope` khỏi mảng nếu `items` rỗng (giảm nhiễu cho LLM), hay giữ
-  nguyên với `items: []` (rõ ràng "đã kiểm tra, không có gì" thay vì im lặng bỏ qua)? Nghiêng
-  về giữ `items: []` — nhất quán "fail loud"/không âm thầm bỏ qua, nhưng cần xác nhận lúc viết
-  plan, không tự quyết ở đây.
+- **[ĐÃ QUYẾT ĐỊNH, khớp đúng implementation hiện có]** Case biên: domain trả về 1 cung nhưng
+  cung đó KHÔNG có Rule nào matched ở 1 (hoặc nhiều) scope. Quyết định: **GIỮ NGUYÊN cả 4
+  scope trong `interpretation_groups`, mỗi scope có `items: []` khi không có Rule nào matched
+  — KHÔNG lược bỏ scope rỗng khỏi mảng.** Đây là hành vi `buildQueryEvidencePack` đã triển
+  khai từ Task 3 của Tầng 2 (mảng `interpretation_groups` luôn có đúng 4 phần tử cố định,
+  không `.filter()` theo `items.length`), giờ xác nhận tường minh là quyết định đúng, không
+  phải hành vi mặc định chưa ai duyệt. Lý do: `items: []` mang nghĩa "đã kiểm tra scope này,
+  không có Rule nào khớp" — khác hẳn về ý nghĩa với việc scope đó không xuất hiện (im lặng bỏ
+  qua, người đọc không biết đã kiểm tra hay chưa) — nhất quán "fail loud"/minh bạch đã giữ
+  xuyên suốt dự án (CLAUDE.md, guard chart_id, throw rõ ràng khi tra cứu thất bại...). Quy tắc
+  1 của `QUERY_SYSTEM_PROMPT` đã xử lý đúng phần diễn giải cho `items: []` (chỉ mô tả sự
+  kiện, không tự suy luận ý nghĩa) — xác nhận qua verify thật ở Task 6 gốc (case
+  `domain=phuc_duc`, LLM nói "chưa đủ cơ sở để đưa ra nhận định cụ thể" khi `items` rỗng).
 - **NLU (câu hỏi tự nhiên → domain)** — phase riêng sau này, không nằm trong v0.1. Ghi chú ở
   đây để không trôi mất (CLAUDE.md mục 10).
 - **[ĐÃ XỬ LÝ, ghi lại để tránh lặp]** `DOMAIN_PALACE_MAP`'s `palace_names` đã verify bằng dữ
