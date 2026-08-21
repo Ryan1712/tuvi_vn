@@ -233,6 +233,21 @@ với ảnh gốc. Đây là minh chứng trực tiếp cho nguyên tắc mục 
 
 ## 7. Cross-check & phân loại khi lệch với reference #1
 
+**[CẬP NHẬT 2026-08-21]** Sau khi đổi `algorithm` mặc định sang `'zhongzhou'` (xem `docs/superpowers/specs/2026-08-21-algorithm-zhongzhou-design.md`), 5 điểm lệch dưới đây **không còn là "khác trường phái hợp lệ"** — đã khớp reference #1:
+- Chủ mệnh (`soul`): Cự Môn → **Lộc Tồn**, khớp ref.
+- Hợi: **thêm Kiếp Sát** (trước thiếu).
+- Dậu: **thêm Long Đức** (trước thiếu).
+- Thân: nhãn `suiqian12` Đại Hao → **Tuế Phá**, khớp ref.
+- Sửu: "Không Vong" (trước dư thừa so với ref) → không còn xuất hiện.
+
+2 nhóm lệch còn tồn tại thật, KHÔNG do quyết định `algorithm` này, vẫn giữ nguyên trạng thái Known Issue:
+1. Thiên Khôi (Sửu vs ref: Hợi) — công thức khác tầng, độc lập `algorithm` (đã xác nhận đọc thẳng source `getKuiYueIndex()` trong `iztro`).
+2. Độ sáng chính tinh (thang 7 mức `iztro` vs 5 mức chú thích ảnh gốc) — không có phép quy đổi trung lập, giữ nguyên nhóm 2 (khác trường phái/quy ước hiển thị hợp lệ).
+
+**Các trường hợp từng ghi ở mục Known Issues — [ĐÃ GIẢI QUYẾT]:**
+- Chủ mệnh lệch "Cự Môn" vs "Lộc Tồn" → đã khớp sau đổi algorithm (xem cập nhật ở trên).
+- Tác động của `algorithm: 'zhongzhou'` lên các field khác → đã khảo sát và cập nhật toàn suite test (xem `docs/superpowers/specs/2026-08-21-algorithm-zhongzhou-design.md`).
+
 Sau khi `buildChart()` chạy ra kết quả cho input Phạm Duy, so từng cung với bảng transcript mục 6.
 Nếu có lệch giữa `iztro` và reference #1, phân loại vào đúng 1 trong 3 nhóm sau — **không được
 mặc định reference #1 đúng chỉ vì nó đến trước hoặc "nhìn uy tín"**:
