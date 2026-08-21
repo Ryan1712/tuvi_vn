@@ -30,25 +30,31 @@ trí nhớ hội thoại để track việc còn dang dở — dùng mục này.
   chính tinh lệch độ sáng so với ảnh reference #1, phân bố không theo 1 pattern lệch cố định 1
   bậc — xác nhận đây là 2 bảng tra độc lập của 2 trường phái, không phải lỗi offset có thể vá.
   Xếp nhóm 2 (khác trường phái hợp lệ), giữ nguyên hành vi hiện tại, không sửa code.
-- **[ĐÃ XỬ LÝ] Chủ mệnh (`soul`) lệch giữa `iztro` và reference #1 — case Phạm Duy: `iztro` cho
-  "Cự Môn", ảnh tuvi.vn cho "Lộc Tồn".** Trước Task 7, mục này bị treo ở nhóm 3 (chưa xác định).
-  Task 7 điều tra bằng cách đọc `node_modules/iztro/lib/astro/astro.js` +
-  `node_modules/iztro/lib/data/earthlyBranches.js` và xác minh thực nghiệm: chủ mệnh (`soul`)
-  KHÔNG tính từ sao đang đứng ở cung Mệnh, mà tra theo 1 bảng cố định theo địa chi — địa chi dùng
-  để tra phụ thuộc config `algorithm`: `'default'` (mặc định `iztro`, trường phái "thông dụng")
-  tra theo địa chi CUNG MỆNH; `'zhongzhou'` (Trung Châu phái) tra theo địa chi NĂM SINH. Đổi
-  `algorithm` sang `'zhongzhou'` cho ra đúng "Lộc Tồn", khớp reference #1. → Đây là khác biệt
-  TRƯỜNG PHÁI có căn cứ code rõ ràng, không phải bug. Xếp nhóm 2. KHÔNG đổi `algorithm` trong code
-  sản phẩm vì đây là config toàn cục ảnh hưởng cả các field khác (xem mục Known Issues mới ngay
-  dưới) — đổi chỉ để khớp 1 field của 1 case test sẽ là chọn ngầm 1 trường phái cho toàn engine.
-- **[MỞ] Tác động của `algorithm: 'zhongzhou'` lên các field khác chưa được khảo sát.** Phát hiện
+- **[ĐÃ XỬ LÝ — xem cập nhật 2026-08-21 bên dưới] Chủ mệnh (`soul`) lệch giữa `iztro` và
+  reference #1 — case Phạm Duy: `iztro` cho "Cự Môn", ảnh tuvi.vn cho "Lộc Tồn".** Trước Task 7,
+  mục này bị treo ở nhóm 3 (chưa xác định). Task 7 điều tra bằng cách đọc
+  `node_modules/iztro/lib/astro/astro.js` + `node_modules/iztro/lib/data/earthlyBranches.js` và
+  xác minh thực nghiệm: chủ mệnh (`soul`) KHÔNG tính từ sao đang đứng ở cung Mệnh, mà tra theo 1
+  bảng cố định theo địa chi — địa chi dùng để tra phụ thuộc config `algorithm`: `'default'` (mặc
+  định `iztro`, trường phái "thông dụng") tra theo địa chi CUNG MỆNH; `'zhongzhou'` (Trung Châu
+  phái) tra theo địa chi NĂM SINH. Đổi `algorithm` sang `'zhongzhou'` cho ra đúng "Lộc Tồn", khớp
+  reference #1. → Đây là khác biệt TRƯỜNG PHÁI có căn cứ code rõ ràng, không phải bug. Xếp nhóm 2.
+  **[Quyết định "KHÔNG đổi `algorithm` trong code sản phẩm" ở câu này ĐÃ BỊ ĐẢO NGƯỢC ngày
+  2026-08-21** — xem `docs/superpowers/specs/2026-08-21-algorithm-zhongzhou-design.md` và bản cập
+  nhật ở mục 7 bên dưới. Dự án hiện DÙNG `algorithm: 'zhongzhou'` làm mặc định toàn cục.**
+- **[ĐÃ XỬ LÝ — 2026-08-21] Tác động của `algorithm: 'zhongzhou'` lên các field khác.** Phát hiện
   ở mục chủ mệnh phía trên cho thấy `iztro` có 1 config toàn cục `algorithm` (`'default'` vs
-  `'zhongzhou'`) ảnh hưởng tới cách tính `soul`. Đọc lướt `astro.js` cho thấy `algorithm` còn được
-  dùng ở các nhánh tính khác. Đã thực nghiệm xác minh cho ĐÚNG 1 input (case Phạm Duy): `body` và
-  `fiveElementsClass` (cục) KHÔNG đổi giữa `algorithm: 'default'` và `'zhongzhou'` — chỉ `soul`
-  đổi. Nhưng đây chỉ là 1 điểm dữ liệu, KHÔNG phải khảo sát toàn diện toàn bộ codebase `iztro` hay
-  toàn bộ các input khác (case nữ mệnh, Cục khác, v.v. — xem mục 10 build spec). Cần khảo sát kỹ
-  hơn nếu sau này có nhu cầu hỗ trợ chọn trường phái Trung Châu phái một cách chính thức.
+  `'zhongzhou'`) ảnh hưởng tới cách tính `soul`. Khảo sát ban đầu (2026-08-16) chỉ xác minh cho
+  ĐÚNG 1 input (case Phạm Duy): `body` và `fiveElementsClass` (cục) KHÔNG đổi — chỉ `soul` đổi,
+  nhưng chưa phải khảo sát toàn diện. **Khảo sát mở rộng 2026-08-21** (xem
+  `docs/superpowers/specs/2026-08-21-algorithm-zhongzhou-design.md`) so sánh TOÀN BỘ 12 cung của
+  case Phạm Duy giữa `default` và `zhongzhou`: xác nhận thêm 4 điểm khác biệt cụ thể (Hợi thêm
+  Kiếp Sát, Dậu thêm Long Đức, Thân nhãn `suiqian12` đổi, Sửu hết "Không Vong") — tất cả đều khớp
+  reference #1 tốt hơn, không có điểm nào tệ hơn. Quyết định: đổi `algorithm` mặc định của dự án
+  sang `'zhongzhou'` (xem mục 7 cập nhật bên dưới để biết chi tiết đầy đủ và lý do đảo ngược quyết
+  định cũ). Chưa khảo sát case nữ mệnh/Cục khác — nếu phát sinh nhu cầu, khảo sát tiếp khi cần,
+  không phải điều kiện chặn quyết định đã đưa ra (dữ liệu 12 cung của 1 case thật đã đủ thuyết
+  phục để hành động, xem lý do trong design doc 2026-08-21).
 
 **Định nghĩa "xong" cho bản này:** code Chart Engine chạy được, có test tự động (Vitest) assert
 đúng case Phạm Duy đối chiếu với reference implementation #1 (mục 1), rồi dừng lại báo cáo kết
