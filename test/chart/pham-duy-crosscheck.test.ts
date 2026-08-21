@@ -62,25 +62,15 @@ describe('BUOC 2 — assertion cuoi cung theo ket qua phan loai', () => {
     expect(palaceOfBranch(chart, 'Than').palace_name).toBe('Tử Nữ');
   });
 
-  // NHOM 2 — khac truong phai hop le, DA TIM DUOC CAN CU CODE CU THE trong task nay
-  // (truoc day treo o nhom 3 "chua xac dinh", nay da dieu tra xong).
-  //
-  // Doc truc tiep node_modules/iztro/lib/astro/astro.js:
-  //   var soul = t(earthlyBranches[getConfig().algorithm === 'zhongzhou'
-  //     ? earthlyBranchOfYear : earthlyBranchOfSoulPalace].soul);
-  // Chu menh KHONG duoc tinh tu sao dang o cung Menh — no tra theo 1 bang co dinh
-  // theo dia chi, va dia chi dung de tra phu thuoc config `algorithm`:
-  //   - 'default' (mac dinh cua iztro, truong phai "thong dung"): tra theo dia chi
-  //     CUNG MENH (Hoi) -> earthlyBranches.haiEarthly.soul = 'jumenMaj' = Cu Mon.
-  //   - 'zhongzhou' (Trung Chau phai): tra theo dia chi NAM SINH (Dan, nam Mau Dan)
-  //     -> earthlyBranches.yinEarthly.soul = 'lucunMin' = Loc Ton — khop dung
-  //     reference #1.
-  // Da xac minh thuc nghiem: goi iztro voi cung input, doi algorithm sang 'zhongzhou'
-  // cho ra dung "Loc Ton". Day la khac biet TRUONG PHAI (chon dia chi goc de tra chu
-  // menh), khong phai bug. KHONG doi `algorithm` sang 'zhongzhou' trong code san pham:
-  // do la 1 config toan cuc anh huong ca cac field khac (vd fiveElementsClass) chua
-  // duoc khao sat day du chi de khop 1 field cua 1 case test — xem Known Issues.
-  it('chu menh: iztro cho Cu Mon (thuat toan "default"/thong dung), reference #1 cho Loc Ton (thuat toan "zhongzhou"/Trung Chau phai) — khac truong phai, da co can cu code (nhom 2)', () => {
-    expect(chart.menh_than.soul_star).toBe('Cự Môn');
+  // [CAP NHAT 2026-08-21] Doan comment + test duoi day TRUOC KIA giai thich vi sao du
+  // an GIU `algorithm: 'default'` (Cu Mon) thay vi doi sang 'zhongzhou' (Loc Ton, khop
+  // reference #1) — quyet dinh do da DAO NGUOC, xem design doc
+  // 2026-08-21-algorithm-zhongzhou-design.md. Sau khi dieu tra lai TREN TOAN BO 12 cung
+  // (khong chi field soul nay), zhongzhou khop reference #1 nhieu hon o >=5 diem, khong
+  // kem o diem nao — du an gio DUNG zhongzhou lam mac dinh toan cuc (astro.config() tai
+  // src/chart/iztro-client.ts). Vi vay day KHONG CON la 1 diem "khac truong phai giu
+  // nguyen ca 2" nua — chart.menh_than.soul_star gio PHAI khop dung reference #1.
+  it('chu menh: sau khi doi algorithm sang zhongzhou (Trung Chau phai), iztro khop dung Loc Ton nhu reference #1', () => {
+    expect(chart.menh_than.soul_star).toBe('Lộc Tồn');
   });
 });
