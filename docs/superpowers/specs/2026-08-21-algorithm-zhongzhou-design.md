@@ -78,6 +78,21 @@ build chart trong worker riêng có thể set `algorithm` độc lập) — khô
 Thêm 1 lời gọi `astro.config({ algorithm: 'zhongzhou' })` ở **module-level** (chạy đúng 1 lần
 khi module được import lần đầu, trước mọi lời gọi `astro.bySolar`/`astro.byLunar`):
 
+**[SỬA SAU KHI USER REVIEW — claim ban đầu ở đây sai, đã tự kiểm chứng lại bằng grep thật]**
+Bản nháp đầu của mục này viết "không có đường nào khác trong codebase còn gọi
+`astro.bySolar`/`astro.byLunar` bỏ qua file này" — **claim đó SAI, chưa từng verify bằng
+grep trước khi viết**. Grep thật (`grep -rn "astro\.bySolar\|astro\.byLunar\|from 'iztro'"
+src/ test/`) cho thấy **4 chỗ trong `test/` import `astro` trực tiếp từ `iztro`, bỏ qua
+`iztro-client.ts` hoàn toàn**: `test/chart/adapter.test.ts` (dòng 2, 15, 156),
+`test/chart/iztro-smoke.test.ts` (dòng 2, 12, 24), `test/llm/evidence-pack.test.ts` (dòng 2,
+21). Đây đúng là rủi ro đã cảnh báo ở mục 3 ("1 file khác import iztro trực tiếp, bỏ qua
+iztro-client.ts") — nhưng đang tồn tại THẬT trong codebase hiện tại, không phải rủi ro giả
+định tương lai. Xem Task bổ sung ở implementation plan: các file test này phải đổi sang gọi
+qua `callIztro()`/`buildChart()` (từ `iztro-client.ts`/`index.ts`) thay vì tự import `astro`
+trực tiếp — nếu không, chúng sẽ chạy với `algorithm` mặc định của `iztro` (KHÔNG PHẢI
+`zhongzhou`) bất cứ khi nào Vitest chạy file đó trước khi `iztro-client.ts` được import lần
+đầu trong cùng tiến trình (thứ tự chạy file của Vitest không đảm bảo, có thể chạy song song).
+
 ```ts
 import { astro } from 'iztro';
 import type { IFunctionalAstrolabe } from 'iztro/lib/astro/FunctionalAstrolabe';
