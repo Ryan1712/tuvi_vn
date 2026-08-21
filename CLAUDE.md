@@ -84,3 +84,25 @@ mọi tri thức khác, kể cả khi nó "nghe hợp lý".
 Nếu phát hiện 1 vấn đề nhưng chưa xử lý xong ngay (VD đang bận việc khác), ghi vào mục
 "Known issues / chưa xử lý" đầu design doc liên quan. Không dựa vào việc "nhớ quay lại sau" —
 đã có tiền lệ 1 phát hiện đúng bị trôi mất vài lượt trao đổi vì không ai ghi lại.
+
+## 11. Mockup/UI có nội dung Tử Vi thật — không được viết tay dữ liệu
+
+Mọi mockup, demo, hoặc UI hiển thị dữ liệu lá số (tên sao, độ sáng, tên cung, chủ mệnh, Đại
+Vận...) **PHẢI lấy từ `buildChart()`/API thật**, KHÔNG viết tay bất kỳ giá trị nào dù chỉ để
+minh họa bố cục/màu sắc nhanh. Đây là mục 6 (đừng tin trí nhớ, phải verify bằng nguồn/hàm có
+sẵn) áp dụng cho tầng trình bày (UI/mockup) — tầng này trước đây chưa từng bị lộ rủi ro, vì mọi
+việc verify trước giờ chỉ nhắm vào Chart Engine/Rule Engine, không nhắm vào việc dựng giao diện.
+
+Nếu 1 giá trị phụ thuộc lựa chọn trường phái đang cấu hình (VD `algorithm: 'default'` vs
+`'zhongzhou'` của `iztro` — xem `docs/superpowers/specs/2026-08-18-ui-design.md`), UI phải hiển
+thị đúng giá trị mà cấu hình hiện tại trả về, không tự đoán/gõ theo trí nhớ con số "nghe đúng
+hơn" từ 1 nguồn khác — đúng tinh thần mục 3, không ép 1 nguồn thắng khi chưa phân loại.
+
+- Đúng: dựng mockup UI → gọi `buildChart()` với input case đã verify (VD Phạm Duy) → đọc trực
+  tiếp `major_stars[].strength`, `palace_name`, `menh_than.soul_star`... từ kết quả trả về.
+- Sai: nhớ mang máng "cung Mệnh hình như Đắc" rồi gõ "Đắc" vào mockup cho nhanh, không chạy lại
+  code để xác nhận — đã xảy ra thật (10 giá trị `strength` + 1 khái niệm "Mệnh chủ" bị gõ sai/
+  nhầm lẫn khi dựng 1 mockup UI, dù dữ liệu thật đã có sẵn trong chính phiên làm việc đó).
+
+Nếu cần dữ liệu cho case khác (nhiều/ít sao hơn, để test layout) — build bằng input khác qua
+`buildChart()`, không tự nghĩ ra giá trị.
