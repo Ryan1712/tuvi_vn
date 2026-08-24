@@ -264,6 +264,15 @@ Trước khi coi bảng đối chiếu này là "đạt", đã qua 1 vòng đố
 
 **Quyết định:** coi đối chiếu 12 cung là đã đạt điểm bão hòa (diminishing returns) — chấp nhận dừng đối chiếu tay thêm ở đây. Không còn giả thuyết "thiếu tham số"/"bug adapter" nào chưa được loại trừ bằng code thật.
 
+**[2026-08-25] 4 điểm nghi vấn phát sinh khi dựng mockup UI (`docs/superpowers/mockups/2026-08-24-dia-ban-vong-cung.html`), đối chiếu tiếp với ảnh reference #1:**
+
+- **"Đầu Quân" — (a) thật sự không tồn tại trong `iztro`.** Grep toàn bộ `node_modules/iztro/lib/` (không chỉ `star.js`): 0 kết quả dưới mọi biến thể tên. Nhóm 2 (khác trường phái/giới hạn thư viện), không sửa.
+- **"Quán Tác" (cung Thiên Di/Tỵ, field `suiqian`) và "Vong Thần" (field `jiangqian`) — (b) cùng mẫu hình Thái Tuế/Tuế Kiện.** Đọc `decorativeStar.js`'s `getYearly12()`/`getJiangqian12StartIndex()`: "Vong Thần" khớp cả tên lẫn vị trí chuẩn (không lệch gì). "Quán Tác" nằm đúng vị trí cố định (offset từ chi năm sinh) mà 1 số sách gọi "Thiếu Âm" — cùng công thức neo, khác nhãn theo dị bản sách, không phải bug. Nhóm 2.
+- **"Lưu Lộc Tồn" tưởng thiếu ở Thiên Di (Tỵ) — (d)→(a) đảo ngược: lỗi ở tham số `view_year` khi dựng mockup, không phải Chart Engine.** Giả thuyết ban đầu ("có thể do khác biệt ranh giới Lập Xuân giữa `iztro` và tuvi.vn") **đã bị bác bỏ bằng thực nghiệm**: build lại với 4 mốc `view_year` khác nhau trong 2026 xác nhận `iztro` tự chuyển đúng Ất Tỵ (trước Lập Xuân) → Bính Ngọ (sau Lập Xuân) — cùng 1 cơ chế, không có 2 hệ tính khác nhau. Mockup ban đầu dùng `view_year: '2026-01-01'` (trước Lập Xuân) nên còn tính Ất Tỵ, ra Lưu Lộc Tồn ở Mão — sai so với "Năm xem mẫu: Bính Ngọ 2026" mà chính build spec/ảnh gốc đã ghi từ đầu dự án (`TuVi_Build_Spec_v1.md:178`). Đổi `view_year: '2026-06-15'` (chắc chắn thuộc Bính Ngọ) → Lưu Lộc Tồn đúng ra ở Tỵ, khớp ảnh gốc. **Bài học:** khi cần dữ liệu Lưu Niên cho 1 năm can-chi cụ thể ghi trong tài liệu, chọn `view_year` giữa năm (an toàn qua mốc Lập Xuân ~cuối tháng 1/đầu tháng 2), không dùng mốc đầu năm dương lịch.
+- **Sao "Phúc Đức" (tạp tinh) tại cung Mệnh — (a) thật sự không tồn tại trong `iztro` như 1 SAO.** Grep toàn bộ thư viện: "Phúc Đức" chỉ xuất hiện đúng 1 nơi — làm TÊN CUNG thứ 12 (`spiritPalace: 'Phúc Đức'` trong `i18n/locales/vi-VN/palace.js`), không phải tên tạp tinh trong `star.js`. Đã loại trừ khả năng đây là biến thể của "Thiên Đức"(`tiande`)/"Nguyệt Đức"(`yuede`) — cả 2 sao này tồn tại độc lập trong `iztro` với tên riêng, không trùng "Phúc Đức". Rủi ro nhầm lẫn khi đối chiếu tay: tên sao trùng tên cung. Nhóm 2, không sửa.
+
+Cả 4 điểm đều đã đóng bằng bằng chứng code (grep vocabulary + đọc source công thức + thực nghiệm build nhiều tham số), không còn điểm nào "chưa xác định" treo lại từ vòng đối chiếu mockup UI.
+
 **Các trường hợp từng ghi ở mục Known Issues — [ĐÃ GIẢI QUYẾT]:**
 - Chủ mệnh lệch "Cự Môn" vs "Lộc Tồn" → đã khớp sau đổi algorithm (xem cập nhật ở trên).
 - Tác động của `algorithm: 'zhongzhou'` lên các field khác → đã khảo sát và cập nhật toàn suite test (xem `docs/superpowers/specs/2026-08-21-algorithm-zhongzhou-design.md`).

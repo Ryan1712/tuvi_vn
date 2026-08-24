@@ -1,0 +1,1543 @@
+<title>Địa Bàn Tử Vi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f2e9d8;
+    --paper-deep: #e9dcc0;
+    --ink: #1f3a5c;
+    --ink-soft: #3a5578;
+    --vermilion: #a8342a;
+    --vermilion-soft: #c25c47;
+    --umber: #4a3b2c;
+    --brass: #b8935a;
+    --brass-line: #cbaa74;
+    --paper-shadow: rgba(31, 58, 92, 0.14);
+    --center-bg: #ece0c8;
+    --focus-ring: #a8342a;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #16212e;
+      --paper-deep: #101924;
+      --ink: #e8dcc3;
+      --ink-soft: #cbbfa4;
+      --vermilion: #d9695a;
+      --vermilion-soft: #e88a7c;
+      --umber: #c9b899;
+      --brass: #8f7442;
+      --brass-line: #6e5a34;
+      --paper-shadow: rgba(0, 0, 0, 0.45);
+      --center-bg: #1c2a3a;
+      --focus-ring: #d9695a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #16212e;
+    --paper-deep: #101924;
+    --ink: #e8dcc3;
+    --ink-soft: #cbbfa4;
+    --vermilion: #d9695a;
+    --vermilion-soft: #e88a7c;
+    --umber: #c9b899;
+    --brass: #8f7442;
+    --brass-line: #6e5a34;
+    --paper-shadow: rgba(0, 0, 0, 0.45);
+    --center-bg: #1c2a3a;
+    --focus-ring: #d9695a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    padding: clamp(16px, 3vw, 40px);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .page-head {
+    max-width: 1400px;
+    margin: 0 auto clamp(20px, 3vw, 32px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--brass-line);
+    padding-bottom: 16px;
+  }
+
+  .page-title {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: clamp(22px, 3vw, 32px);
+    letter-spacing: 0.04em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.03em;
+  }
+
+  .board-wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .board {
+    position: relative;
+    width: min(1240px, 100%);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: clamp(6px, 0.8vw, 12px);
+  }
+
+  .center-block {
+    grid-column: 2 / 4;
+    grid-row: 2 / 4;
+    background:
+      radial-gradient(circle at 30% 20%, var(--paper-deep), var(--center-bg) 70%);
+    border: 1px solid var(--brass-line);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: clamp(10px, 1.6vw, 22px);
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .center-block::before {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border: 1px solid var(--brass-line);
+    border-radius: 4px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .center-name {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: clamp(18px, 2.2vw, 28px);
+    letter-spacing: 0.08em;
+    margin: 2px 0 6px;
+  }
+
+  .center-row {
+    font-size: clamp(11px, 1vw, 13px);
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  .center-row strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .center-divider {
+    width: 40%;
+    height: 1px;
+    background: var(--brass-line);
+    margin: 6px 0;
+    opacity: 0.7;
+  }
+
+  .center-tag {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  .center-tag span {
+    border: 1px solid var(--vermilion-soft);
+    color: var(--vermilion);
+    border-radius: 999px;
+    padding: 2px 9px;
+  }
+
+  .palace {
+    background: var(--paper-deep);
+    border: 1px solid var(--brass-line);
+    border-radius: 5px;
+    padding: 8px 9px 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    box-shadow: 0 1px 0 var(--paper-shadow);
+    position: relative;
+  }
+
+  .palace.is-menh {
+    border-color: var(--vermilion);
+    border-width: 2px;
+    box-shadow: 0 0 0 1px var(--vermilion) inset, 0 2px 6px var(--paper-shadow);
+  }
+
+  .palace.is-than::after {
+    content: "Thân";
+    position: absolute;
+    top: -9px;
+    right: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+
+  .palace-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px;
+    border-bottom: 1px solid var(--brass-line);
+    padding-bottom: 3px;
+  }
+
+  .palace-branch {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: var(--brass);
+    letter-spacing: 0.04em;
+  }
+
+  .palace-name {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 600;
+    font-size: clamp(12px, 1.05vw, 15px);
+    color: var(--ink);
+  }
+
+  .palace-age {
+    font-size: 10px;
+    color: var(--ink-soft);
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  .major-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 5px;
+  }
+
+  .star-chip {
+    font-family: "Noto Serif TC", serif;
+    font-size: clamp(14px, 1.3vw, 18px);
+    font-weight: 700;
+    color: var(--vermilion);
+    letter-spacing: 0.02em;
+  }
+
+  .star-chip .brightness {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 500;
+    font-size: 0.6em;
+    color: var(--vermilion-soft);
+    margin-left: 2px;
+  }
+
+  .sihua-tag {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--paper);
+    background: var(--ink);
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 2px;
+    letter-spacing: 0.02em;
+    vertical-align: 1px;
+  }
+
+  .minor-row, .adj-row {
+    font-size: clamp(9.5px, 0.8vw, 11px);
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .minor-row .star, .adj-row .star {
+    color: var(--umber);
+  }
+
+  .minor-row .star::after, .adj-row .star:not(:last-child)::after {
+    content: "、";
+    color: var(--ink-soft);
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 1px;
+  }
+
+  .badge {
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--ink-soft);
+    color: var(--ink-soft);
+    border-radius: 3px;
+    padding: 0 4px;
+  }
+
+  .badge.tuan { border-color: var(--brass); color: var(--brass); }
+  .badge.triet { border-color: var(--vermilion-soft); color: var(--vermilion); }
+
+  .cycle-strip {
+    margin-top: auto;
+    padding-top: 4px;
+    border-top: 1px dashed var(--brass-line);
+    font-size: 9px;
+    color: var(--ink-soft);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px 6px;
+  }
+
+  .cycle-strip .lbl { color: var(--brass); }
+
+  .luu-nien-line {
+    font-size: 9px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .luu-nien-line strong { color: var(--umber); font-style: normal; }
+
+  /* Grid placement per branch — Ty at top-right-of-center, counter-clockwise ring
+     matching the traditional dia ban orientation used in web/PalaceGrid.tsx. */
+  .pos-Ty2 { grid-column: 1; grid-row: 1; }
+  .pos-Ngo { grid-column: 2; grid-row: 1; }
+  .pos-Mui { grid-column: 3; grid-row: 1; }
+  .pos-Than { grid-column: 4; grid-row: 1; }
+  .pos-Thin { grid-column: 1; grid-row: 2; }
+  .pos-Dau { grid-column: 4; grid-row: 2; }
+  .pos-Mao { grid-column: 1; grid-row: 3; }
+  .pos-Tuat { grid-column: 4; grid-row: 3; }
+  .pos-Dan { grid-column: 1; grid-row: 4; }
+  .pos-Suu { grid-column: 2; grid-row: 4; }
+  .pos-Ty { grid-column: 3; grid-row: 4; }
+  .pos-Hoi { grid-column: 4; grid-row: 4; }
+
+  .legend {
+    max-width: 1400px;
+    margin: 20px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 22px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    justify-content: center;
+    border-top: 1px solid var(--brass-line);
+    padding-top: 14px;
+  }
+
+  .legend b { color: var(--ink); font-weight: 600; }
+
+  .foot-note {
+    max-width: 1400px;
+    margin: 10px auto 0;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    text-align: center;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 760px) {
+    .board {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(7, auto);
+      aspect-ratio: auto;
+    }
+    .center-block { grid-column: 1 / 3; grid-row: 1; aspect-ratio: 2.4 / 1; }
+    .pos-Ty2 { grid-column: 1; grid-row: 2; }
+    .pos-Ngo { grid-column: 2; grid-row: 2; }
+    .pos-Mui { grid-column: 1; grid-row: 3; }
+    .pos-Than { grid-column: 2; grid-row: 3; }
+    .pos-Thin { grid-column: 1; grid-row: 4; }
+    .pos-Dau { grid-column: 2; grid-row: 4; }
+    .pos-Mao { grid-column: 1; grid-row: 5; }
+    .pos-Tuat { grid-column: 2; grid-row: 5; }
+    .pos-Dan { grid-column: 1; grid-row: 6; }
+    .pos-Suu { grid-column: 2; grid-row: 6; }
+    .pos-Ty { grid-column: 1; grid-row: 7; }
+    .pos-Hoi { grid-column: 2; grid-row: 7; }
+  }
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .palace { transition: box-shadow 0.15s ease; }
+    .palace:hover { box-shadow: 0 3px 10px var(--paper-shadow); }
+  }
+</style>
+
+<div class="page-head">
+  <h1 class="page-title">Địa Bàn Tử Vi — Phạm Duy</h1>
+  <div class="page-sub" id="page-sub"></div>
+</div>
+
+<div class="board-wrap">
+  <div class="board" id="board"></div>
+</div>
+
+<div class="legend">
+  <span><b style="color:var(--vermilion)">■</b> Chính tinh</span>
+  <span><b style="color:var(--umber)">■</b> Phụ tinh / Tạp tinh</span>
+  <span><b>ĐV</b> = Đại Vận · <b>TS</b> = Tràng Sinh</span>
+  <span><b>BS</b> = Bác Sỹ · <b>TT</b> = Tướng Tiền · <b>TuT</b> = Tuế Tiền</span>
+  <span>Viền đỏ = cung Mệnh · Nhãn "Thân" = cung an Thân</span>
+</div>
+<div class="foot-note">Dữ liệu lấy trực tiếp từ buildChart() — algorithm: zhongzhou. Bố cục thử nghiệm thẩm mỹ, chưa phải bản chính thức.</div>
+
+<script>
+const chart = {
+  "chart_id": "1998-12-17_t12_nam",
+  "metadata": {
+    "birth_solar_date": "1998-12-17",
+    "birth_lunar_date": "一九九八年十月廿九",
+    "chinese_date": "Mậu Dần - Quý Hợi - Kỷ Hợi - Giáp Tý",
+    "time_label": "Giờ tý muộn",
+    "time_range": "23:00~00:00",
+    "gender": "nam",
+    "calendar_type": "duong_lich",
+    "year_can_chi": "Mậu Dần"
+  },
+  "menh_than": {
+    "menh_branch": "Hoi",
+    "than_branch": "Hoi",
+    "same_palace": true,
+    "soul_star": "Lộc Tồn",
+    "body_star": "Thiên Lương"
+  },
+  "cuc": {
+    "ngu_hanh": "Thuy",
+    "cuc_so": 2,
+    "raw": "Thủy Nhị Cục"
+  },
+  "ban_menh_nap_am": "Thành Đầu Thổ",
+  "palaces": [
+    {
+      "branch": "Dan",
+      "palace_name": "Điền Trạch",
+      "palace_stem": "Giáp",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "THAM_LANG",
+          "strength": "binh"
+        }
+      ],
+      "minor_stars": [],
+      "adjective_stars": [
+        {
+          "star_id": "AN_QUANG"
+        },
+        {
+          "star_id": "PHONG_CAO"
+        }
+      ],
+      "sihua": [
+        {
+          "star_id": "THAM_LANG",
+          "type": "Loc",
+          "source": "ban_menh"
+        }
+      ],
+      "branch_element": "Moc",
+      "truong_sinh": "Bệnh",
+      "boshi": "Đại Hao",
+      "jiangqian": "Chỉ Bối",
+      "suiqian": "Tuế Kiện"
+    },
+    {
+      "branch": "Mao",
+      "palace_name": "Quan Lộc",
+      "palace_stem": "Ất",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "THIEN_CO",
+          "strength": "vuong"
+        },
+        {
+          "star_id": "CU_MON",
+          "strength": "mieu"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "LINH_TINH",
+          "strength": "loi",
+          "type": "tough"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "HAM_TRI"
+        },
+        {
+          "star_id": "THIEN_QUAN"
+        },
+        {
+          "star_id": "THIEN_PHUC"
+        },
+        {
+          "star_id": "THIEN_KHONG"
+        }
+      ],
+      "sihua": [
+        {
+          "star_id": "THIEN_CO",
+          "type": "Ky",
+          "source": "ban_menh"
+        }
+      ],
+      "branch_element": "Moc",
+      "truong_sinh": "Tử",
+      "boshi": "Phục Binh",
+      "jiangqian": "Hàm Trì",
+      "suiqian": "Hối Khí"
+    },
+    {
+      "branch": "Thin",
+      "palace_name": "Nô Bộc",
+      "palace_stem": "Bính",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "TU_VI",
+          "strength": "dac"
+        },
+        {
+          "star_id": "THIEN_TUONG",
+          "strength": "dac"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "VAN_KHUC",
+          "strength": "dac",
+          "type": "soft"
+        },
+        {
+          "star_id": "DA_LA",
+          "strength": "mieu",
+          "type": "tough"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "GIAI_THAN"
+        },
+        {
+          "star_id": "THIEN_KHOC"
+        },
+        {
+          "star_id": "THIEN_THUONG"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Tho",
+      "truong_sinh": "Mộ",
+      "boshi": "Quan Phủ",
+      "jiangqian": "Nguyệt Sát",
+      "suiqian": "Tang Môn"
+    },
+    {
+      "branch": "Ty2",
+      "palace_name": "Thiên Di",
+      "palace_stem": "Đinh",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "THIEN_LUONG",
+          "strength": "ham"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "LOC_TON",
+          "type": "lucun"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "CO_THAN"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Hoa",
+      "truong_sinh": "Tuyệt",
+      "boshi": "Bác Sỹ",
+      "jiangqian": "Vong Thần",
+      "suiqian": "Quán Tác"
+    },
+    {
+      "branch": "Ngo",
+      "palace_name": "Tật Ách",
+      "palace_stem": "Mậu",
+      "is_body_palace": false,
+      "is_original_palace": true,
+      "major_stars": [
+        {
+          "star_id": "THAT_SAT",
+          "strength": "vuong"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "KINH_DUONG",
+          "strength": "ham",
+          "type": "tough"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "TAM_THAI"
+        },
+        {
+          "star_id": "LONG_TRI"
+        },
+        {
+          "star_id": "DAI_PHU"
+        },
+        {
+          "star_id": "THIEN_TRU"
+        },
+        {
+          "star_id": "THIEN_NGUYET"
+        },
+        {
+          "star_id": "THIEN_HINH"
+        },
+        {
+          "star_id": "THIEN_SU"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Hoa",
+      "truong_sinh": "Thai",
+      "boshi": "Lực Sỹ",
+      "jiangqian": "Tướng Tinh",
+      "suiqian": "Quan Phù"
+    },
+    {
+      "branch": "Mui",
+      "palace_name": "Tài Bạch",
+      "palace_stem": "Kỷ",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [],
+      "minor_stars": [
+        {
+          "star_id": "THIEN_VIET",
+          "type": "soft"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "THIEN_HY"
+        },
+        {
+          "star_id": "NGUYET_DUC"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Tho",
+      "truong_sinh": "Dưỡng",
+      "boshi": "Thanh Long",
+      "jiangqian": "Phan Án",
+      "suiqian": "Tiểu Hao"
+    },
+    {
+      "branch": "Than",
+      "palace_name": "Tử Nữ",
+      "palace_stem": "Canh",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "LIEM_TRINH",
+          "strength": "mieu"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "THIEN_MA",
+          "type": "tianma"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "BAT_TOA"
+        },
+        {
+          "star_id": "THIEN_QUY"
+        },
+        {
+          "star_id": "PHUNG_CAC"
+        },
+        {
+          "star_id": "THIEN_VU"
+        },
+        {
+          "star_id": "TUAN_KHONG"
+        },
+        {
+          "star_id": "AM_SAT"
+        },
+        {
+          "star_id": "THIEN_HU"
+        },
+        {
+          "star_id": "NIEN_GIAI"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Kim",
+      "truong_sinh": "Trường Sinh",
+      "boshi": "Tiểu Hao",
+      "jiangqian": "Tuế Dịch",
+      "suiqian": "Tuế Phá"
+    },
+    {
+      "branch": "Dau",
+      "palace_name": "Phu Thê",
+      "palace_stem": "Tân",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [],
+      "minor_stars": [],
+      "adjective_stars": [
+        {
+          "star_id": "LONG_DUC"
+        },
+        {
+          "star_id": "DAI_HAO"
+        },
+        {
+          "star_id": "PHA_TOAI"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Kim",
+      "truong_sinh": "Mục Dục",
+      "boshi": "Tướng Quân",
+      "jiangqian": "Tức Thần",
+      "suiqian": "Long Đức"
+    },
+    {
+      "branch": "Tuat",
+      "palace_name": "Huynh Đệ",
+      "palace_stem": "Nhâm",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "PHA_QUAN",
+          "strength": "vuong"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "VAN_XUONG",
+          "strength": "ham",
+          "type": "soft"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "THIEN_DIEU"
+        },
+        {
+          "star_id": "HOA_CAI"
+        },
+        {
+          "star_id": "PHI_LIEM"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Tho",
+      "truong_sinh": "Quan Đới",
+      "boshi": "Tấu Thư",
+      "jiangqian": "Hoa Cái",
+      "suiqian": "Bạch Hổ"
+    },
+    {
+      "branch": "Hoi",
+      "palace_name": "Mệnh",
+      "palace_stem": "Quý",
+      "is_body_palace": true,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "THIEN_DONG",
+          "strength": "mieu"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "DIA_KHONG",
+          "type": "tough"
+        },
+        {
+          "star_id": "DIA_KIEP",
+          "type": "tough"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "THIEN_DUC"
+        },
+        {
+          "star_id": "KIEP_SAT"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Thuy",
+      "truong_sinh": "Lâm Quan",
+      "boshi": "Phi Liêm",
+      "jiangqian": "Kiếp Sát",
+      "suiqian": "Thiên Đức"
+    },
+    {
+      "branch": "Ty",
+      "palace_name": "Phụ Mẫu",
+      "palace_stem": "Giáp",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "VU_KHUC",
+          "strength": "vuong"
+        },
+        {
+          "star_id": "THIEN_PHU",
+          "strength": "mieu"
+        }
+      ],
+      "minor_stars": [],
+      "adjective_stars": [
+        {
+          "star_id": "TRIET_KHONG"
+        }
+      ],
+      "sihua": [],
+      "branch_element": "Thuy",
+      "truong_sinh": "Đế Vượng",
+      "boshi": "Hỷ Thần",
+      "jiangqian": "Tai Sát",
+      "suiqian": "Điếu Khách"
+    },
+    {
+      "branch": "Suu",
+      "palace_name": "Phúc Đức",
+      "palace_stem": "Ất",
+      "is_body_palace": false,
+      "is_original_palace": false,
+      "major_stars": [
+        {
+          "star_id": "THAI_DUONG",
+          "strength": "bat"
+        },
+        {
+          "star_id": "THAI_AM",
+          "strength": "mieu"
+        }
+      ],
+      "minor_stars": [
+        {
+          "star_id": "TA_PHU",
+          "type": "soft"
+        },
+        {
+          "star_id": "HUU_BAT",
+          "type": "soft"
+        },
+        {
+          "star_id": "THIEN_KHOI",
+          "type": "soft"
+        },
+        {
+          "star_id": "HOA_TINH",
+          "strength": "dac",
+          "type": "tough"
+        }
+      ],
+      "adjective_stars": [
+        {
+          "star_id": "HONG_LOAN"
+        },
+        {
+          "star_id": "THIEN_TAI"
+        },
+        {
+          "star_id": "THIEN_THO"
+        },
+        {
+          "star_id": "QUA_TU"
+        }
+      ],
+      "sihua": [
+        {
+          "star_id": "THAI_AM",
+          "type": "Quyen",
+          "source": "ban_menh"
+        },
+        {
+          "star_id": "HUU_BAT",
+          "type": "Khoa",
+          "source": "ban_menh"
+        }
+      ],
+      "branch_element": "Tho",
+      "truong_sinh": "Suy",
+      "boshi": "Bệnh Phù",
+      "jiangqian": "Thiên Sát",
+      "suiqian": "Bệnh Phù"
+    }
+  ],
+  "luck_cycles": {
+    "dai_van": [
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 2,
+        "age_to": 11,
+        "branch": "Hoi",
+        "stem": "Quý",
+        "palace_name": "Mệnh"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 12,
+        "age_to": 21,
+        "branch": "Ty",
+        "stem": "Giáp",
+        "palace_name": "Phụ Mẫu"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 22,
+        "age_to": 31,
+        "branch": "Suu",
+        "stem": "Ất",
+        "palace_name": "Phúc Đức"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 32,
+        "age_to": 41,
+        "branch": "Dan",
+        "stem": "Giáp",
+        "palace_name": "Điền Trạch"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 42,
+        "age_to": 51,
+        "branch": "Mao",
+        "stem": "Ất",
+        "palace_name": "Quan Lộc"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 52,
+        "age_to": 61,
+        "branch": "Thin",
+        "stem": "Bính",
+        "palace_name": "Nô Bộc"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 62,
+        "age_to": 71,
+        "branch": "Ty2",
+        "stem": "Đinh",
+        "palace_name": "Thiên Di"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 72,
+        "age_to": 81,
+        "branch": "Ngo",
+        "stem": "Mậu",
+        "palace_name": "Tật Ách"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 82,
+        "age_to": 91,
+        "branch": "Mui",
+        "stem": "Kỷ",
+        "palace_name": "Tài Bạch"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 92,
+        "age_to": 101,
+        "branch": "Than",
+        "stem": "Canh",
+        "palace_name": "Tử Nữ"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 102,
+        "age_to": 111,
+        "branch": "Dau",
+        "stem": "Tân",
+        "palace_name": "Phu Thê"
+      },
+      {
+        "chart_id": "1998-12-17_t12_nam",
+        "age_from": 112,
+        "age_to": 121,
+        "branch": "Tuat",
+        "stem": "Nhâm",
+        "palace_name": "Huynh Đệ"
+      }
+    ],
+    "tieu_van": [
+      {
+        "branch": "Dan",
+        "ages": [
+          11,
+          23,
+          35,
+          47,
+          59,
+          71,
+          83,
+          95,
+          107,
+          119
+        ]
+      },
+      {
+        "branch": "Mao",
+        "ages": [
+          12,
+          24,
+          36,
+          48,
+          60,
+          72,
+          84,
+          96,
+          108,
+          120
+        ]
+      },
+      {
+        "branch": "Thin",
+        "ages": [
+          1,
+          13,
+          25,
+          37,
+          49,
+          61,
+          73,
+          85,
+          97,
+          109
+        ]
+      },
+      {
+        "branch": "Ty2",
+        "ages": [
+          2,
+          14,
+          26,
+          38,
+          50,
+          62,
+          74,
+          86,
+          98,
+          110
+        ]
+      },
+      {
+        "branch": "Ngo",
+        "ages": [
+          3,
+          15,
+          27,
+          39,
+          51,
+          63,
+          75,
+          87,
+          99,
+          111
+        ]
+      },
+      {
+        "branch": "Mui",
+        "ages": [
+          4,
+          16,
+          28,
+          40,
+          52,
+          64,
+          76,
+          88,
+          100,
+          112
+        ]
+      },
+      {
+        "branch": "Than",
+        "ages": [
+          5,
+          17,
+          29,
+          41,
+          53,
+          65,
+          77,
+          89,
+          101,
+          113
+        ]
+      },
+      {
+        "branch": "Dau",
+        "ages": [
+          6,
+          18,
+          30,
+          42,
+          54,
+          66,
+          78,
+          90,
+          102,
+          114
+        ]
+      },
+      {
+        "branch": "Tuat",
+        "ages": [
+          7,
+          19,
+          31,
+          43,
+          55,
+          67,
+          79,
+          91,
+          103,
+          115
+        ]
+      },
+      {
+        "branch": "Hoi",
+        "ages": [
+          8,
+          20,
+          32,
+          44,
+          56,
+          68,
+          80,
+          92,
+          104,
+          116
+        ]
+      },
+      {
+        "branch": "Ty",
+        "ages": [
+          9,
+          21,
+          33,
+          45,
+          57,
+          69,
+          81,
+          93,
+          105,
+          117
+        ]
+      },
+      {
+        "branch": "Suu",
+        "ages": [
+          10,
+          22,
+          34,
+          46,
+          58,
+          70,
+          82,
+          94,
+          106,
+          118
+        ]
+      }
+    ]
+  },
+  "engine_meta": {
+    "engine": "iztro",
+    "engine_version": "2.6.0",
+    "language": "vi-VN",
+    "notes": [
+      "Do sang giu nguyen thang 7 muc cua iztro (Mieu/Vuong/Dac/Loi/Binh/Bat/Han), khong rut ve 5 muc.",
+      "Nap am lay tu lunar-typescript vi iztro khong cung cap.",
+      "Tuan/Triet nam trong adjective_stars (TUAN_KHONG / TRIET_KHONG / KHONG_VONG), khong phai truong rieng.",
+      "luu_nien CO CHU DICH khong nam trong Chart: no la du lieu theo nam duoc hoi, khong phai fact tinh cua la so. Dung astrolabe.horoscope(date) khi can.",
+      "algorithm: zhongzhou (Trung Chau phai) — cau hinh toan cuc tai iztro-client.ts, xem design doc 2026-08-21-algorithm-zhongzhou-design.md."
+    ]
+  },
+  "luu_nien": {
+    "chart_id": "1998-12-17_t12_nam",
+    "year": 2026,
+    "heavenly_stem": "Bính",
+    "earthly_branch": "Ngọ",
+    "mutagen": [
+      "Thiên Đồng",
+      "Thiên Cơ",
+      "Văn Xương",
+      "Liêm Trinh"
+    ],
+    "palaces": [
+      {
+        "branch": "Dan",
+        "palace_name": "Tài Bạch",
+        "stars": []
+      },
+      {
+        "branch": "Mao",
+        "palace_name": "Tử Nữ",
+        "stars": [
+          {
+            "star_id": "LUU_THIEN_HY"
+          }
+        ]
+      },
+      {
+        "branch": "Thin",
+        "palace_name": "Phu Thê",
+        "stars": [
+          {
+            "star_id": "NIEN_GIAI"
+          },
+          {
+            "star_id": "LUU_DA_LA"
+          }
+        ]
+      },
+      {
+        "branch": "Ty2",
+        "palace_name": "Huynh Đệ",
+        "stars": [
+          {
+            "star_id": "LUU_LOC_TON"
+          }
+        ]
+      },
+      {
+        "branch": "Ngo",
+        "palace_name": "Mệnh",
+        "stars": [
+          {
+            "star_id": "LUU_VAN_KHUC"
+          },
+          {
+            "star_id": "LUU_KINH_DUONG"
+          }
+        ]
+      },
+      {
+        "branch": "Mui",
+        "palace_name": "Phụ Mẫu",
+        "stars": []
+      },
+      {
+        "branch": "Than",
+        "palace_name": "Phúc Đức",
+        "stars": [
+          {
+            "star_id": "LUU_VAN_XUONG"
+          },
+          {
+            "star_id": "LUU_THIEN_MA"
+          }
+        ]
+      },
+      {
+        "branch": "Dau",
+        "palace_name": "Điền Trạch",
+        "stars": [
+          {
+            "star_id": "LUU_THIEN_VIET"
+          },
+          {
+            "star_id": "LUU_HONG_LOAN"
+          }
+        ]
+      },
+      {
+        "branch": "Tuat",
+        "palace_name": "Quan Lộc",
+        "stars": []
+      },
+      {
+        "branch": "Hoi",
+        "palace_name": "Nô Bộc",
+        "stars": [
+          {
+            "star_id": "LUU_THIEN_KHOI"
+          }
+        ]
+      },
+      {
+        "branch": "Ty",
+        "palace_name": "Thiên Di",
+        "stars": []
+      },
+      {
+        "branch": "Suu",
+        "palace_name": "Tật Ách",
+        "stars": []
+      }
+    ]
+  }
+};
+const starLabel = {
+  "TU_VI": "Tử Vi",
+  "THIEN_CO": "Thiên Cơ",
+  "THAI_DUONG": "Thái Dương",
+  "VU_KHUC": "Vũ Khúc",
+  "THIEN_DONG": "Thiên Đồng",
+  "LIEM_TRINH": "Liêm Trinh",
+  "THIEN_PHU": "Thiên Phủ",
+  "THAI_AM": "Thái Âm",
+  "THAM_LANG": "Tham Lang",
+  "CU_MON": "Cự Môn",
+  "THIEN_TUONG": "Thiên Tướng",
+  "THIEN_LUONG": "Thiên Lương",
+  "THAT_SAT": "Thất Sát",
+  "PHA_QUAN": "Phá Quân",
+  "TA_PHU": "Tả Phù",
+  "HUU_BAT": "Hữu Bật",
+  "VAN_XUONG": "Văn Xương",
+  "VAN_KHUC": "Văn Khúc",
+  "THIEN_KHOI": "Thiên Khôi",
+  "THIEN_VIET": "Thiên Việt",
+  "LOC_TON": "Lộc Tồn",
+  "THIEN_MA": "Thiên Mã",
+  "KINH_DUONG": "Kình Dương",
+  "DA_LA": "Đà La",
+  "HOA_TINH": "Hỏa Tinh",
+  "LINH_TINH": "Linh Tinh",
+  "DIA_KHONG": "Địa Không",
+  "DIA_KIEP": "Địa Kiếp",
+  "THIEN_DUC": "Thiên Đức",
+  "THIEN_DIEU": "Thiên Diêu",
+  "HOA_CAI": "Hoa Cái",
+  "PHI_LIEM": "Phi Liêm",
+  "TRIET_LO": "Triệt Lộ",
+  "TUAN_KHONG": "Tuần Không",
+  "KHONG_VONG": "Không Vong",
+  "HONG_LOAN": "Hồng Loan",
+  "AN_QUANG": "Ân Quang",
+  "THIEN_TAI": "Thiên Tài",
+  "THIEN_THO": "Thiên Thọ",
+  "QUA_TU": "Quả Tú",
+  "PHONG_CAO": "Phong Cáo",
+  "HAM_TRI": "Hàm Trì",
+  "THIEN_QUAN": "Thiên Quan",
+  "THIEN_PHUC": "Thiên Phúc",
+  "THIEN_KHONG": "Thiên Không",
+  "GIAI_THAN": "Giải Thần",
+  "THIEN_KHOC": "Thiên Khốc",
+  "THIEN_THUONG": "Thiên Thương",
+  "CO_THAN": "Cô Thần",
+  "TAM_THAI": "Tam Thai",
+  "LONG_TRI": "Long Trì",
+  "DAI_PHU": "Đài Phụ",
+  "THIEN_TRU": "Thiên Trù",
+  "THIEN_NGUYET": "Thiên Nguyệt",
+  "THIEN_HINH": "Thiên Hình",
+  "THIEN_SU": "Thiên Sứ",
+  "THIEN_HY": "Thiên Hỷ",
+  "NGUYET_DUC": "Nguyệt Đức",
+  "BAT_TOA": "Bát Tọa",
+  "THIEN_QUY": "Thiên Quý",
+  "PHUNG_CAC": "Phụng Các",
+  "THIEN_VU": "Thiên Vu",
+  "AM_SAT": "Âm Sát",
+  "THIEN_HU": "Thiên Hư",
+  "NIEN_GIAI": "Niên Giải",
+  "PHA_TOAI": "Phá Toái",
+  "LONG_DUC": "Long Đức",
+  "DAI_HAO": "Đại Hao",
+  "KIEP_SAT": "Kiếp Sát",
+  "TRIET_KHONG": "Triệt Không",
+  "LUU_THIEN_KHOI": "Lưu Khôi",
+  "LUU_THIEN_VIET": "Lưu Việt",
+  "LUU_VAN_XUONG": "Lưu Xương",
+  "LUU_VAN_KHUC": "Lưu Khúc",
+  "LUU_HONG_LOAN": "Lưu Loan",
+  "LUU_THIEN_HY": "Lưu Hỷ",
+  "LUU_LOC_TON": "Lưu Lộc",
+  "LUU_KINH_DUONG": "Lưu Dương",
+  "LUU_DA_LA": "Lưu Đà",
+  "LUU_THIEN_MA": "Lưu Mã"
+};
+
+const BRANCH_VI = {
+  Ty: 'Tý', Suu: 'Sửu', Dan: 'Dần', Mao: 'Mão', Thin: 'Thìn', Ty2: 'Tỵ',
+  Ngo: 'Ngọ', Mui: 'Mùi', Than: 'Thân', Dau: 'Dậu', Tuat: 'Tuất', Hoi: 'Hợi',
+};
+
+const BRIGHTNESS_VI = {
+  mieu: 'Miếu', vuong: 'Vượng', dac: 'Đắc', loi: 'Lợi', binh: 'Bình', bat: 'Bất', ham: 'Hãm',
+};
+
+const SIHUA_VI = { Loc: 'Lộc', Quyen: 'Quyền', Khoa: 'Khoa', Ky: 'Kỵ' };
+
+function label(starId) {
+  return starLabel[starId] || starId;
+}
+
+function sihuaFor(starId, sihuaList) {
+  const hit = sihuaList.find((s) => s.star_id === starId);
+  return hit ? SIHUA_VI[hit.type] : null;
+}
+
+function el(tag, className, html) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (html !== undefined) node.innerHTML = html;
+  return node;
+}
+
+function renderPalace(palace, daiVan, luuNienPalace) {
+  const wrap = el('div', 'palace pos-' + palace.branch);
+  if (palace.branch === chart.menh_than.menh_branch) wrap.classList.add('is-menh');
+  if (palace.is_body_palace) wrap.classList.add('is-than');
+
+  const head = el('div', 'palace-head');
+  head.appendChild(el('span', 'palace-branch', palace.palace_stem + '.' + BRANCH_VI[palace.branch]));
+  head.appendChild(el('span', 'palace-name', palace.palace_name));
+  head.appendChild(el('span', 'palace-age', daiVan ? daiVan.age_from + '–' + daiVan.age_to : ''));
+  wrap.appendChild(head);
+
+  if (palace.major_stars.length > 0) {
+    const row = el('div', 'major-row');
+    palace.major_stars.forEach((s) => {
+      const sh = sihuaFor(s.star_id, palace.sihua);
+      const chip = el('span', 'star-chip',
+        label(s.star_id) +
+        (s.strength ? '<span class="brightness">(' + (BRIGHTNESS_VI[s.strength] || s.strength) + ')</span>' : '') +
+        (sh ? '<span class="sihua-tag">Hóa ' + sh + '</span>' : '')
+      );
+      row.appendChild(chip);
+    });
+    wrap.appendChild(row);
+  }
+
+  if (palace.minor_stars.length > 0) {
+    const names = palace.minor_stars.map((s) => {
+      const sh = sihuaFor(s.star_id, palace.sihua);
+      return '<span class="star">' + label(s.star_id) + (s.strength ? '(' + (BRIGHTNESS_VI[s.strength] || s.strength) + ')' : '') + (sh ? ' <span class="sihua-tag">Hóa ' + sh + '</span>' : '') + '</span>';
+    });
+    wrap.appendChild(el('div', 'minor-row', names.join('')));
+  }
+
+  if (palace.adjective_stars.length > 0) {
+    const names = palace.adjective_stars.map((s) => '<span class="star">' + label(s.star_id) + '</span>');
+    wrap.appendChild(el('div', 'adj-row', names.join('')));
+  }
+
+  const hasTuan = palace.adjective_stars.some((s) => s.star_id === 'TUAN_KHONG');
+  const hasTriet = palace.adjective_stars.some((s) => s.star_id === 'TRIET_KHONG');
+  if (hasTuan || hasTriet) {
+    const badges = el('div', 'badge-row');
+    if (hasTuan) badges.appendChild(el('span', 'badge tuan', 'Tuần'));
+    if (hasTriet) badges.appendChild(el('span', 'badge triet', 'Triệt'));
+    wrap.appendChild(badges);
+  }
+
+  const cycles = el('div', 'cycle-strip');
+  cycles.innerHTML =
+    '<div><span class="lbl">TS</span> ' + palace.truong_sinh + '</div>' +
+    '<div><span class="lbl">ĐV</span> ' + (daiVan ? daiVan.palace_name : '—') + '</div>' +
+    '<div><span class="lbl">BS</span> ' + palace.boshi + '</div>' +
+    '<div><span class="lbl">TT</span> ' + palace.jiangqian + '</div>' +
+    '<div><span class="lbl">TuT</span> ' + palace.suiqian + '</div>';
+  wrap.appendChild(cycles);
+
+  if (luuNienPalace) {
+    const stars = luuNienPalace.stars.map((s) => label(s.star_id)).join(', ');
+    wrap.appendChild(el('div', 'luu-nien-line', '<strong>LN.' + luuNienPalace.palace_name + '</strong>' + (stars ? ' — ' + stars : '')));
+  }
+
+  return wrap;
+}
+
+function renderCenter() {
+  const c = el('div', 'center-block');
+  c.appendChild(el('div', 'center-name', 'Phạm Duy'));
+  c.appendChild(el('div', 'center-row',
+    '<strong>' + chart.metadata.birth_solar_date + '</strong> (dương) · ' + chart.metadata.birth_lunar_date + ' (âm)'));
+  c.appendChild(el('div', 'center-row', chart.metadata.time_label + ' (' + chart.metadata.time_range + ') · ' + (chart.metadata.gender === 'nam' ? 'Nam mệnh' : 'Nữ mệnh')));
+  c.appendChild(el('div', 'center-row', chart.metadata.chinese_date));
+  c.appendChild(el('div', 'center-divider'));
+  c.appendChild(el('div', 'center-row', '<strong>' + chart.cuc.raw + '</strong> · Nạp âm: ' + chart.ban_menh_nap_am));
+  c.appendChild(el('div', 'center-row', 'Chủ mệnh: <strong>' + chart.menh_than.soul_star + '</strong> · Chủ thân: <strong>' + chart.menh_than.body_star + '</strong>'));
+  if (chart.luu_nien) {
+    c.appendChild(el('div', 'center-divider'));
+    c.appendChild(el('div', 'center-row', 'Lưu niên ' + chart.luu_nien.year + ' — ' + chart.luu_nien.heavenly_stem + '.' + chart.luu_nien.earthly_branch));
+    const tag = el('div', 'center-tag');
+    tag.innerHTML = chart.luu_nien.mutagen.map((m) => '<span>' + m + '</span>').join('');
+    c.appendChild(tag);
+  }
+  return c;
+}
+
+function render() {
+  const board = document.getElementById('board');
+  board.appendChild(renderCenter());
+  chart.palaces.forEach((palace) => {
+    const daiVan = chart.luck_cycles.dai_van.find((d) => d.branch === palace.branch);
+    const luuNienPalace = chart.luu_nien ? chart.luu_nien.palaces.find((p) => p.branch === palace.branch) : null;
+    board.appendChild(renderPalace(palace, daiVan, luuNienPalace));
+  });
+  document.getElementById('page-sub').textContent =
+    'engine: ' + chart.engine_meta.engine + ' ' + chart.engine_meta.engine_version + ' · algorithm: zhongzhou · chart_id: ' + chart.chart_id;
+}
+
+render();
+</script>
