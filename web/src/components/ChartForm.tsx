@@ -103,7 +103,7 @@ export function ChartForm({ onSubmit }: ChartFormProps) {
         </select>
       </div>
       <div>
-        <label htmlFor="view_year">Năm xem (YYYY-M-D, để trống nếu không cần Lưu Niên)</label>
+        <label htmlFor="view_year">Năm xem (YYYY-M-D, xóa trống nếu không cần Lưu Niên)</label>
         <input id="view_year" value={viewYear} onChange={(e) => setViewYear(e.target.value)} />
       </div>
       <button type="submit">Xem lá số</button>

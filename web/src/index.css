@@ -342,13 +342,6 @@ code {
   line-height: 1.6;
 }
 
-.rule-results {
-  margin-top: 4px;
-  border-top: 1px solid #333;
-  padding-top: 4px;
-  font-size: 10px;
-}
-
 .legend {
   margin-top: 16px;
   text-align: center;
