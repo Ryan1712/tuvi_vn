@@ -317,3 +317,5 @@ ALGORITHM ZHONGZHOU READY FOR finishing-a-development-branch.
 Started: 2026-08-25
 Task 1 (web vong cung port): complete (commit 4c9d392, base 0a3b24d, review clean)
   Added scripts/generate-star-labels.ts (regex-parse STAR_ID_BY_VI tu src/chart/star-id-map.ts, dao nguoc thanh web/src/star-labels.ts, KHONG import runtime). 80 nhan sao sinh ra, khop hoan toan voi source. Reviewer xac nhan byte-for-byte khop brief, khong co Critical/Important.
+Task 2 (web vong cung port): complete (commits 3c83ebe..8a8a28b, review clean after 1 fix)
+  Doi token mau/font sang palette giay do/muc cham/do son (3-layer dark-theme structure). Review vong 1 phat hien Important: xoa :root cu lam dangling 3 custom property (--border/--text-h/--code-bg) van dung o #root/code/.counter. Fix: thay truc tiep bang token moi (--brass-line/--ink/--paper-deep). Re-review sau fix: Approved, 0 Critical/Important/Minor.
