@@ -205,3 +205,12 @@ export interface ChartOverviewResponse {
   chart: Chart;
   overview_text: string;
 }
+
+/**
+ * "Co luan giai hay khong" cho 1 cung -- DUY NHAT 1 cong thuc, dung o ca badge (PalaceCell)
+ * lan dieu kien hien "chua co luan giai" (RuleResultsPanel). matched la mang CHUA CA rule
+ * KHONG match (RuleEvalResult.matched la co that) -- phai loc truoc khi dung.
+ */
+export function hasInterpretation(ruleResult: PalaceRuleResult): boolean {
+  return ruleResult.matched.some((r) => r.matched) || ruleResult.conflicts.length > 0;
+}
