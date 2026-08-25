@@ -63,6 +63,7 @@ export function PalaceCell({
       <div className="palace-top-row">
         <span className="palace-branch-stem">
           {palace.palace_stem}.{BRANCH_LABEL[palace.branch]}
+          <span className="palace-element">-{palace.branch_element}</span>
         </span>
         <span className="palace-name">{palace.palace_name}</span>
         <span className="palace-age">{ageAtDecadalStart}</span>

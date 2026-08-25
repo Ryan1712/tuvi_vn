@@ -184,6 +184,13 @@ code {
   letter-spacing: 0.04em;
 }
 
+.palace-element {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
 .palace-name {
   font-family: var(--heading);
   font-weight: 600;
