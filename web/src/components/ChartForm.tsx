@@ -5,14 +5,33 @@ interface ChartFormProps {
   onSubmit: (input: BuildChartInput, name: string) => void;
 }
 
+// 12 khung gio tu vi (0 = Ty som 00:00-01:00, 12 = Ty muon 23:00-00:00 -- gio Ty
+// tach doi thanh 2 index rieng, KHONG phai 11 khung 2 tieng thong thuong). Bang lay
+// tu buildChart() that (metadata.time_range), khong tu doan cong thuc.
+function timeIndexFromClock(hhmm: string): number {
+  const [hourStr, minuteStr] = hhmm.split(':');
+  const hour = Number.parseInt(hourStr, 10);
+  const minute = Number.parseInt(minuteStr ?? '0', 10);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return 12;
+  if (hour === 23) return 12;
+  if (hour === 0) return 0;
+  return Math.ceil(hour / 2);
+}
+
+function todayAsYmd(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
 export function ChartForm({ onSubmit }: ChartFormProps) {
   const [name, setName] = useState('');
   const [calendarType, setCalendarType] = useState<CalendarType>('duong_lich');
   const [date, setDate] = useState('1998-12-17');
-  const [timeIndex, setTimeIndex] = useState(12);
+  const [clockTime, setClockTime] = useState('23:15');
   const [gender, setGender] = useState<Gender>('nam');
   const [isLeapMonth, setIsLeapMonth] = useState(false);
-  const [viewYear, setViewYear] = useState('');
+  const [viewYear, setViewYear] = useState(todayAsYmd());
+  const timeIndex = timeIndexFromClock(clockTime);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -67,14 +86,12 @@ export function ChartForm({ onSubmit }: ChartFormProps) {
         </div>
       )}
       <div>
-        <label htmlFor="time_index">Giờ sinh (0 = Tý sớm 00:00-01:00, 12 = Tý muộn 23:00-00:00)</label>
+        <label htmlFor="clock_time">Giờ sinh</label>
         <input
-          id="time_index"
-          type="number"
-          min={0}
-          max={12}
-          value={timeIndex}
-          onChange={(e) => setTimeIndex(Number.parseInt(e.target.value, 10))}
+          id="clock_time"
+          type="time"
+          value={clockTime}
+          onChange={(e) => setClockTime(e.target.value)}
           required
         />
       </div>

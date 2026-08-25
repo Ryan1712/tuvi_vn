@@ -33,6 +33,7 @@ function CenterBlock({ chart, displayName }: { chart: Chart; displayName: string
       <div className="center-row">Ngày sinh: {chart.metadata.birth_solar_date} (dương) / {chart.metadata.birth_lunar_date} (âm)</div>
       <div className="center-row">Giờ: {chart.metadata.time_label} ({chart.metadata.time_range})</div>
       <div className="center-row">Năm can chi: {chart.metadata.year_can_chi}</div>
+      <div className="center-row">Tứ trụ: {chart.metadata.chinese_date}</div>
       {chart.luu_nien && <div className="center-row">Năm xem: {chart.luu_nien.year} ({chart.luu_nien.heavenly_stem}.{chart.luu_nien.earthly_branch})</div>}
       <div className="center-row">Bản mệnh: {chart.ban_menh_nap_am} — {chart.cuc.raw}</div>
       <div className="center-row">Chủ mệnh: {chart.menh_than.soul_star}</div>
