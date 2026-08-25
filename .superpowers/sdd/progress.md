@@ -312,3 +312,8 @@ ALGORITHM ZHONGZHOU: FINAL WHOLE-BRANCH REVIEW complete (range 0205125..8e5979b,
   Verdict: Approved. 0 Critical, 0 Important, 0 Minor. All 7 integration checks confirmed independently: single astro.config() call site (grep-verified, 3 comment false-positives correctly excluded), 4 new star entries correct position/convention with Triet Lo preserved, 165/165 tests with zero loosened assertions, algorithm-config.test.ts proven to have real teeth (reviewer independently ran buildChart() for OTHER_CASE outside the test, matched hardcoded expectation), doc consistency confirmed genuine (both top-of-file and mục 7 now say [ĐÃ XỬ LÝ], old historical docs correctly left as history not contradiction), pham-duy-crosscheck.test.ts's old 18-line comment fully replaced, and mục 1.2's layering claim verified against real conflict-resolver.ts code (not just narrative). No TODO/debug residue, zero UI/frontend files touched (design doc mục 6 honored). Typecheck clean.
 
 ALGORITHM ZHONGZHOU READY FOR finishing-a-development-branch.
+
+=== WEB VONG CUNG PORT (plan: docs/superpowers/plans/2026-08-25-web-vong-cung-port.md) ===
+Started: 2026-08-25
+Task 1 (web vong cung port): complete (commit 4c9d392, base 0a3b24d, review clean)
+  Added scripts/generate-star-labels.ts (regex-parse STAR_ID_BY_VI tu src/chart/star-id-map.ts, dao nguoc thanh web/src/star-labels.ts, KHONG import runtime). 80 nhan sao sinh ra, khop hoan toan voi source. Reviewer xac nhan byte-for-byte khop brief, khong co Critical/Important.
