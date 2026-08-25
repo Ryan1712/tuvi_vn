@@ -65,7 +65,7 @@
 }
 
 #root {
-  width: 1126px;
+  width: 1320px;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -125,12 +125,22 @@ code {
 }
 
 .palace-grid {
+  position: relative;
+  width: min(1240px, 100%);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 4px;
-  max-width: 900px;
-  margin: 0 auto;
+  gap: clamp(6px, 0.8vw, 12px);
+}
+
+@media (max-width: 760px) {
+  .palace-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(7, auto);
+    aspect-ratio: auto;
+  }
 }
 
 .palace-cell {
@@ -309,6 +319,27 @@ code {
   letter-spacing: 0.08em;
   margin: 2px 0 6px;
   color: var(--ink);
+}
+
+.center-block {
+  height: 100%;
+  background: radial-gradient(circle at 30% 20%, var(--paper-deep), var(--center-bg) 70%);
+  border: 1px solid var(--brass-line);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(10px, 1.6vw, 22px);
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.center-row {
+  font-size: clamp(11px, 1vw, 13px);
+  color: var(--ink-soft);
+  line-height: 1.6;
 }
 
 .rule-results {

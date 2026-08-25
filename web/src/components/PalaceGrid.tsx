@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import type { Branch, Chart, ChartRulesResponse } from '../types';
 import { PalaceCell } from './PalaceCell';
+import { RuleResultsPanel } from './RuleResultsPanel';
 
 interface PalaceGridProps {
   data: ChartRulesResponse;
@@ -28,20 +30,25 @@ function CenterBlock({ chart, displayName }: { chart: Chart; displayName: string
   return (
     <div className="center-block">
       {displayName && <div className="center-title">{displayName}</div>}
-      <div>Ngày sinh: {chart.metadata.birth_solar_date} (dương) / {chart.metadata.birth_lunar_date} (âm)</div>
-      <div>Giờ: {chart.metadata.time_label} ({chart.metadata.time_range})</div>
-      <div>Năm can chi: {chart.metadata.year_can_chi}</div>
-      {chart.luu_nien && <div>Năm xem: {chart.luu_nien.year} ({chart.luu_nien.heavenly_stem}.{chart.luu_nien.earthly_branch})</div>}
-      <div>Bản mệnh: {chart.ban_menh_nap_am} — {chart.cuc.raw}</div>
-      <div>Chủ mệnh: {chart.menh_than.soul_star}</div>
-      <div>Chủ thân: {chart.menh_than.body_star}</div>
-      {laiNhanPalace && <div>Lai nhân cung: {laiNhanPalace.palace_name}</div>}
+      <div className="center-row">Ngày sinh: {chart.metadata.birth_solar_date} (dương) / {chart.metadata.birth_lunar_date} (âm)</div>
+      <div className="center-row">Giờ: {chart.metadata.time_label} ({chart.metadata.time_range})</div>
+      <div className="center-row">Năm can chi: {chart.metadata.year_can_chi}</div>
+      {chart.luu_nien && <div className="center-row">Năm xem: {chart.luu_nien.year} ({chart.luu_nien.heavenly_stem}.{chart.luu_nien.earthly_branch})</div>}
+      <div className="center-row">Bản mệnh: {chart.ban_menh_nap_am} — {chart.cuc.raw}</div>
+      <div className="center-row">Chủ mệnh: {chart.menh_than.soul_star}</div>
+      <div className="center-row">Chủ thân: {chart.menh_than.body_star}</div>
+      {laiNhanPalace && <div className="center-row">Lai nhân cung: {laiNhanPalace.palace_name}</div>}
     </div>
   );
 }
 
 export function PalaceGrid({ data, displayName }: PalaceGridProps) {
   const { chart, rules_by_palace } = data;
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+  const selectedPalace = selectedBranch
+    ? chart.palaces.find((p) => p.branch === selectedBranch)
+    : null;
+
   return (
     <div className="palace-grid">
       {chart.palaces.map((palace) => {
@@ -55,10 +62,13 @@ export function PalaceGrid({ data, displayName }: PalaceGridProps) {
           >
             <PalaceCell
               palace={palace}
+              isMenhPalace={palace.branch === chart.menh_than.menh_branch}
               ageAtDecadalStart={decadal?.age_from ?? 0}
               daiVanPalaceName={decadal?.palace_name}
               luuNienPalaceName={luuNienPalace?.palace_name}
+              luuNienStars={luuNienPalace?.stars}
               ruleResult={rules_by_palace[palace.branch]}
+              onSelect={() => setSelectedBranch(palace.branch)}
             />
           </div>
         );
@@ -66,6 +76,12 @@ export function PalaceGrid({ data, displayName }: PalaceGridProps) {
       <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4' }}>
         <CenterBlock chart={chart} displayName={displayName} />
       </div>
+      <RuleResultsPanel
+        branch={selectedBranch}
+        palaceName={selectedPalace?.palace_name ?? null}
+        ruleResult={selectedBranch ? rules_by_palace[selectedBranch] : null}
+        onClose={() => setSelectedBranch(null)}
+      />
     </div>
   );
 }
