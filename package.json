@@ -10,6 +10,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "crosscheck": "npx tsx scripts/crosscheck-report.ts",
+    "generate:star-labels": "npx tsx scripts/generate-star-labels.ts",
     "start": "tsx src/server/server.ts"
   },
   "keywords": [],
