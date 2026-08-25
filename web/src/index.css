@@ -134,73 +134,174 @@ code {
 }
 
 .palace-cell {
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 6px;
-  font-size: 11px;
-  min-height: 140px;
+  background: var(--paper-deep);
+  border: 1px solid var(--brass-line);
+  border-radius: 5px;
+  padding: 8px 9px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 0 var(--paper-shadow);
+  position: relative;
+  cursor: pointer;
+}
+
+.palace-cell-menh {
+  border-color: var(--vermilion);
+  border-width: 2px;
+  box-shadow: 0 0 0 1px var(--vermilion) inset, 0 2px 6px var(--paper-shadow);
+}
+
+.palace-cell-than::after {
+  content: "Thân";
+  position: absolute;
+  top: -9px;
+  right: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding: 1px 6px;
+  border-radius: 999px;
 }
 
 .palace-top-row {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  font-weight: 600;
+  gap: 4px;
+  border-bottom: 1px solid var(--brass-line);
+  padding-bottom: 3px;
+}
+
+.palace-branch-stem {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--brass);
+  letter-spacing: 0.04em;
 }
 
 .palace-name {
-  color: #d9a441;
-}
-
-.palace-major {
-  color: #d94f4f;
-}
-
-.sihua-marker {
-  color: #2f9e44;
+  font-family: var(--heading);
   font-weight: 600;
+  font-size: clamp(12px, 1.05vw, 15px);
+  color: var(--ink);
 }
 
-.palace-minor-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px 6px;
+.palace-age {
   font-size: 10px;
+  color: var(--ink-soft);
+  font-family: var(--mono);
 }
 
-.palace-minor-col-cat {
-  color: #4fa8d9;
+.major-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 5px;
 }
 
-.palace-minor-col-other {
-  color: #888;
+.star-chip {
+  font-family: var(--heading);
+  font-size: clamp(14px, 1.3vw, 18px);
+  font-weight: 700;
+  color: var(--vermilion);
+  letter-spacing: 0.02em;
 }
 
-.palace-adjective,
-.palace-cycles {
-  font-size: 10px;
-  opacity: 0.75;
+.star-chip .brightness {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.6em;
+  color: var(--vermilion-soft);
+  margin-left: 2px;
+}
+
+.sihua-tag {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--paper);
+  background: var(--ink);
+  border-radius: 3px;
+  padding: 0 3px;
+  margin-left: 2px;
+  letter-spacing: 0.02em;
+  vertical-align: 1px;
+}
+
+.minor-row, .adj-row {
+  font-size: clamp(9.5px, 0.8vw, 11px);
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.minor-row .star, .adj-row .star {
+  color: var(--umber);
+}
+
+.minor-row .star::after, .adj-row .star:not(:last-child)::after {
+  content: "、";
+  color: var(--ink-soft);
+}
+
+.badge-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 1px;
 }
 
 .badge {
   font-size: 9px;
-  padding: 1px 4px;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--ink-soft);
+  color: var(--ink-soft);
   border-radius: 3px;
-  border: 1px solid #666;
-  margin-right: 4px;
+  padding: 0 4px;
 }
 
-.center-block {
-  border: 1px solid #d9a441;
-  border-radius: 4px;
-  padding: 10px;
-  font-size: 12px;
-  height: 100%;
+.badge.tuan { border-color: var(--brass); color: var(--brass); }
+.badge.triet { border-color: var(--vermilion-soft); color: var(--vermilion); }
+
+.cycle-strip {
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px dashed var(--brass-line);
+  font-size: 9px;
+  color: var(--ink-soft);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px 6px;
+}
+
+.cycle-strip .lbl { color: var(--brass); }
+
+.luu-nien-line {
+  font-size: 9px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.luu-nien-line strong { color: var(--umber); font-style: normal; }
+
+.palace-has-interpretation {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vermilion);
 }
 
 .center-title {
+  font-family: var(--heading);
   font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 6px;
+  font-size: clamp(18px, 2.2vw, 28px);
+  letter-spacing: 0.08em;
+  margin: 2px 0 6px;
+  color: var(--ink);
 }
 
 .rule-results {
