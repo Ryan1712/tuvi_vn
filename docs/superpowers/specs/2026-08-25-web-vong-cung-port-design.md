@@ -69,10 +69,11 @@ interface RuleResultsPanelProps {
 
 1. Lọc `matched = ruleResult.matched.filter((r) => r.matched)` — **BẮT BUỘC lọc `matched: true`** trước khi
    dùng để quyết định có luận giải hay không hoặc để hiển thị. Xem "Global Constraints" bên dưới — đây là
-   bẫy dữ liệu cụ thể, không phải quy ước phong cách.
-2. Nếu `matched.length === 0 && ruleResult.conflicts.length === 0`: hiển thị rõ ràng dòng chữ "Chưa có luận
-   giải cho cung này" (không để trống trơn — trống trơn gây cảm giác lỗi tải dữ liệu, đúng nguyên tắc "fail
-   loud" áp dụng cho UI, không chỉ code).
+   bẫy dữ liệu cụ thể, không phải quy ước phong cách. Dùng qua hàm `hasInterpretation()` dùng chung (xem
+   Global Constraints) — không tự viết lại biểu thức lọc ở đây.
+2. Nếu `!hasInterpretation(ruleResult)`: hiển thị rõ ràng dòng chữ "Chưa có luận giải cho cung này" (không để
+   trống trơn — trống trơn gây cảm giác lỗi tải dữ liệu, đúng nguyên tắc "fail loud" áp dụng cho UI, không
+   chỉ code).
 3. Nếu có `matched` (không thuộc `conflicts`): liệt kê từng rule — `rule_id`, và nếu có
    `matched_modifiers.length > 0` thì hiện modifier (`effect` của từng modifier), giữ đúng format hiện tại
    của `RuleResults.tsx` dòng 13-19.
@@ -84,6 +85,12 @@ interface RuleResultsPanelProps {
    (cùng cỡ chữ, cùng vị trí phân cấp — không cái to cái nhỏ, không cái trên cùng cái thu gọn).
 
 **Đóng panel:** nút X, click nền ngoài (backdrop), phím Esc — cả 3 cách đều gọi `onClose()`.
+
+**Chuyển cung khi panel đang mở:** nếu panel đang hiện cung A và người dùng click sang ô cung B (không đóng
+panel trước), panel PHẢI cập nhật ngay sang nội dung cung B — không cần đóng-rồi-mở lại. Cơ chế: click 1 ô
+luôn gọi `setSelectedBranch(branch)` của ô đó (không phải toggle so với state hiện tại), nên `selectedBranch`
+tự nhiên đổi giá trị khi click ô khác, panel re-render theo `ruleResult` mới. Backdrop chỉ chặn/đóng khi click
+NGOÀI toàn bộ lưới 12 cung (VD ngoài `.board`) — không chặn việc click từ ô này sang ô khác trong lưới.
 
 **Style:** dùng palette mới (giấy dó/mực chàm/đỏ son) nhất quán với ô cung, nhưng panel nổi trên nền tối mờ
 (backdrop) để phân biệt rõ đang ở lớp Interpretation, không phải Facts.
@@ -113,7 +120,7 @@ Thêm class mới cho `RuleResultsPanel`: `.panel-backdrop`, `.rule-panel`, `.ru
 `.rule-panel-conflict-group` (2+ rules ngang hàng bên trong, không cái to cái nhỏ).
 
 Thêm class mới cho badge "có luận giải" trên mỗi ô: `.palace-has-interpretation` (chấm nhỏ hoặc icon ở góc
-ô, chỉ hiện khi cung đó có `matched.filter(r => r.matched).length > 0 || conflicts.length > 0`).
+ô, chỉ hiện khi `hasInterpretation(ruleResult)` trả về true — xem Global Constraints).
 
 ### `web/src/components/PalaceGrid.tsx`
 
@@ -137,8 +144,8 @@ Thêm class mới cho badge "có luận giải" trên mỗi ô: `.palace-has-int
   liệu), tạp tinh, badge Tuần/Triệt, Tràng Sinh, Bác Sỹ/Tướng Tiền/Tuế Tiền, Đại Vận cung, Lưu Niên cung nếu
   có.
 - **XÓA** `<RuleResults result={ruleResult} />` khỏi render trực tiếp trong ô.
-- **THÊM** badge nhỏ `.palace-has-interpretation` khi
-  `ruleResult.matched.some((r) => r.matched) || ruleResult.conflicts.length > 0`.
+- **THÊM** badge nhỏ `.palace-has-interpretation` khi `hasInterpretation(ruleResult)` (xem Global
+  Constraints) — không tự viết lại biểu thức lọc ở đây.
 - **THÊM** `onClick={onSelect}` trên cả ô (toàn bộ `.palace` clickable, không chỉ badge — dễ bấm hơn, đúng
   thực hành UI thông thường khi cả khối đại diện 1 đối tượng có thể click).
 
@@ -160,6 +167,20 @@ ngoài vòng cung).
   gốc — dùng sai sẽ khiến badge/panel báo "có luận giải" ngay cả khi mọi rule trong cung đó đều
   `matched: false`. Đây là nguồn lỗi âm thầm nguy hiểm nhất của phase này — ghi rõ ở đây để implementer/
   reviewer đều thấy trước khi code, không chỉ nằm trong đầu người viết design doc.
+- **Chỉ 1 công thức duy nhất cho "cung này có luận giải hay không", dùng ở cả 2 nơi (badge trong
+  `PalaceCell` và điều kiện rỗng trong `RuleResultsPanel`).** Viết 1 hàm dùng chung:
+  ```ts
+  export function hasInterpretation(ruleResult: PalaceRuleResult): boolean {
+    return ruleResult.matched.some((r) => r.matched) || ruleResult.conflicts.length > 0;
+  }
+  ```
+  Đặt trong `web/src/types.ts` (cạnh các type `PalaceRuleResult`/`ConflictGroup` mà nó thao tác) hoặc 1 file
+  helper mới `web/src/rule-helpers.ts` nếu `types.ts` không phải chỗ hợp lý cho logic (quyết định ở bước
+  plan). KHÔNG viết lại biểu thức lọc `matched.some(...)`/`matched.filter(...)` riêng ở `PalaceCell.tsx` và
+  `RuleResultsPanel.tsx` — cả 2 nơi PHẢI gọi `hasInterpretation()`. Lý do: đây là 2 nơi tính cùng 1 điều kiện
+  từ cùng 1 dữ liệu nguồn — đúng mẫu rủi ro đã gặp với `chart_id` (Rule Engine v0.4): nếu sau này định nghĩa
+  "có luận giải" thay đổi (VD thêm 1 loại kết quả khác cần tính vào), sửa 1 chỗ mà quên chỗ kia sẽ làm 2 nơi
+  lệch nhau âm thầm.
 - **Conflict groups PHẢI hiển thị đủ mọi `rules` trong nhóm, ngang hàng nhau** — không rút gọn, không mặc
   định thu gọn 1 bên, không sắp xếp theo thứ tự ngụ ý "cái đầu tiên đúng hơn". Đây là ranh giới cốt lõi dự
   án (CLAUDE.md mục 2), áp dụng cho UI y hệt tầng LLM.
