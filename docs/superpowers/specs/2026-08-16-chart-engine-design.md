@@ -280,6 +280,17 @@ Cả 4 điểm đều đã đóng bằng bằng chứng code (grep vocabulary + 
 
 **Ghi chú phương pháp:** cả 2 phát hiện này đến từ việc người dùng tự test UI với case cá nhân (không phải case Phạm Duy chuẩn) — khẳng định soi ảnh gốc bằng mắt qua nhiều vòng đã chạm giới hạn, dù mỗi lần đều bắt được ít nhất 1 điểm thật. **Quyết định:** chuyển hẳn sang so sánh tự động bằng code — mở rộng `full-crosscheck-report.ts` (hoặc viết script mới) dùng 1 fixture transcribe cẩn thận 1 LẦN từ ảnh gốc (đầy đủ mọi vòng sao: major/minor/adjective/boshi/jiangqian/suiqian TĨNH + `yearlyDecStar` LƯU NIÊN một khi đã thêm vào Chart Engine), so với output `iztro` cho MỌI cung một lần dứt điểm, không tiếp tục vòng lặp đối chiếu tay từng phần. Đang chờ ảnh gốc rõ nét từ người dùng để transcribe.
 
+**[2026-08-25, vòng 3] Xác định vị trí Tuần/Triệt cho case cá nhân (Mậu Dần) — ví dụ thực tế của lỗi "nhầm 2 giá trị gần giống" xảy ra ở TẦNG LÝ THUYẾT, không phải tầng đọc ảnh:**
+
+Người dùng đề xuất công thức lý thuyết cho Tuần Không (nguyên lý "vòng Giáp": 10 Thiên Can ghép 12 Địa Chi trong 1 tuần Giáp, 2 Chi dư ra là Tuần Không) và Triệt Không (tra theo Thiên Can năm sinh). Verify bằng 2 bước:
+
+1. **Đọc trực tiếp source `iztro`** (`node_modules/iztro/lib/star/location.js:600-637`, hàm `getYearlyStarIndex`): `xunkongIndex` tính bằng công thức đại số (`fixEarthlyBranchIndex(yearly[1]) + index(Quý) - index(Thiên Can năm) + 1`, có bước điều chỉnh +1 theo âm dương chi năm), `jiekongIndex` (Triệt) tra theo Thiên Can năm sinh qua 1 trong 2 bảng `jieluIndex`/`kongwangIndex` tùy âm dương. Chạy code thật cho case Mậu Dần: `astrolabe.palaces` cho **Tuần Không tại Thân**, **Triệt Không tại Tý** — khớp đúng ảnh gốc người dùng gửi (badge Tuần ở biên Thân/Dậu, badge Triệt ở biên Tý/Tuất).
+2. **Tính tay lại công thức "vòng Giáp"** để đối chiếu với ảnh: ban đầu tưởng nhầm Mậu Dần thuộc "vòng Giáp Dần" (kết luận sai: Tuần = Tý/Sửu, MÂU THUẪN với `iztro`) — nhưng viết script tính đúng vị trí 60 Can-Chi xác nhận **Mậu Dần thực ra thuộc vòng Giáp TUẤT** (Giáp Tuất→Ất Hợi→Bính Tý→Đinh Sửu→Mậu Dần→...→Quý Mùi), 2 Chi dư ra đúng là **Thân, Dậu** — khớp hoàn toàn `iztro` và ảnh gốc.
+
+**Kết luận: KHÔNG có mâu thuẫn giữa lý thuyết và `iztro` — cả 2 cùng 1 công thức (biến đổi đại số của cùng nguyên lý "vòng Giáp"), sai lệch ban đầu là do TÍNH TAY NHẦM vòng Giáp chứa Mậu Dần** (nhầm "Mậu Dần" trùng chữ "Dần" với "vòng Giáp Dần" — trong khi vòng Giáp được đặt tên theo Can-Chi ĐẦU vòng, không phải theo phần chi trùng). Đây là ví dụ cụ thể, mới, của đúng loại lỗi CLAUDE.md mục 6 cảnh báo ("nhầm giữa 2 giá trị gần giống nhau") — nhưng lần này xảy ra ở TẦNG SUY LUẬN LÝ THUYẾT (tính tay vòng 60 Giáp Tý), không phải tầng đọc ảnh/đọc code. Bài học mở rộng: verify chéo không chỉ "code vs ảnh" mà cả "lý thuyết vs code" — khi 1 công thức lý thuyết mâu thuẫn với code đã chạy thật, ưu tiên viết script tính lại chính xác (không tính nhẩm) trước khi kết luận "2 trường phái khác nhau".
+
+**Fixture kết luận (dùng để transcribe cố định):** Tuần Không → cung Thân (Tử Tức); Triệt Không → cung Tý (Phụ Mẫu). Nhóm 1 áp dụng ngược lại — nghĩa là: không có bug, không có khác trường phái, output `iztro` hiện tại đã đúng, không sửa gì.
+
 **Các trường hợp từng ghi ở mục Known Issues — [ĐÃ GIẢI QUYẾT]:**
 - Chủ mệnh lệch "Cự Môn" vs "Lộc Tồn" → đã khớp sau đổi algorithm (xem cập nhật ở trên).
 - Tác động của `algorithm: 'zhongzhou'` lên các field khác → đã khảo sát và cập nhật toàn suite test (xem `docs/superpowers/specs/2026-08-21-algorithm-zhongzhou-design.md`).
