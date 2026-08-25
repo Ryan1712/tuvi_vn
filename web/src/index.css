@@ -340,3 +340,108 @@ code {
   border-color: #d94f4f;
   color: #d94f4f;
 }
+
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.rule-panel {
+  background: var(--paper);
+  border: 1px solid var(--brass-line);
+  border-radius: 8px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 16px 20px 20px;
+  box-shadow: 0 8px 24px var(--paper-shadow);
+}
+
+.rule-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--brass-line);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.rule-panel-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.rule-panel-close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.rule-panel-empty {
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.rule-panel-match {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--brass-line);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.rule-panel-modifier {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.rule-panel-conflict {
+  margin-top: 10px;
+}
+
+.rule-panel-conflict-label {
+  font-size: 12px;
+  color: var(--vermilion);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.rule-panel-conflict-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rule-panel-conflict-rule {
+  background: var(--paper-deep);
+  border: 1px solid var(--brass-line);
+  border-radius: 5px;
+  padding: 8px 10px;
+}
+
+.rule-panel-conflict-rule-id {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--brass);
+  margin-bottom: 3px;
+}
+
+.rule-panel-conflict-rule-text {
+  font-size: 14px;
+  color: var(--ink);
+}
