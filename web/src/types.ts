@@ -214,3 +214,17 @@ export interface ChartOverviewResponse {
 export function hasInterpretation(ruleResult: PalaceRuleResult): boolean {
   return ruleResult.matched.some((r) => r.matched) || ruleResult.conflicts.length > 0;
 }
+
+/**
+ * Tam hop + xung chieu cua 1 cung, tinh THUAN TUY tren FE (khong goi API) -- dung dung offset
+ * da xac nhan tu source that cua iztro (node_modules/iztro/lib/astro/analyzer.js's
+ * getSurroundedPalaces: opposite = +6, career (Quan Loc) = +4, wealth (Tai Bach) = +8, tinh
+ * theo THU TU DIA CHI CO DINH Ty=0...Hoi=11 -- KHAC voi vi tri hien thi tren luoi UI
+ * (GRID_POSITION sap theo dia ban, khong theo thu tu 0-11). Ham nay CHI tra ve Branch, khong
+ * tra toa do UI -- noi goi phai tu tra GRID_POSITION rieng de lay toa do that.
+ */
+export function relatedBranches(branch: Branch): { opposite: Branch; career: Branch; wealth: Branch } {
+  const idx = BRANCHES.indexOf(branch);
+  const at = (offset: number) => BRANCHES[(idx + offset) % 12];
+  return { opposite: at(6), career: at(4), wealth: at(8) };
+}

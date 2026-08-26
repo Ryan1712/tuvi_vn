@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Branch, Chart, ChartRulesResponse } from '../types';
+import { relatedBranches } from '../types';
 import { PalaceCell } from './PalaceCell';
 import { RuleResultsPanel } from './RuleResultsPanel';
 
@@ -25,6 +26,43 @@ const GRID_POSITION: Record<Branch, { column: number; row: number }> = {
   Hoi: { column: 4, row: 4 },
 };
 
+// Tam cua 1 o tren luoi 4x4, tinh theo % (0..100) de dat SVG overlay len tren .palace-grid.
+// GRID_POSITION la vi tri HIEN THI (1-4), khac voi index dia chi co dinh dung trong
+// relatedBranches() — 2 he toa do khac nhau, KHONG duoc lan lon (xem ghi chu relatedBranches).
+function cellCenterPercent(branch: Branch): { x: number; y: number } {
+  const pos = GRID_POSITION[branch];
+  return {
+    x: (pos.column - 0.5) * 25,
+    y: (pos.row - 0.5) * 25,
+  };
+}
+
+interface RelationLinesProps {
+  fromBranch: Branch;
+}
+
+// Ve Tam Phuong Tu Chinh (Menh/cung dang hover + 2 cung tam hop + 1 cung xung chieu) — CHI
+// hien khi hover, khong ve co dinh 12 cung x 3 duong (se roi). SVG overlay tuyet doi tren
+// .palace-grid, khong chan click/hover cac o ben duoi (pointer-events: none).
+function RelationLines({ fromBranch }: RelationLinesProps) {
+  const { opposite, career, wealth } = relatedBranches(fromBranch);
+  const from = cellCenterPercent(fromBranch);
+  const targets = [opposite, career, wealth].map((b) => cellCenterPercent(b));
+
+  return (
+    <svg className="relation-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+      {targets.map((to, i) => (
+        <line
+          key={i}
+          x1={from.x} y1={from.y}
+          x2={to.x} y2={to.y}
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
+    </svg>
+  );
+}
+
 function CenterBlock({ chart, displayName }: { chart: Chart; displayName: string }) {
   const laiNhanPalace = chart.palaces.find((p) => p.is_original_palace);
   return (
@@ -46,6 +84,7 @@ function CenterBlock({ chart, displayName }: { chart: Chart; displayName: string
 export function PalaceGrid({ data, displayName }: PalaceGridProps) {
   const { chart, rules_by_palace } = data;
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+  const [hoveredBranch, setHoveredBranch] = useState<Branch | null>(null);
   const selectedPalace = selectedBranch
     ? chart.palaces.find((p) => p.branch === selectedBranch)
     : null;
@@ -60,6 +99,8 @@ export function PalaceGrid({ data, displayName }: PalaceGridProps) {
           <div
             key={palace.branch}
             style={{ gridColumn: pos.column, gridRow: pos.row }}
+            onMouseEnter={() => setHoveredBranch(palace.branch)}
+            onMouseLeave={() => setHoveredBranch((cur) => (cur === palace.branch ? null : cur))}
           >
             <PalaceCell
               palace={palace}
@@ -77,6 +118,7 @@ export function PalaceGrid({ data, displayName }: PalaceGridProps) {
       <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4' }}>
         <CenterBlock chart={chart} displayName={displayName} />
       </div>
+      {hoveredBranch && <RelationLines fromBranch={hoveredBranch} />}
       <RuleResultsPanel
         branch={selectedBranch}
         palaceName={selectedPalace?.palace_name ?? null}

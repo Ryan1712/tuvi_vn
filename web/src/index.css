@@ -143,6 +143,30 @@ code {
   }
 }
 
+.relation-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.relation-lines line {
+  stroke: var(--vermilion);
+  stroke-width: 1.5px;
+  stroke-dasharray: 4 3;
+  opacity: 0.7;
+}
+
+@media (max-width: 760px) {
+  /* Bo cuc mobile la 2 cot, thu tu khac han luoi 4x4 -- toa do % tinh theo GRID_POSITION
+     4x4 se sai lech. An duong noi o man hinh nho thay vi ve sai vi tri. */
+  .relation-lines {
+    display: none;
+  }
+}
+
 .palace-cell {
   background: var(--paper-deep);
   border: 1px solid var(--brass-line);
