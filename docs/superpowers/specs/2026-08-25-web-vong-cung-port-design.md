@@ -208,3 +208,14 @@ Không thêm test framework (xem "Ngoài phạm vi"). Xác nhận bằng:
    - Test light/dark mode (đổi theme hệ điều hành hoặc DevTools) — palette đổi đúng, không có vùng chữ không
      đọc được.
    - Test lỗi API (VD tắt backend) → thông báo lỗi vẫn hiển thị đúng như trước khi port.
+
+## Backlog UI (phát sinh sau khi port xong, chưa làm)
+
+- **[MỞ, 2026-08-26] Vẽ đường nối Tam Phương Tứ Chính của cung Mệnh.** Người dùng đề xuất sau
+  khi test UI với 3 Rule: vẽ 4 đường nối từ Mệnh tới 2 cung tam hợp + 1 cung xung chiếu (case
+  Phạm Duy: Mệnh/Hợi nối Quan Lộc/Mão + Tài Bạch/Mùi (tam hợp) + Thiên Di/Tỵ (xung chiếu)) —
+  đây là khái niệm nền tảng của Tử Vi (mọi sao ở 4 cung này đều "chiếu" trực tiếp vào Mệnh),
+  không phải trang trí. Dữ liệu đã có sẵn qua `relatedPalaces()` (`src/chart/queries.ts`) —
+  đây là việc UI thuần túy, không cần tính toán mới, rủi ro kỹ thuật thấp. **Quyết định:** để
+  sau, ưu tiên điều tra bug Triệt Không (nghi vấn 1 cung vs 2 cung) trước — làm tuần tự, không
+  song song.
