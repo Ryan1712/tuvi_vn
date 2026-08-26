@@ -291,6 +291,31 @@ Người dùng đề xuất công thức lý thuyết cho Tuần Không (nguyên
 
 **Fixture kết luận (dùng để transcribe cố định):** Tuần Không → cung Thân (Tử Tức); Triệt Không → cung Tý (Phụ Mẫu). Nhóm 1 áp dụng ngược lại — nghĩa là: không có bug, không có khác trường phái, output `iztro` hiện tại đã đúng, không sửa gì.
 
+**[2026-08-26] Điều tra thêm: nghi vấn "Triệt trải 2 cung (Sửu-Tý)" từ nhãn trên ảnh gốc — kết luận KHÔNG có bug, quyết định `algorithm: 'zhongzhou'` vẫn đúng.**
+
+Người dùng quan sát trên UI mới (bố cục vòng cung) rồi đối chiếu ảnh gốc: nhãn đen "Triệt" trên ảnh gốc đặt giữa ranh giới 2 cung Phúc Đức (Sửu) và Phụ Mẫu (Tý) — đặt giả thuyết: theo quy ước cổ điển, Tuần/Triệt mỗi cái đóng ở 1 CẶP 2 địa chi liền kề, không phải 1 cung đơn — và nghi ngờ `adapter.ts`/`iztro` chỉ lấy 1 nửa dữ liệu.
+
+**Bước 1 — đọc source `iztro` xác nhận có 2 công thức riêng biệt, đúng khớp giả thuyết về mặt VỊ TRÍ:** `node_modules/iztro/lib/star/location.js:626-627` — `jieluIndex` ("Triệt Lộ") và `kongwangIndex` ("Không Vong") là 2 index độc lập. Tính tay cho case Phạm Duy (Mậu, `HEAVENLY_STEMS.indexOf('wuHeavenly') % 5 = 4`): `jieluIndex` → **Tý**, `kongwangIndex` → **Sửu** — đúng khớp cặp Tý-Sửu quan sát trên ảnh.
+
+**Bước 2 — đọc `node_modules/iztro/lib/star/adjectiveStar.js:57-65`, có comment gốc tác giả xác nhận cơ chế thật:**
+```js
+if (algorithm !== 'zhongzhou') {
+    // 中州派没有的星耀 ("sao mà Trung Châu phái không có")
+    stars[jieluIndex].push('Triệt Lộ');    // tại Tý
+    stars[kongwangIndex].push('Không Vong'); // tại Sửu
+} else {
+    // 中州派特有的星耀 ("sao đặc trưng riêng của Trung Châu phái")
+    stars[jiekongIndex].push('Triệt Không'); // CHỈ 1 trong 2 index, chọn theo âm dương năm sinh
+}
+```
+`algorithm: 'default'` sinh **2 sao riêng biệt** (Triệt Lộ tại Tý + Không Vong tại Sửu). `algorithm: 'zhongzhou'` **gộp thành 1 khái niệm** "Triệt Không", chỉ chọn 1 trong 2 vị trí. Case Phạm Duy (Dần = dương chi) → `jiekongIndex = jieluIndex` = Tý — khớp đúng output hiện tại.
+
+**Bước 3 — QUAN TRỌNG, tưởng có mâu thuẫn với quyết định cũ (2026-08-21) nhưng hóa ra không:** design doc `2026-08-21-algorithm-zhongzhou-design.md` dòng 17 từng ghi "Sửu: Không Vong thừa | ref không có | `zhongzhou` không có → `zhongzhou` khớp ref tốt hơn". Thoạt nhìn tưởng mâu thuẫn với việc "nhãn Triệt trải qua Sửu" — nhưng người dùng xác nhận lại bằng cách đọc kỹ DANH SÁCH SAO THẬT bên trong ô Phúc Đức (Sửu) trên ảnh gốc (đã transcribe từ đầu dự án): Hữu Bật, Tả Phù, Thiên Khôi, Quốc Ấn, Hồng Loan, Thiên Tài, Thiên Thọ, Hỏa Tinh, Quả Tú, Trực Phù, Bệnh Phù, Hóa Quyền, Hóa Khoa — **KHÔNG có "Không Vong"/"Triệt Lộ" trong danh sách này.**
+
+**Kết luận: KHÔNG có mâu thuẫn.** Nhãn "Triệt" trên ảnh gốc là 1 KÝ HIỆU VỊ TRÍ (giống badge UI hiện tại), đặt bên ngoài lưới 12 cung — KHÁC với "tên sao trong danh sách sao bên trong ô". Nhãn trải qua biên giới 2 ô chỉ là quy ước trình bày của tuvi.vn cho 1 giá trị Triệt duy nhất, KHÔNG phải bằng chứng có 2 sao riêng biệt. Đã verify: ô Sửu thật sự không có sao "Không Vong"/"Triệt Lộ" nào — khớp hoàn toàn `algorithm: 'zhongzhou'` hiện tại. **Không sửa gì, quyết định `algorithm: 'zhongzhou'` giữ nguyên đúng như đã chốt 2026-08-21.**
+
+**Bài học phương pháp:** đây là ví dụ giá trị của việc dừng lại hỏi làm rõ thay vì tự kết luận vội theo giả thuyết ban đầu (dù giả thuyết có vẻ hợp lý và có bằng chứng code ủng hộ 1 phần) — nếu kết luận vội "có bug" chỉ dựa trên việc jieluIndex/kongwangIndex tồn tại và khớp vị trí Tý-Sửu, sẽ dẫn tới việc sửa nhầm 1 quyết định `algorithm` đã đúng, dựa trên cách đọc nhãn hiển thị (ký hiệu vị trí) nhầm thành dữ liệu sao (nội dung danh sách).
+
 **[2026-08-25, vòng 4 — DỨT ĐIỂM] Xây dựng script so sánh tự động toàn diện, chấm dứt đối chiếu tay từng phần:**
 
 Fixture đầy đủ 12 cung: `test/chart/fixtures/pham-duy-full.ts` (`PHAM_DUY_FULL_REFERENCE`) — transcribe từ ảnh reference #1 (năm xem Bính Ngọ 2026), đã qua đúng 1 vòng người dùng tự soát lại toàn bộ so với ảnh gốc trước khi tin dùng (không phải "AI tự tin dữ liệu do chính AI đọc"). Script: `scripts/full-crosscheck-fixture.ts` (`npm run crosscheck:full`) — so 4 phần: (A) chính tinh theo tên/vị trí, KHÔNG so độ sáng (Known Issue thang 7 vs 5 mức đã đóng từ 2026-08-16, không có phép quy đổi trung lập); (B) phụ tinh+tạp tinh+boshi/jiangqian/suiqian TĨNH, so theo SET gộp chung (không tách vòng vì phân loại lại đòi hỏi kiến thức chuyên sâu, rủi ro tự đoán sai — CLAUDE.md mục 6/9); (C) 10 sao lưu động có phiên bản riêng trong `iztro` (Khôi/Việt/Xương/Khúc/Loan/Hỷ/Lộc/Dương/Đà/Mã — LƯU Ý: `iztro` dùng tên rút gọn khác nhau cho mỗi sao, VD "Lưu Lộc" không phải "Lưu Lộc Tồn", không theo quy tắc chung `LUU_` + tên gốc); (D) các mục còn lại ("L.Thái Tuế", "L.Hóa Kỵ"...) thuộc `yearlyDecStar`/Tứ Hóa lưu niên — Chart Engine CHƯA đọc (xem Known Issue vòng 2), báo cáo riêng không tính vào tổng.
