@@ -51,21 +51,34 @@ interface RelationLinesProps {
   fromBranch: Branch;
 }
 
-// Ve Tam Phuong Tu Chinh (Menh/cung dang hover + 2 cung tam hop + 1 cung xung chieu) — CHI
-// hien khi hover, khong ve co dinh 12 cung x 3 duong (se roi). SVG overlay tuyet doi tren
-// .palace-grid, khong chan click/hover cac o ben duoi (pointer-events: none).
+// Ve Tam Phuong Tu Chinh: DU 4 duong, dung theo xac nhan cua nguoi dung doi chieu tuvi.vn
+// (khong phai 3 duong toa ra tu 1 diem). 4 duong = tam giac KHEP KIN giua 3 cung (cung dang
+// hover + 2 cung tam hop — noi ca 3 canh voi nhau, KE CA canh giua 2 dinh tam hop, khong qua
+// cung dang hover) CONG 1 duong rieng biet toi cung xung chieu. CHI hien khi hover, khong ve
+// co dinh 12 cung — se roi. SVG overlay tuyet doi tren .palace-grid, khong chan click/hover
+// cac o ben duoi (pointer-events: none).
 function RelationLines({ fromBranch }: RelationLinesProps) {
   const { opposite, career, wealth } = relatedBranches(fromBranch);
   const from = cellAnchorPercent(fromBranch);
-  const targets = [opposite, career, wealth].map((b) => cellAnchorPercent(b));
+  const oppositePoint = cellAnchorPercent(opposite);
+  const careerPoint = cellAnchorPercent(career);
+  const wealthPoint = cellAnchorPercent(wealth);
+
+  // 4 duong: tam giac (from-career, from-wealth, career-wealth) + 1 duong xung chieu rieng.
+  const lines = [
+    [from, careerPoint],
+    [from, wealthPoint],
+    [careerPoint, wealthPoint],
+    [from, oppositePoint],
+  ] as const;
 
   return (
     <svg className="relation-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
-      {targets.map((to, i) => (
+      {lines.map(([a, b], i) => (
         <line
           key={i}
-          x1={from.x} y1={from.y}
-          x2={to.x} y2={to.y}
+          x1={a.x} y1={a.y}
+          x2={b.x} y2={b.y}
           vectorEffect="non-scaling-stroke"
         />
       ))}
