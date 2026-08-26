@@ -1,9 +1,15 @@
 import type { Rule, Source, DomainPalaceEntry } from './types.js';
 
 /**
- * Entry mau duy nhat cua Rule Engine v0.1 (build spec muc 9):
+ * Entry mau dau tien cua Rule Engine v0.1 (build spec muc 9):
  * "Thien Dong ngo Khong/Kiep" — 2 quan diem trai chieu, dung de chung minh
- * conflict_group_id hoat dong dung. KHONG viet them Rule ngoai Entry nay (build spec muc 13).
+ * conflict_group_id hoat dong dung.
+ *
+ * [CAP NHAT 2026-08-25] Rang buoc goc "KHONG viet them Rule ngoai Entry nay" (build spec muc
+ * 13, ghi ngay 2026-08-16) la chi dao cho GIAI DOAN DAU ("KB mo rong tam dung, cho dinh huong
+ * product tiep theo") — dinh huong do da toi (Rule Engine v0.2/v0.3/v0.4, Tang 2 Domain Query,
+ * UI da build xong), va chu du an truc tiep yeu cau mo rong KB. Rang buoc nay KHONG con hieu
+ * luc, xem RULE_MENH_VCD_MUON_CHINH_TINH ben duoi la Entry thu 3.
  */
 
 export const SRC_001: Source = {
@@ -83,8 +89,68 @@ export const RULE_B: Rule = {
   notes: 'Luan ve vi tri Ty/Hoi, KHONG dong nghia truc tiep "Thien Dong + Khong Kiep = tot".',
 };
 
-export const KNOWLEDGE_BASE: Rule[] = [RULE_A, RULE_B];
-export const SOURCES: Source[] = [SRC_001, SRC_002];
+export const SRC_003: Source = {
+  source_id: 'SRC_003',
+  type: 'dien_dan_web',
+  title: 'Tong hop nhieu trang tra cuu Tu Vi pho thong (baoquocte.vn, thansohoconline.com, huyenbi.net, astrology.vn, tracuutuvi.com...)',
+  author: null,
+  school: null,
+  reliability_tier: '3_thap',
+  excerpt_or_link: 'Tra cuu qua web search 2026-08-26 — xem hoi thoai brainstorm goc cho danh sach URL day du neu can truy lai.',
+};
+
+/**
+ * Vo Chinh Dieu (1 cung khong co chinh tinh nao) — cach cuc pho thong, nhieu nguon doc lap
+ * dong thuan ve co che loi: MUON chinh tinh cua cung xung chieu de luan thay vi tu chinh tinh
+ * cua chinh cung do (khong co). Muc do anh huong cu the (~60-80% tuy nguon, CHUA thong nhat
+ * con so chinh xac) khong dua vao conditions/modifiers — chi ghi trong conclusion.text nhu 1
+ * mo ta dinh tinh, dung dua so lieu chua thong nhat lam dieu kien cung.
+ *
+ * QUAN TRONG — pham vi ap dung MOI CUNG, khong rieng Menh: Rule Engine chay matchRules() cho
+ * ca 12 cung (xem src/server/routes.ts), khong chi cung Menh. "Menh Vo Chinh Dieu" chi la
+ * truong hop duoc ban nhieu nhat vi Menh la cung quan trong nhat — nguon tra cuu KHONG gioi
+ * han hien tuong nay chi xay ra o Menh. conclusion.text vi vay viet TONG QUAT ("cung xung
+ * chieu", khong hardcode ten 1 cung cu the nhu "Thien Di") — vi doi cung khac nhau tuy cung
+ * dang xet (VD Tai Bach doi cung la Phu The, khong phai Thien Di). Neu tang LLM can biet TEN
+ * CU THE cua cung xung chieu de dien dat tu nhien hon, do la viec cua Evidence Pack dua them
+ * du kien (da co san qua relatedPalaces()), KHONG phai nhet cung vao conclusion.text tinh.
+ *
+ * QUAN TRONG ve pham vi dieu kien: chi encode dung DIEU KIEN "cung nay khong co chinh tinh"
+ * (kiem tra duoc tren 1 cung, scope star_palace, KHONG can palace_relationship) — phan "muon
+ * chinh tinh doi cung" la MO TA CO CHE trong ket luan, khong phai 1 condition rieng can
+ * evaluate. Day la Rule DAU TIEN dung operator is_empty (them 2026-08-25 sau khi phat hien
+ * ConditionOperator cu khong co cach dien dat "khong co sao nao" ma khong ep cau truc).
+ *
+ * Nhom "6 cach cuc Tam Khong/Tu Khong" (Dac Nhi Khong, Dac Tam Khong, Kien Tam Khong, Ngo Tam
+ * Khong, Dac Tu Khong, Nhat Nguyet tinh minh) CHUA duoc encode — can dem so sao tren TAP NHIEU
+ * cung cung luc (1 cung + 2 tam hop + xung chieu), Rule Engine hien tai (scope star_palace/
+ * palace_relationship) khong xu ly duoc dieu nay, can thiet ke scope moi rieng. Xem
+ * docs/superpowers/specs/2026-08-16-chart-engine-design.md hoac spec Rule Engine lien quan
+ * ve quyet dinh nay khi duoc thiet ke.
+ */
+export const RULE_VO_CHINH_DIEU_MUON_CHINH_TINH: Rule = {
+  rule_id: 'RULE_VO_CHINH_DIEU_MUON_CHINH_TINH',
+  conflict_group_id: null,
+  scope: 'star_palace',
+  subject: { type: 'pattern', id: 'VO_CHINH_DIEU' },
+  conditions: [
+    { field: 'major_stars', operator: 'is_empty', value: '', required: true },
+  ],
+  modifiers: [],
+  exceptions: [],
+  conclusion: {
+    text: 'Vo Chinh Dieu (khong co chinh tinh toa thu tai cung nay) — muon chinh tinh cua cung xung chieu de luan thay, mot phan anh huong so voi truong hop chinh tinh toa thu truc tiep.',
+    valence: 'trung_tinh',
+    magnitude: 'vua',
+  },
+  school: 'pho_thong',
+  sources: ['SRC_003'],
+  consensus: 'cao',
+  notes: 'Muc do "%" anh huong cu the KHONG thong nhat giua cac nguon (60-80% tuy nguon) — khong dua vao dieu kien/modifier, chi mo ta dinh tinh trong conclusion.',
+};
+
+export const KNOWLEDGE_BASE: Rule[] = [RULE_A, RULE_B, RULE_VO_CHINH_DIEU_MUON_CHINH_TINH];
+export const SOURCES: Source[] = [SRC_001, SRC_002, SRC_003];
 
 /**
  * Tri thuc domain -> cung. 10 domain ro rang (1 cung), 2 domain mo ho (nhieu cung).

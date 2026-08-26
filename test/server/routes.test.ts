@@ -75,9 +75,10 @@ describe('POST /charts/rules', () => {
 
   it('cung khong match rule nao van co matched voi toan bo ket qua false, conflicts rong', async () => {
     const res = await request(app).post('/charts/rules').send(PHAM_DUY_INPUT);
-    // Cung Dan (Dien Trach) khong co Thien Dong/Khong/Kiep -> khong rule nao match
+    // Cung Dan (Dien Trach) co Tham Lang (chinh tinh) -> khong rule nao trong KB hien tai match:
+    // khong co Thien Dong/Khong/Kiep (RULE_A/B), khong Vo Chinh Dieu vi CO chinh tinh (RULE moi).
     const danResult = res.body.rules_by_palace.Dan;
-    expect(danResult.matched).toHaveLength(2); // ca RULE_A, RULE_B deu duoc danh gia
+    expect(danResult.matched).toHaveLength(3); // toan bo KNOWLEDGE_BASE deu duoc danh gia
     expect(danResult.matched.every((r: { matched: boolean }) => r.matched === false)).toBe(true);
     expect(danResult.conflicts).toHaveLength(0);
   });

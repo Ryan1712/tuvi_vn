@@ -11,6 +11,53 @@ LLM integration, không viết thêm Rule ngoài Entry mẫu, không UI (build s
 *(Trống ở thời điểm viết design. Theo dõi phát hiện dở dang tại đây trong suốt quá trình
 brainstorm/implementation, không dựa vào trí nhớ hội thoại — bài học từ Chart Engine.)*
 
+**[2026-08-25 — ĐÃ XỬ LÝ] Ràng buộc "không viết thêm Rule ngoài Entry mẫu" (dòng 6-7 ở trên,
+build spec mục 13) đã HẾT HIỆU LỰC.** Ràng buộc gốc ghi ngày 2026-08-16, là chỉ đạo cho GIAI
+ĐOẠN ĐẦU ("KB mở rộng tạm dừng, chờ định hướng product tiếp theo"). Định hướng đó đã tới (Rule
+Engine v0.2/v0.3/v0.4, Tầng 2 Domain Query, UI đã build xong) và chủ dự án trực tiếp yêu cầu
+mở rộng KB. Đã thêm Entry thứ 3: `RULE_VO_CHINH_DIEU_MUON_CHINH_TINH` (`src/rule/
+knowledge-base.ts`) — xem chi tiết dưới đây.
+
+**[2026-08-25 — ĐÃ XỬ LÝ] Thêm `ConditionOperator` mới: `is_empty`/`is_not_empty`.** Phát hiện
+khi cố encode Entry "Vô Chính Diệu": `ConditionOperator` gốc (`contains`/`not_contains`/
+`equals`/`in`/`not_in`) không có cách diễn đạt "field này KHÔNG CHỨA GIÁ TRỊ NÀO" mà không ép
+cấu trúc sai bản chất (VD `not_in` với `value` liệt kê đủ 14 mã chính tinh — dễ vỡ nếu danh
+sách gốc đổi, không phản ánh đúng ý nghĩa "trạng thái rỗng"). Đã thêm 2 operator mới vào
+`ConditionOperator` (`src/rule/types.ts`), sửa `evalOperator()` (`src/rule/evaluator.ts`) —
+CHỈ 1 nơi, vì `annual-evaluator.ts`/`decade-evaluator.ts`/`relation-evaluator.ts` đều tái sử
+dụng `evalOperator`/`evalCondition` từ `evaluator.ts`, không tự implement riêng (đã xác nhận
+bằng grep trước khi sửa — không có rủi ro "4 nơi tính cùng 1 thứ" như đã từng gặp với
+`chart_id`). `value: ''` là quy ước khi dùng 2 operator này (không đổi `Condition.value` thành
+optional, tránh xáo trộn các nơi khác).
+
+**[2026-08-25 — ĐÃ XỬ LÝ] Entry mới: `RULE_VO_CHINH_DIEU_MUON_CHINH_TINH`** — "Vô Chính Diệu"
+(1 cung không có chính tinh nào tọa thủ) → mượn chính tinh của cung xung chiếu để luận thay.
+`scope: 'star_palace'`, `condition: { field: 'major_stars', operator: 'is_empty' }` — chỉ
+encode điều kiện kiểm tra được trên 1 cung; phần "mượn chính tinh đối cung" là mô tả cơ chế
+trong `conclusion.text`, không phải condition riêng (không cần `palace_relationship`).
+**Phạm vi áp dụng MỌI cung, không riêng Mệnh** — `matchRules()` chạy cho cả 12 cung
+(`src/server/routes.ts`), nên `conclusion.text` viết tổng quát ("cung xung chiếu", không
+hardcode tên 1 cung cụ thể như "Thiên Di") — tránh lỗi mô tả sai khi Rule match ở cung khác
+Mệnh (VD case Phạm Duy: Tài Bạch và Phu Thê đều Vô Chính Diệu thật, đối cung của chúng KHÔNG
+PHẢI Thiên Di). Verify bằng dữ liệu thật: match `true` tại Tài Bạch/Phu Thê (Vô Chính Diệu
+thật), `false` tại Mệnh (có Thiên Đồng). Nguồn: `SRC_003` (tổng hợp nhiều trang tra cứu Tử Vi
+phổ thông, `reliability_tier: '3_thap'`, cùng tier với SRC_001/SRC_002).
+
+**[MỞ] Nhóm "6 cách cục Tam Không/Tứ Không"** (Đắc Nhị Không, Đắc Tam Không, Kiến Tam Không,
+Ngộ Tam Không, Đắc Tứ Không, Nhật Nguyệt tịnh minh) — người dùng đã tra cứu và structured hóa
+sơ bộ, nhưng **KHÔNG encode được với Rule Engine hiện tại**: cần đếm tổng số sao thuộc 1 tập
+hợp (VD 4 sao "Không": Thiên Không/Địa Không/Tuần Không/Triệt Không) xuất hiện trên **TẬP HỢP
+NHIỀU CUNG cùng lúc** (1 cung + 2 cung tam hợp + 1 cung xung chiếu — tối đa 4 cung). Đã xác
+nhận bằng cách đọc code: `relatedPalaces()` (`src/chart/queries.ts:48-63`) đã trả về đúng 4
+cung liên quan (bằng chứng: `wealth`/`career` của `iztro`'s `surroundedPalaces()` chính là 2
+cung tam hợp, xác nhận qua `node_modules/iztro/lib/astro/analyzer.js`'s `getSurroundedPalaces`
+dùng offset ±4 vị trí — công thức tam hợp cổ điển) — nhưng `evaluateRelationRule()`
+(`src/rule/relation-evaluator.ts`) chỉ đánh giá **1 `RelationTarget` mỗi lần gọi**, không có
+cơ chế gộp 4 cung rồi đếm. Cần thiết kế 1 scope Rule Engine mới (đề xuất tên: đếm sao trên tập
+nhiều cung — kiểu quyết định đã làm cho `decade`/`annual` ở v0.2/v0.3) trước khi encode nhóm
+này. 1 nguồn có 2 dị bản mâu thuẫn nhau cho "Kiến Tam Không" (điều kiện + kết luận khác nhau) —
+khi encode, cần đánh `conflict_group_id` giữa 2 cách hiểu, không tự chọn 1 bên.
+
 ---
 
 ## 1. Bối cảnh & nguồn tham khảo

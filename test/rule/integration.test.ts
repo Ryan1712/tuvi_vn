@@ -17,7 +17,8 @@ describe('End-to-end: Chart Pham Duy thuc qua Rule Engine', () => {
   it('ca RULE_A va RULE_B deu match tren Menh@Hoi', () => {
     const chart = buildChart(PHAM_DUY);
     const results = matchRules(chart, 'Hoi', KNOWLEDGE_BASE);
-    expect(results).toHaveLength(2);
+    // So luong ket qua = so luong KNOWLEDGE_BASE (khong hardcode — KB co the mo rong sau nay).
+    expect(results).toHaveLength(KNOWLEDGE_BASE.length);
     expect(results.find((r) => r.rule_id === RULE_A.rule_id)?.matched).toBe(true);
     expect(results.find((r) => r.rule_id === RULE_B.rule_id)?.matched).toBe(true);
   });

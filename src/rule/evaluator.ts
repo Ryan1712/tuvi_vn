@@ -23,8 +23,10 @@ export function evalOperator(values: Set<string>, operator: Condition['operator'
   if (operator === 'not_contains') return !values.has(value);
   if (operator === 'equals') return values.size === 1 && values.has(value);
   if (operator === 'in') return value.split(',').some((v) => values.has(v));
-  // operator === 'not_in'
-  return !value.split(',').some((v) => values.has(v));
+  if (operator === 'not_in') return !value.split(',').some((v) => values.has(v));
+  if (operator === 'is_empty') return values.size === 0;
+  // operator === 'is_not_empty'
+  return values.size > 0;
 }
 
 export function evalCondition(palace: ChartPalace, condition: Condition): boolean {

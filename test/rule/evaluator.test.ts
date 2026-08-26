@@ -88,6 +88,28 @@ describe('evalCondition', () => {
     const menh = palaceOfBranch(chart, 'Hoi');
     expect(evalCondition(menh, { field: 'major_stars', operator: 'not_contains', value: 'THAT_SAT', required: true })).toBe(true);
   });
+
+  it('is_empty tra ve true khi cung khong co chinh tinh (Tai Bach, Pham Duy — Vo Chinh Dieu that)', () => {
+    const chart = buildChart(PHAM_DUY);
+    const taiBach = palaceOfBranch(chart, 'Mui');
+    expect(taiBach.major_stars).toHaveLength(0); // xac nhan tien de: case nay THAT SU vo chinh dieu
+    expect(evalCondition(taiBach, { field: 'major_stars', operator: 'is_empty', value: '', required: true })).toBe(true);
+  });
+
+  it('is_empty tra ve false khi cung co chinh tinh (Menh, Pham Duy — co Thien Dong)', () => {
+    const chart = buildChart(PHAM_DUY);
+    const menh = palaceOfBranch(chart, 'Hoi');
+    expect(menh.major_stars.length).toBeGreaterThan(0);
+    expect(evalCondition(menh, { field: 'major_stars', operator: 'is_empty', value: '', required: true })).toBe(false);
+  });
+
+  it('is_not_empty la phu dinh chinh xac cua is_empty (khong chi "khac ket qua boi ngau nhien")', () => {
+    const chart = buildChart(PHAM_DUY);
+    const menh = palaceOfBranch(chart, 'Hoi');
+    const taiBach = palaceOfBranch(chart, 'Mui');
+    expect(evalCondition(menh, { field: 'major_stars', operator: 'is_not_empty', value: '', required: true })).toBe(true);
+    expect(evalCondition(taiBach, { field: 'major_stars', operator: 'is_not_empty', value: '', required: true })).toBe(false);
+  });
 });
 
 describe('evalModifier', () => {

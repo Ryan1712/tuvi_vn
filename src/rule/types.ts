@@ -21,7 +21,15 @@ export type RuleScope =
   | 'annual'
   | 'spouse_matching';
 
-export type ConditionOperator = 'contains' | 'not_contains' | 'equals' | 'in' | 'not_in';
+/**
+ * is_empty/is_not_empty KHONG dung `value` — quy uoc value: '' khi dung 2 operator nay (Condition/
+ * Modifier van bat buoc field value: string, khong doi thanh optional de tranh xao tron cac noi
+ * khac dang dung Condition). Dung cho dieu kien dinh tinh "khong co sao nao trong field nay" (vd
+ * Menh Vo Chinh Dieu: major_stars rong) — KHONG liet ke value la danh sach am tinh (vd "not_in
+ * voi ca 14 ma chinh tinh"), vi do la ep cau truc khong dung ban chat, de vo neu danh sach goc doi.
+ */
+export type ConditionOperator =
+  | 'contains' | 'not_contains' | 'equals' | 'in' | 'not_in' | 'is_empty' | 'is_not_empty';
 
 /**
  * Field doc duoc tren 1 ChartPalace, thu hep so voi build spec (field: string tu do).
