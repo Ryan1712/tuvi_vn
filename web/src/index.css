@@ -167,6 +167,20 @@ code {
   }
 }
 
+/* Spotlight: khi hover 1 cung, cac cung KHONG thuoc Tam Phuong Tu Chinh mo di de lam noi
+   bat nhom 4 cung lien quan. Ap dung tren wrapper div (khong phai .palace-cell truc tiep)
+   vi PalaceGrid gan class nay tren div bao ngoai PalaceCell. */
+.palace-dimmed {
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palace-dimmed {
+    transition: none;
+  }
+}
+
 .palace-cell {
   background: var(--paper-deep);
   border: 1px solid var(--brass-line);

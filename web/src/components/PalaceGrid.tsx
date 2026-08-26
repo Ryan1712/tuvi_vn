@@ -37,6 +37,16 @@ function cellCenterPercent(branch: Branch): { x: number; y: number } {
   };
 }
 
+// Diem noi LECH ve phia goc tren-trai cua o (huong nhan chi/can, .palace-top-row) thay vi
+// dung tam o — dung anh goc tuvi.vn: duong cheo "dam sau" vao trong vung cung dich, khong
+// dung lai o bien ngoai. Offset ~30% ban kinh 1 o ve phia goc tren-trai.
+function cellAnchorPercent(branch: Branch): { x: number; y: number } {
+  const center = cellCenterPercent(branch);
+  const cellHalfSize = 12.5; // 25% / 2
+  const offset = cellHalfSize * 0.6;
+  return { x: center.x - offset, y: center.y - offset };
+}
+
 interface RelationLinesProps {
   fromBranch: Branch;
 }
@@ -46,8 +56,8 @@ interface RelationLinesProps {
 // .palace-grid, khong chan click/hover cac o ben duoi (pointer-events: none).
 function RelationLines({ fromBranch }: RelationLinesProps) {
   const { opposite, career, wealth } = relatedBranches(fromBranch);
-  const from = cellCenterPercent(fromBranch);
-  const targets = [opposite, career, wealth].map((b) => cellCenterPercent(b));
+  const from = cellAnchorPercent(fromBranch);
+  const targets = [opposite, career, wealth].map((b) => cellAnchorPercent(b));
 
   return (
     <svg className="relation-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -89,15 +99,24 @@ export function PalaceGrid({ data, displayName }: PalaceGridProps) {
     ? chart.palaces.find((p) => p.branch === selectedBranch)
     : null;
 
+  // Nhom "sang" khi dang hover: chinh cung dang hover + 2 tam hop + 1 xung chieu. Cung khong
+  // trong nhom nay se bi mo di (spotlight) — chi ap dung khi CO hover, khong anh huong trang
+  // thai mac dinh.
+  const highlightedBranches = hoveredBranch
+    ? new Set<Branch>([hoveredBranch, ...Object.values(relatedBranches(hoveredBranch))])
+    : null;
+
   return (
     <div className="palace-grid">
       {chart.palaces.map((palace) => {
         const pos = GRID_POSITION[palace.branch];
         const decadal = chart.luck_cycles.dai_van.find((d) => d.branch === palace.branch);
         const luuNienPalace = chart.luu_nien?.palaces.find((p) => p.branch === palace.branch);
+        const isDimmed = highlightedBranches !== null && !highlightedBranches.has(palace.branch);
         return (
           <div
             key={palace.branch}
+            className={isDimmed ? 'palace-dimmed' : ''}
             style={{ gridColumn: pos.column, gridRow: pos.row }}
             onMouseEnter={() => setHoveredBranch(palace.branch)}
             onMouseLeave={() => setHoveredBranch((cur) => (cur === palace.branch ? null : cur))}
