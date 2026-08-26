@@ -424,3 +424,29 @@ chưa được chạm tới bởi case này, ví dụ:
 Mỗi case bổ sung này cần 1 reference implementation độc lập riêng (ảnh lá số từ 1 nguồn nào đó)
 để đối chiếu, theo đúng quy trình mục 7 — không tự bịa dữ liệu kỳ vọng. Việc này nằm ngoài phạm
 vi bản Chart Engine đầu tiên, ghi lại đây để không bị quên khi đánh giá "đã đủ tin cậy chưa".
+
+**[2026-08-25 — ĐÃ XỬ LÝ MỘT PHẦN, hạ thấp yêu cầu có chủ đích] `test/chart/diverse-cases.test.ts`
+thêm cả 3 case, nhưng KHÔNG có reference implementation ảnh thật** — người dùng xác nhận trực
+tiếp hạ thấp yêu cầu (không cần đối chiếu ảnh), chỉ cần: (1) không crash, (2) shape dữ liệu hợp
+lệ (12 cung, đủ field), (3) logic TỰ NHẤT QUÁN kiểm chứng được bằng công thức đã biết — không
+assert giá trị chính tinh/phụ tinh cụ thể nào (sẽ là tự bịa, đúng điều CLAUDE.md mục 6 cấm).
+
+- **Case 1 (nữ mệnh + Cục khác):** `1990-06-15`, nữ, giờ Mão. Verify độc lập bằng script trước
+  khi viết assertion (không suy từ code đang test): ra **Hỏa Lục Cục** (khác Thủy Nhị Cục của
+  Phạm Duy — phủ được 1 Cục khác). Kiểm tra chiều Đại Vận bằng quy luật cổ điển (Dương Can +
+  Nữ → đi nghịch, khác Dương Nam đi thuận của Phạm Duy) — xác định Dương/Âm Can TỪ CHÍNH
+  `chart.metadata.chinese_date` của case đó (không hardcode), rồi so với chiều `dai_van` thực
+  tế: case này là Canh Ngọ (Canh = Dương Can) + Nữ → đúng đi **nghịch**, khớp quy luật.
+- **Case 2 (tháng nhuận):** năm 2023 (âm lịch có tháng 2 nhuận), ngày "2-15". Verify: build với
+  `is_leap_month: true` và `is_leap_month: false` cho CÙNG chuỗi ngày âm lịch phải ra 2 ngày
+  dương lịch KHÁC NHAU (`2023-4-5` vs `2023-3-6`) — bằng chứng `is_leap_month` thực sự được đọc
+  và ảnh hưởng kết quả, không bị bỏ qua âm thầm.
+- **Case 3 (ổn định):** build lặp lại 2 lần cùng input, xác nhận kết quả giống hệt (không bị
+  "trôi" theo số lần gọi trước đó — cùng tinh thần guard đã có ở `algorithm-config.test.ts`).
+
+**Còn treo (không đóng hẳn mục 10):** đây KHÔNG phải "đã đủ tin cậy nói chung" theo đúng nghĩa
+ban đầu của mục 10 — chỉ xác nhận Chart Engine không crash và 1 vài quy luật tổng quát (chiều
+Đại Vận, tôn trọng `is_leap_month`) đúng như lý thuyết. Chưa verify chính tinh/phụ tinh cụ thể
+của 3 case này có đúng không (cần ảnh đối chiếu thật, như đã làm cho case Phạm Duy qua
+`full-crosscheck-fixture.ts`) — nếu sau này có ảnh/nguồn đối chiếu cho 1 trong 3 case, nên bổ
+sung fixture đầy đủ theo đúng mẫu `pham-duy-full.ts`.
