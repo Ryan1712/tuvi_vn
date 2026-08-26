@@ -309,6 +309,20 @@ Sau khi sửa script, chạy lại phát hiện 7 vấn đề "thật" cần đi
 
 **Quyết định:** `scripts/full-crosscheck-fixture.ts` + `test/chart/fixtures/pham-duy-full.ts` là công cụ đối chiếu tự động CHÍNH THỨC cho case Phạm Duy từ nay — thay thế hoàn toàn việc đối chiếu tay từng phần qua nhiều vòng hội thoại. Khi Chart Engine thay đổi (đổi `algorithm`, cập nhật `iztro`, sửa adapter...), chạy lại `npm run crosscheck:full` để xác nhận không có regression, không cần lặp lại quy trình soi ảnh bằng mắt.
 
+**[2026-08-25, vòng 5 — ĐÃ XỬ LÝ MỘT PHẦN] Vòng Lưu Tuế Tiền/Tướng Tiền (`yearlyDecStar`) đã được thêm vào Chart Engine — đóng "Lưu Thái Tuế" thiếu:**
+
+Thêm `LuuNienPalace.jiangqian`/`.suiqian` (`src/chart/types.ts`) đọc từ `astrolabe.horoscope(viewYear, 0).yearly.yearlyDecStar.jiangqian12`/`.suiqian12` (`adaptLuuNien()`, `src/chart/adapter.ts`) — song song với field tĩnh `ChartPalace.jiangqian`/`.suiqian` đã có từ trước. Đồng thời thêm `LuuNien.nominal_age` (đọc `horoscope.age.nominalAge`, cùng object trả về, cùng công thức đã dùng ở `src/llm/query-evidence-pack.ts:139` — verify chéo khớp giá trị `29` cho case Phạm Duy năm 2026).
+
+Cập nhật `scripts/full-crosscheck-fixture.ts` Phần D để verify thật (không chỉ báo "chưa đọc" nữa): 4/6 mục "L.X" liên quan vòng lưu niên khớp ngay lần đầu, bao gồm đúng **"Lưu Thái Tuế" tại cung Tật Ách** (khớp `suiqian: "Tuế Kiện"`, đúng mẫu hình Thái Tuế/Tuế Kiện đã xác nhận ở vòng tĩnh) — xác nhận field mới hoạt động đúng, đóng phát hiện ban đầu của người dùng.
+
+**[MỞ — phạm vi hẹp hơn, để lần sau] 2 mục còn chưa khớp sau khi thêm field mới:**
+- "L.Đào Hoa" (Quan Lộc) — không thuộc `yearlyDecStar.jiangqian12`/`.suiqian12` (đã verify: cung này có `jiangqian="Hàm Trì"`, `suiqian="Thiên Đức"`, không phải "Đào Hoa"). Lưu ý: "Đào Hoa" (tĩnh) đã biết không tồn tại trong `iztro` (nhóm 2) — nhưng "L.Đào Hoa" là sao LƯU NIÊN, chưa rõ có cùng kết luận hay thuộc field khác chưa điều tra.
+- "L.Thiên Khốc"/"L.Thiên Hư" (Phụ Mẫu) — cũng không thuộc `jiangqian12`/`suiqian12` của cung đó (`jiangqian="Tai Sát"`, `suiqian="Tuế Phá"`).
+- Đã thử grep `changsheng`/`Trường Sinh`/biến thể trong `node_modules/iztro/lib/data/types/astro.d.ts` — không ra kết quả, chưa xác định được 2 sao này thuộc field nào của `horoscope()`. Cần đọc trực tiếp toàn bộ cấu trúc object `horoscope()` trả về (không chỉ nhánh `yearly`) để tìm đúng field, hoặc đối chiếu tên gốc tiếng Trung khác.
+- **Tứ Hóa lưu niên hoàn toàn CHƯA được đọc** (phát hiện khi điều tra, KHÁC với vấn đề trên): `extractSihua()` (`src/chart/adapter.ts:49-61`) chỉ đọc `star.mutagen` từ `palace.majorStars`/`minorStars` (Tứ Hóa BẢN MỆNH), luôn gán cứng `source: 'ban_menh'` — không có nhánh nào đọc Tứ Hóa lưu niên (dù `LuuNien.mutagen: string[]` đã tồn tại từ trước, chưa map vào `sihua` của từng `LuuNienPalace`). 4 mục "L.Hóa X" trong fixture case Phạm Duy (L.Hóa Kỵ, L.Hóa Quyền, L.Hóa Khoa, L.Hóa Lộc) chưa được `crosscheck:full` verify vì lý do này — script hiện chỉ đếm số lượng, không so khớp.
+
+Cả 2 nhóm trên đều ngoài phạm vi đã chốt cho lần sửa này (chỉ định `jiangqian`/`suiqian`/`nominal_age`) — để phase riêng sau khi cần.
+
 **Các trường hợp từng ghi ở mục Known Issues — [ĐÃ GIẢI QUYẾT]:**
 - Chủ mệnh lệch "Cự Môn" vs "Lộc Tồn" → đã khớp sau đổi algorithm (xem cập nhật ở trên).
 - Tác động của `algorithm: 'zhongzhou'` lên các field khác → đã khảo sát và cập nhật toàn suite test (xem `docs/superpowers/specs/2026-08-21-algorithm-zhongzhou-design.md`).

@@ -117,10 +117,13 @@ function adaptLuuNien(astrolabe: IFunctionalAstrolabe, viewYear: string, chartId
   const horoscope = astrolabe.horoscope(viewYear, 0);
   const yearly = horoscope.yearly;
   const year = Number.parseInt(viewYear.split('-')[0] ?? '', 10);
+  const { jiangqian12, suiqian12 } = yearly.yearlyDecStar;
   const palaces: LuuNienPalace[] = astrolabe.palaces.map((p, i) => ({
     branch: branchFromVi(p.earthlyBranch),
     palace_name: yearly.palaceNames[i] ?? '',
     stars: (yearly.stars?.[i] ?? []).map((s) => ({ star_id: starIdFromVi(s.name) })),
+    jiangqian: jiangqian12[i] ?? '',
+    suiqian: suiqian12[i] ?? '',
   }));
   return {
     chart_id: chartId,
@@ -128,6 +131,7 @@ function adaptLuuNien(astrolabe: IFunctionalAstrolabe, viewYear: string, chartId
     heavenly_stem: yearly.heavenlyStem,
     earthly_branch: yearly.earthlyBranch,
     mutagen: [...yearly.mutagen],
+    nominal_age: horoscope.age.nominalAge,
     palaces,
   };
 }

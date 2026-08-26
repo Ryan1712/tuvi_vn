@@ -183,6 +183,18 @@ export interface LuuNienPalace {
   /** Ten cung theo Luu Nien (khac ten cung goc — vong Luu Nien xoay theo nam xem). */
   palace_name: string;
   stars: { star_id: string }[];
+  /**
+   * Vong Luu Tuong Tien 12 than CUA NAM XEM (iztro: horoscope().yearly.yearlyDecStar.
+   * jiangqian12) — KHAC voi ChartPalace.jiangqian (vong TINH cua ban menh). Giu nguyen
+   * chuoi tieng Viet co dau, KHONG qua starIdFromVi, cung ly do nhu ChartPalace.jiangqian
+   * (ten TRANG THAI/VI TRI, khong phai "sao"). Phat hien 2026-08-25: iztro tinh san field
+   * nay nhung adapter truoc do chua doc — xem design doc muc 7.
+   */
+  jiangqian: string;
+  /** Vong Luu Tue Tien 12 than CUA NAM XEM (iztro: yearlyDecStar.suiqian12). Day chinh la
+   * vi tri "Luu Thai Tue" (ten goi cua algorithm 'zhongzhou' la "Tue Kien") — cung ly do
+   * tren, giu nguyen chuoi, khong qua starIdFromVi. */
+  suiqian: string;
 }
 
 /**
@@ -197,6 +209,9 @@ export interface LuuNien {
   heavenly_stem: string;
   earthly_branch: string;
   mutagen: string[];
+  /** Tuoi mu (iztro: horoscope().age.nominalAge) tai nam xem — thuoc tinh CUA NAM XEM, khong
+   * phai cua tung cung, nen dat o cap LuuNien, khong lap lai trong LuuNienPalace. */
+  nominal_age: number;
   palaces: LuuNienPalace[];
 }
 

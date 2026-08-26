@@ -207,9 +207,6 @@ for (const ref of PHAM_DUY_FULL_REFERENCE.palaces) {
 }
 
 console.log('\n===== PHAN C: SAO LUU DONG (10 sao co phien ban Luu Nien trong iztro — xem LUU_NIEN_DISPLAY_TO_IZTRO_NAME) =====\n');
-console.log('(Cac muc "L.X" khac KHONG thuoc 10 sao nay — vd L.Thai Tue/L.Hoa Ky/L.Dai Hao thuoc');
-console.log(' yearlyDecStar hoac Tu Hoa luu nien, Chart Engine CHUA doc — xem Known Issue 2026-08-25.');
-console.log(' Cac muc do duoc BAO CAO RIENG o Phan D, khong tinh vao "van de" cua Phan C.)\n');
 
 const unmappedLuuNienEntries: { branch: string; entry: string }[] = [];
 
@@ -255,23 +252,44 @@ for (const ref of PHAM_DUY_FULL_REFERENCE.palaces) {
   if (extra.length > 0) console.log(`     THUA (chi tham khao): ${extra.join(', ')}`);
 }
 
-console.log('\n===== PHAN D: CAC MUC "L.X" CHUA CO CHO TRONG CHART ENGINE (Known Issue 2026-08-25 — khong tinh vao so van de) =====\n');
-if (unmappedLuuNienEntries.length === 0) {
-  console.log('(khong co muc nao)');
-} else {
-  const byBranch = new Map<string, string[]>();
-  for (const { branch, entry } of unmappedLuuNienEntries) {
-    if (!byBranch.has(branch)) byBranch.set(branch, []);
-    byBranch.get(branch)!.push(entry);
+console.log('\n===== PHAN D: VONG LUU TUE TIEN/TUONG TIEN (LuuNienPalace.jiangqian/.suiqian, them 2026-08-25) =====\n');
+console.log('("L.Thai Tue" la ten hien thi cua ANH GOC cho vi tri dau vong Luu Tue Tien —');
+console.log(' iztro/zhongzhou goi vi tri nay la "Tue Kien" (cung mau hinh Thai Tue/Tue Kien');
+console.log(' da xac nhan o vong tinh). Cac muc "L.Hoa X" (Tu Hoa luu nien) CHUA duoc kiem tra');
+console.log(' o day — extractSihua() trong adapter.ts moi chi doc Tu Hoa BAN MENH, chua doc Tu');
+console.log(' Hoa luu nien, day la Known Issue RIENG, xem cuoi file.)\n');
+
+const luuThaiTueMap: Readonly<Record<string, string>> = { 'Thái Tuế': 'Tuế Kiện' };
+let luuHoaLuuNienCount = 0;
+
+for (const ref of PHAM_DUY_FULL_REFERENCE.palaces) {
+  if (!chart.luu_nien) break;
+  const luuNienPalace = chart.luu_nien.palaces.find((p) => p.branch === ref.branch);
+  const cycleEntries = ref.luu_nien_stars.filter((e) => {
+    const displayName = e.replace(/^L\./, '');
+    return !(displayName in LUU_NIEN_DISPLAY_TO_IZTRO_NAME) && !displayName.startsWith('Hóa ');
+  });
+  const sihuaLuuNienEntries = ref.luu_nien_stars.filter((e) => e.replace(/^L\./, '').startsWith('Hóa '));
+  luuHoaLuuNienCount += sihuaLuuNienEntries.length;
+
+  if (cycleEntries.length === 0) continue;
+
+  const missing: string[] = [];
+  for (const entry of cycleEntries) {
+    const displayName = entry.replace(/^L\./, '');
+    const expectedName = luuThaiTueMap[displayName] ?? displayName;
+    const found = luuNienPalace?.jiangqian === expectedName || luuNienPalace?.suiqian === expectedName;
+    if (!found) missing.push(`${entry} (ky vong "${expectedName}", thuc te jiangqian="${luuNienPalace?.jiangqian}" suiqian="${luuNienPalace?.suiqian}")`);
   }
-  for (const [branch, entries] of byBranch) {
-    console.log(`${branch.padEnd(4)} | ${entries.join(', ')}`);
-    excludedKnown += entries.length;
-  }
-  console.log('\nLy do: day la sao thuoc yearlyDecStar (vong Luu Tue Tien/Tuong Tien) hoac Tu Hoa');
-  console.log('luu nien — adaptLuuNien() (src/chart/adapter.ts) CHUA doc field nay. Xem Known Issue');
-  console.log('"Luu Thai Tue" trong docs/superpowers/specs/2026-08-16-chart-engine-design.md muc 7.');
+
+  const hasIssue = missing.length > 0;
+  if (hasIssue) realIssues++;
+  console.log(`${ref.branch.padEnd(4)} | ${ref.palace_name.padEnd(12)} | [${hasIssue ? 'THIEU' : 'OK'}]`);
+  if (missing.length > 0) console.log(`     THIEU: ${missing.join('; ')}`);
 }
+
+console.log(`\n(Tu Hoa luu nien: ${luuHoaLuuNienCount} muc trong fixture "L.Hoa X" — CHUA verify, xem Known Issue duoi.)`);
+excludedKnown += luuHoaLuuNienCount;
 
 console.log(`\n===== TONG KET =====`);
 console.log(`Van de THAT can xem lai: ${realIssues}`);
